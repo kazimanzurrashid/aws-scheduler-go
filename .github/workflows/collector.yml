@@ -1,3 +1,4 @@
+name: collector
 on:
   push:
     branches:
@@ -32,7 +33,7 @@ jobs:
           zip -r -9 scheduler-collector-v1.zip ./*
 
       - name: Update
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.AWS_REGION }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.AWS_REGION != '' }}
         uses: kazimanzurrashid/aws-lambda-update-action@v1
         with:
           zip-file: ./collector/dist/scheduler-collector-v1.zip
