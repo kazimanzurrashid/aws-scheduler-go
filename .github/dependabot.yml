@@ -4,23 +4,28 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 128
 
   - package-ecosystem: "gomod"
     directory: "/graphql"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 128
 
   - package-ecosystem: "gomod"
     directory: "/collector"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 128
 
   - package-ecosystem: "gomod"
     directory: "/worker"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 128
 
   - package-ecosystem: "npm"
     directory: "/stack"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 128
