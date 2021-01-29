@@ -18,3 +18,11 @@ func Test_Factory_NewFactory_Success(t *testing.T) {
 	assert.NotNil(t, factory)
 }
 
+func Test_Factory_Schema_Success(t *testing.T) {
+	db := fakeStorage{}
+	factory := NewFactory(&db)
+	schema, err := factory.Schema()
+
+	assert.NotNil(t, schema)
+	assert.Nil(t, err)
+}
