@@ -33,7 +33,7 @@ jobs:
           zip -r -9 scheduler-graphql-v1.zip ./*
 
       - name: Update
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.AWS_REGION != '' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && env.AWS_REGION != '' }}
         uses: kazimanzurrashid/aws-lambda-update-action@v1
         with:
           zip-file: ./graphql/dist/scheduler-graphql-v1.zip
