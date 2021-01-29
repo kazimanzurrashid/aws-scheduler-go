@@ -212,3 +212,28 @@ func Test_Database_Delete_Fail_Query_Error(t *testing.T) {
 
 	assert.NotNil(t, err)
 }
+
+func Test_Database_Delete_Fail_Delete_Error(t *testing.T) {
+	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fake := fakeDynamoDB{
+		BatchWriteReturnError: fmt.Errorf("batch write error"),
+	}
+
+	fake.PushQueryOutput(&dynamodb.QueryOutput{
+		Items: []map[string]*dynamodb.AttributeValue{
+			{
+				"id": { S: aws.String(id) },
+			},
+		},
+	})
+
+	db := NewDatabase(&fake)
+
+	err = db.Delete(ctx)
+
+	assert.NotNil(t, err)
+}
