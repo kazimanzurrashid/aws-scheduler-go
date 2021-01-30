@@ -61,12 +61,14 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			continue
 		}
 
-		if canceled, ok := record.Change.OldImage["canceled"]; ok && canceled.Boolean() {
+		attributes := record.Change.OldImage
+
+		if canceled, ok := attributes["canceled"]; ok && canceled.Boolean() {
 			continue
 		}
 
 		g.Go(func() error {
-			return handle(ctx, record.Change.OldImage)
+			return handle(ctx, attributes)
 		})
 	}
 
