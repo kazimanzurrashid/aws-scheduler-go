@@ -75,6 +75,7 @@ func Test_handle_Success(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
+	assert.Equal(t, 2, len(ft.Requests))
 
 	for _, req := range ft.Requests {
 		assert.Equal(t, url, req.URL.String())
