@@ -14,7 +14,7 @@ import (
 var database storage.Storage
 
 func handler(ctx context.Context) error {
-	return database.Delete(ctx)
+	return database.Update(ctx)
 }
 
 func init() {

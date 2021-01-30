@@ -13,8 +13,13 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const (
+	scheduleStatusIdle = "IDLE"
+	scheduleStatusQueued = "QUEUED"
+)
+
 type Storage interface {
-	Delete(context.Context) error
+	Update(context.Context) error
 }
 
 type Database struct {
@@ -25,27 +30,27 @@ func NewDatabase(dynamodb dynamodbiface.DynamoDBAPI) *Database {
 	return &Database{dynamodb}
 }
 
-func (srv *Database) Delete(ctx context.Context) error {
+func (srv *Database) Update(ctx context.Context) error {
+	table := tableName()
 	startKey := make(map[string]*dynamodb.AttributeValue)
 	now := strconv.FormatInt(time.Now().Unix(), 10)
 	g, _ := errgroup.WithContext(ctx)
 
 	for {
 		params := &dynamodb.QueryInput{
-			TableName:              aws.String(tableName()),
-			IndexName:              aws.String("ix_due_at"),
-			KeyConditionExpression: aws.String("#d = :d AND #da < :da"),
-			ProjectionExpression:   aws.String("#i"),
+			TableName:              aws.String(table),
+			IndexName:              aws.String("ix_status_dueAt"),
+			KeyConditionExpression: aws.String("#s = :s AND #da < :da"),
 			ExpressionAttributeNames: map[string]*string{
-				"#i":  aws.String("id"),
-				"#d":  aws.String("dummy"),
+				"#s":  aws.String("status"),
 				"#da": aws.String("dueAt"),
 			},
 			ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-				":d":  {S: aws.String("s")},
+				":s":  {S: aws.String(scheduleStatusIdle)},
 				":da": {N: aws.String(now)},
 			},
-			ReturnConsumedCapacity: aws.String(dynamodb.ReturnConsumedCapacityNone),
+			ReturnConsumedCapacity: aws.String(
+				dynamodb.ReturnConsumedCapacityNone),
 		}
 
 		if len(startKey) > 0 {
@@ -58,34 +63,31 @@ func (srv *Database) Delete(ctx context.Context) error {
 			return err
 		}
 
-		length := len(res.Items)
-
-		if length == 0 {
+		if len(res.Items) == 0 {
 			return nil
 		}
 
-		ids := make([]string, length)
+		for _, chunk := range chunkBy(res.Items, 25) {
+			localItems := chunk
 
-		for index, row := range res.Items {
-			ids[index] = *row["id"].S
-		}
-
-		for _, chunk := range chunkBy(ids, 25) {
 			g.Go(func() error {
-				writes := make([]*dynamodb.WriteRequest, len(chunk))
+				writes := make([]*dynamodb.WriteRequest, len(localItems))
 
-				for index, id := range chunk {
+				for index, item := range localItems {
+					item["status"] = &dynamodb.AttributeValue {
+						S: aws.String(scheduleStatusQueued),
+					}
+
 					write := &dynamodb.WriteRequest{
-						DeleteRequest: &dynamodb.DeleteRequest{
-							Key: map[string]*dynamodb.AttributeValue{
-								"id": {S: aws.String(id)},
-							},
+						PutRequest: &dynamodb.PutRequest{
+							Item: item,
 						},
 					}
+
 					writes[index] = write
 				}
 
-				return srv.delete(ctx, writes)
+				return srv.update(ctx, table, writes)
 			})
 		}
 
@@ -99,12 +101,17 @@ func (srv *Database) Delete(ctx context.Context) error {
 	return g.Wait()
 }
 
-func (srv *Database) delete(ctx context.Context, writes []*dynamodb.WriteRequest) error {
-	table := tableName()
+func (srv *Database) update(
+	ctx context.Context,
+	table string,
+	writes []*dynamodb.WriteRequest) error {
+
 	params := &dynamodb.BatchWriteItemInput{
 		RequestItems:                map[string][]*dynamodb.WriteRequest{},
-		ReturnItemCollectionMetrics: aws.String(dynamodb.ReturnItemCollectionMetricsNone),
-		ReturnConsumedCapacity:      aws.String(dynamodb.ReturnConsumedCapacityNone),
+		ReturnItemCollectionMetrics: aws.String(
+			dynamodb.ReturnItemCollectionMetricsNone),
+		ReturnConsumedCapacity:      aws.String(
+			dynamodb.ReturnConsumedCapacityNone),
 	}
 
 	params.RequestItems[table] = writes
@@ -119,14 +126,17 @@ func (srv *Database) delete(ctx context.Context, writes []*dynamodb.WriteRequest
 		ui, ok := res.UnprocessedItems[table]
 
 		if ok && len(ui) > 0 {
-			return srv.delete(ctx, ui)
+			return srv.update(ctx, table, ui)
 		}
 	}
 
 	return nil
 }
 
-func chunkBy(items []string, size int) (chunks [][]string) {
+func chunkBy(
+	items []map[string]*dynamodb.AttributeValue,
+	size int) (chunks [][]map[string]*dynamodb.AttributeValue) {
+
 	for size < len(items) {
 		items, chunks = items[size:], append(chunks, items[0:size:size])
 	}

@@ -15,7 +15,10 @@ type fakeGetStorage struct {
 }
 
 //goland:noinspection GoUnusedParameter
-func (srv *fakeGetStorage) Get(ctx context.Context, id string) (*storage.Schedule, error) {
+func (srv *fakeGetStorage) Get(
+	ctx context.Context,
+	id string) (*storage.Schedule, error) {
+
 	srv.ID = id
 
 	return &storage.Schedule{}, nil

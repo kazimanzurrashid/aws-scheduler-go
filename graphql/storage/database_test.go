@@ -70,6 +70,13 @@ const (
 
 var ctx = context.TODO()
 
+func setTableName(t *testing.T)  {
+	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func Test_Database_NewDatabase_Success(t *testing.T) {
 	db := NewDatabase(&fakeDynamoDB{})
 
@@ -82,10 +89,7 @@ func Test_Database_Create_Success(t *testing.T) {
 		"accept": accept,
 	}
 
-	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
-	if err != nil {
-		t.Error(err)
-	}
+	setTableName(t)
 
 	fake := fakeDynamoDB{}
 	db := NewDatabase(&fake)
@@ -106,11 +110,12 @@ func Test_Database_Create_Success(t *testing.T) {
 		t,
 		strconv.FormatInt(dueAt.Unix(), 10),
 		*fake.PutInput.Item["dueAt"].N)
-	assert.NotEqual(t, "", *fake.PutInput.Item["dummy"].S)
+	assert.Equal(t, ScheduleStatusIdle, *fake.PutInput.Item["status"].S)
 	assert.Equal(t, url, *fake.PutInput.Item["url"].S)
 	assert.Equal(t, method, *fake.PutInput.Item["method"].S)
 	assert.Equal(t, accept, *fake.PutInput.Item["headers"].M["accept"].S)
 	assert.Equal(t, body, *fake.PutInput.Item["body"].S)
+	assert.NotEqual(t, "", *fake.PutInput.Item["createdAt"].N)
 }
 
 func Test_Database_Create_Fail_ID_Generate_Error(t *testing.T) {
@@ -131,9 +136,12 @@ func Test_Database_Create_Fail_ID_Generate_Error(t *testing.T) {
 }
 
 func Test_Database_Create_Fail_Input_Marshal_Error(t *testing.T) {
-	realMarshal := marshalMap
+	realMarshal := marshalStruct
 
-	marshalMap = func(in interface{}) (map[string]*dynamodb.AttributeValue, error) {
+	marshalStruct = func(in interface{}) (
+		map[string]*dynamodb.AttributeValue,
+		error) {
+
 		return nil, fmt.Errorf("marshal error")
 	}
 
@@ -145,18 +153,13 @@ func Test_Database_Create_Fail_Input_Marshal_Error(t *testing.T) {
 	assert.Equal(t, res, "")
 	assert.NotNil(t, err)
 
-	marshalMap = realMarshal
+	marshalStruct = realMarshal
 }
 
 func Test_Database_Create_Fail_Internal_Error(t *testing.T) {
 	dueAt := time.Now().Add(time.Minute * 1)
 	headers := map[string]string{
 		"accept": accept,
-	}
-
-	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
-	if err != nil {
-		t.Error(err)
 	}
 
 	fake := fakeDynamoDB{
@@ -174,24 +177,10 @@ func Test_Database_Create_Fail_Internal_Error(t *testing.T) {
 
 	assert.Equal(t, res, "")
 	assert.NotNil(t, err)
-	assert.Equal(t, table, *fake.PutInput.TableName)
-	assert.NotEqual(t, "", *fake.PutInput.Item["id"].S)
-	assert.Equal(
-		t,
-		strconv.FormatInt(dueAt.Unix(), 10),
-		*fake.PutInput.Item["dueAt"].N)
-	assert.NotEqual(t, "", *fake.PutInput.Item["dummy"].S)
-	assert.Equal(t, url, *fake.PutInput.Item["url"].S)
-	assert.Equal(t, method, *fake.PutInput.Item["method"].S)
-	assert.Equal(t, accept, *fake.PutInput.Item["headers"].M["accept"].S)
-	assert.Equal(t, body, *fake.PutInput.Item["body"].S)
 }
 
-func Test_Database_Cancel_Success_Existent_Record(t *testing.T) {
-	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
-	if err != nil {
-		t.Error(err)
-	}
+func Test_Database_Cancel_Success(t *testing.T) {
+	setTableName(t)
 
 	fake := fakeDynamoDB{}
 	db := NewDatabase(&fake)
@@ -202,18 +191,23 @@ func Test_Database_Cancel_Success_Existent_Record(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, table, *fake.UpdateInput.TableName)
 	assert.Equal(t, id, *fake.UpdateInput.Key["id"].S)
+	assert.NotEqual(t, "", *fake.UpdateInput.UpdateExpression)
+	assert.NotEqual(t, "", *fake.UpdateInput.ConditionExpression)
 	assert.Equal(
 		t,
-		aws.Bool(true),
-		fake.UpdateInput.ExpressionAttributeValues[":c"].BOOL)
+		ScheduleStatusCanceled,
+		*fake.UpdateInput.ExpressionAttributeValues[":s1"].S)
+	assert.Equal(
+		t,
+		ScheduleStatusIdle,
+		*fake.UpdateInput.ExpressionAttributeValues[":s2"].S)
+	assert.NotEqual(
+		t,
+		"",
+		*fake.UpdateInput.ExpressionAttributeValues[":ca"].N)
 }
 
-func Test_Database_Cancel_Success_NonExistent_Record(t *testing.T) {
-	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
-	if err != nil {
-		t.Error(err)
-	}
-
+func Test_Database_Cancel_Success_Conditional_Check_Fail(t *testing.T) {
 	fake := fakeDynamoDB{
 		ReturnError: awserr.NewRequestFailure(
 			awserr.New(
@@ -229,20 +223,9 @@ func Test_Database_Cancel_Success_NonExistent_Record(t *testing.T) {
 
 	assert.False(t, res)
 	assert.Nil(t, err)
-	assert.Equal(t, table, *fake.UpdateInput.TableName)
-	assert.Equal(t, id, *fake.UpdateInput.Key["id"].S)
-	assert.Equal(
-		t,
-		aws.Bool(true),
-		fake.UpdateInput.ExpressionAttributeValues[":c"].BOOL)
 }
 
 func Test_Database_Cancel_Fail_Internal_Error(t *testing.T) {
-	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
-	if err != nil {
-		t.Error(err)
-	}
-
 	fake := fakeDynamoDB{
 		ReturnError: awserr.New("InternalError", "InternalError", nil),
 	}
@@ -252,21 +235,12 @@ func Test_Database_Cancel_Fail_Internal_Error(t *testing.T) {
 
 	assert.False(t, res)
 	assert.NotNil(t, err)
-	assert.Equal(t, table, *fake.UpdateInput.TableName)
-	assert.Equal(t, id, *fake.UpdateInput.Key["id"].S)
-	assert.Equal(
-		t,
-		aws.Bool(true),
-		fake.UpdateInput.ExpressionAttributeValues[":c"].BOOL)
 }
 
 func Test_Database_Get_Success_Existent_Record(t *testing.T) {
-	dueAt := time.Now().Add(time.Minute * 1)
+	dueAt := time.Now().Add(-time.Hour * 24 * 7)
 
-	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
-	if err != nil {
-		t.Error(err)
-	}
+	setTableName(t)
 
 	item, err := dynamodbattribute.MarshalMap(Schedule{
 		ID:     id,
@@ -277,6 +251,10 @@ func Test_Database_Get_Success_Existent_Record(t *testing.T) {
 			"accept": accept,
 		},
 		Body: body,
+		Status: ScheduleStatusSucceeded,
+		StartedAt: dueAt.Add(time.Minute * 2),
+		CompletedAt: time.Now().Add(time.Minute * 3),
+		CreatedAt: dueAt.Add(-time.Hour * 24 * 3),
 	})
 
 	if err != nil {
@@ -304,11 +282,6 @@ func Test_Database_Get_Success_Existent_Record(t *testing.T) {
 }
 
 func Test_Database_Get_Success_NonExistent_Record(t *testing.T) {
-	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
-	if err != nil {
-		t.Error(err)
-	}
-
 	fake := fakeDynamoDB{
 		GetOutput: &dynamodb.GetItemOutput{},
 	}
@@ -318,16 +291,9 @@ func Test_Database_Get_Success_NonExistent_Record(t *testing.T) {
 
 	assert.Nil(t, res)
 	assert.Nil(t, err)
-	assert.Equal(t, table, *fake.GetInput.TableName)
-	assert.Equal(t, id, *fake.GetInput.Key["id"].S)
 }
 
 func Test_Database_Get_Fail_Internal_Error(t *testing.T) {
-	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
-	if err != nil {
-		t.Error(err)
-	}
-
 	fake := fakeDynamoDB{
 		ReturnError: awserr.New("InternalError", "InternalError", nil),
 	}
@@ -337,24 +303,21 @@ func Test_Database_Get_Fail_Internal_Error(t *testing.T) {
 
 	assert.Nil(t, res)
 	assert.NotNil(t, err)
-	assert.Equal(t, table, *fake.GetInput.TableName)
-	assert.Equal(t, id, *fake.GetInput.Key["id"].S)
 }
 
 func Test_Database_Get_Fail_Output_Unmarshal_Error(t *testing.T) {
-	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
-	if err != nil {
-		t.Error(err)
-	}
-
 	realUnmarshal := unmarshalMap
-	unmarshalMap = func(m map[string]*dynamodb.AttributeValue, out interface{}) error {
+	unmarshalMap = func(
+		m map[string]*dynamodb.AttributeValue,
+		out interface{}) error {
+
 		return fmt.Errorf("unmarshal error")
 	}
 
 	fake := fakeDynamoDB{
-		GetOutput: &dynamodb.GetItemOutput{Item: map[string]*dynamodb.AttributeValue{
-			"id": {S: aws.String(id)},
+		GetOutput: &dynamodb.GetItemOutput{
+			Item: map[string]*dynamodb.AttributeValue{
+				"id": {S: aws.String(id)},
 		}},
 	}
 	db := NewDatabase(&fake)
@@ -363,8 +326,6 @@ func Test_Database_Get_Fail_Output_Unmarshal_Error(t *testing.T) {
 
 	assert.Nil(t, res)
 	assert.NotNil(t, err)
-	assert.Equal(t, table, *fake.GetInput.TableName)
-	assert.Equal(t, id, *fake.GetInput.Key["id"].S)
 
 	unmarshalMap = realUnmarshal
 }

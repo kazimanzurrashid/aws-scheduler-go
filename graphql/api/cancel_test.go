@@ -15,7 +15,10 @@ type fakeCancelStorage struct {
 }
 
 //goland:noinspection GoUnusedParameter
-func (srv *fakeCancelStorage) Cancel(ctx context.Context, id string) (bool, error) {
+func (srv *fakeCancelStorage) Cancel(
+	ctx context.Context,
+	id string) (bool, error) {
+
 	srv.ID = id
 
 	return true, nil

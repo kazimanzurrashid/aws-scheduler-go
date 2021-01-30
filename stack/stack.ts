@@ -1,5 +1,5 @@
 import { App, Construct, Duration, RemovalPolicy, Stack, StackProps } from '@aws-cdk/core';
-import { AttributeType, BillingMode, ProjectionType, StreamViewType, Table } from '@aws-cdk/aws-dynamodb';
+import { AttributeType, BillingMode, StreamViewType, Table } from '@aws-cdk/aws-dynamodb';
 import { Code, Function, Runtime, StartingPosition, Tracing } from '@aws-cdk/aws-lambda';
 import { DynamoEventSource } from '@aws-cdk/aws-lambda-event-sources';
 import { Rule, RuleTargetInput, Schedule } from '@aws-cdk/aws-events';
@@ -25,20 +25,19 @@ class SchedulerStack extends Stack {
         name: 'id',
         type: AttributeType.STRING
       },
-      stream: StreamViewType.OLD_IMAGE
+      stream: StreamViewType.NEW_IMAGE
     });
 
     schedulerTable.addGlobalSecondaryIndex({
-      indexName: 'ix_due_at',
+      indexName: 'ix_status_dueAt',
       partitionKey: {
-        name: 'dummy',
+        name: 'status',
         type: AttributeType.STRING
       },
       sortKey: {
         name: 'dueAt',
         type: AttributeType.NUMBER
-      },
-      projectionType: ProjectionType.KEYS_ONLY
+      }
     });
 
     const graphqlLambda = new Function(this, 'GraphQLFunction', {
@@ -83,7 +82,10 @@ class SchedulerStack extends Stack {
       memorySize: 3008,
       timeout: Duration.minutes(15),
       tracing: Tracing.ACTIVE,
-      code: Code.fromAsset(`./../worker/dist`)
+      code: Code.fromAsset(`./../worker/dist`),
+      environment: {
+        SCHEDULER_TABLE_NAME: schedulerTable.tableName
+      }
     });
 
     workerLambda.addEventSource(new DynamoEventSource(schedulerTable, {
@@ -91,6 +93,7 @@ class SchedulerStack extends Stack {
     }));
 
     schedulerTable.grantStreamRead(workerLambda);
+    schedulerTable.grantWriteData(workerLambda);
 
     const integration = new LambdaProxyIntegration({
       handler: graphqlLambda,

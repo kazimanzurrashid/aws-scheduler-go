@@ -23,5 +23,23 @@ var scheduleType = graphql.NewObject(graphql.ObjectConfig{
 		"body": &graphql.Field{
 			Type: graphql.String,
 		},
+		"status": &graphql.Field{
+			Type: graphql.NewNonNull(scheduleStatusType),
+		},
+		"startedAt": &graphql.Field{
+			Type: graphql.DateTime,
+		},
+		"completedAt": &graphql.Field{
+			Type: graphql.DateTime,
+		},
+		"canceledAt": &graphql.Field{
+			Type: graphql.DateTime,
+		},
+		"result": &graphql.Field{
+			Type: graphql.String,
+		},
+		"createdAt": &graphql.Field{
+			Type: graphql.NewNonNull(graphql.DateTime),
+		},
 	},
 })

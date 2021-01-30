@@ -25,7 +25,10 @@ const (
 )
 
 //goland:noinspection GoUnusedParameter
-func (srv *fakeCreateStorage) Create(ctx context.Context, input *storage.CreateInput) (string, error) {
+func (srv *fakeCreateStorage) Create(
+	ctx context.Context,
+	input *storage.CreateInput) (string, error) {
+
 	srv.Input = input
 
 	return id, nil

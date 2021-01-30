@@ -1,82 +1,77 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"net/http"
+	"sync"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-xray-sdk-go/xray"
 
 	"github.com/hashicorp/go-retryablehttp"
 
-	"golang.org/x/sync/errgroup"
+	"github.com/kazimanzurrashid/aws-scheduler-go/worker/services"
 )
 
-var httpClient *http.Client
-
-func handle(ctx context.Context, record map[string]events.DynamoDBAttributeValue) error {
-	var body string
-
-	if attr, found := record["body"]; found && !attr.IsNull() {
-		body = attr.String()
-	}
-
-	req, err := http.NewRequestWithContext(
-		ctx,
-		record["method"].String(),
-		record["url"].String(),
-		bytes.NewBufferString(body))
-
-	if err != nil {
-		return err
-	}
-
-	if attr, found := record["headers"]; found && !attr.IsNull() {
-		for k, v := range attr.Map() {
-			req.Header.Set(k, v.String())
-		}
-	} else {
-		for k, v := range map[string]string{
-			"Accept":       "application/json;charset=utf-8",
-			"Content-Type": "application/json;charset=utf-8",
-		} {
-			req.Header.Set(k, v)
-		}
-	}
-
-	if _, err = httpClient.Do(req); err != nil {
-		return err
-	}
-
-	return nil
-}
+var (
+	httpClient services.Client
+	database   services.Storage
+)
 
 func handler(ctx context.Context, e events.DynamoDBEvent) error {
-	g, _ := errgroup.WithContext(ctx)
+	var uis []*services.UpdateInput
+	var wg sync.WaitGroup
 
 	for _, record := range e.Records {
-		if record.EventName != "REMOVE" {
+		if record.EventName != "MODIFY" {
 			continue
 		}
 
-		attributes := record.Change.OldImage
-
-		if canceled, ok := attributes["canceled"]; ok && canceled.Boolean() {
+		if status := record.Change.NewImage["status"];
+		status.String() != services.ScheduleStatusQueued {
 			continue
 		}
 
-		g.Go(func() error {
-			return handle(ctx, attributes)
-		})
+		wg.Add(1)
+		go func(attrs map[string]events.DynamoDBAttributeValue) {
+			defer wg.Done()
+
+			ri := services.CreateRequestInput(attrs)
+			ui := services.CreateUpdateInput(attrs)
+
+			ui.StartedAt = time.Now().Unix()
+
+			ro := httpClient.Request(ctx, ri)
+
+			ui.Status = ro.Status
+			ui.Result = ro.Result
+			ui.CompletedAt = time.Now().Unix()
+
+			uis = append(uis, ui)
+		}(record.Change.NewImage)
 	}
 
-	return g.Wait()
+	wg.Wait()
+
+	if len(uis) == 0 {
+		return nil
+	}
+
+	return database.Update(ctx, uis)
 }
 
 func init() {
-	httpClient = xray.Client(retryablehttp.NewClient().StandardClient())
+	ses := session.Must(session.NewSession())
+
+	ddbc := dynamodb.New(ses)
+	xray.AWS(ddbc.Client)
+
+	database = services.NewDatabase(ddbc)
+	httpClient = services.NewHttpClient(
+		xray.Client(retryablehttp.NewClient().StandardClient()))
 }
 
 func main() {

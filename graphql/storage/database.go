@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,23 +14,6 @@ import (
 
 	"github.com/matoous/go-nanoid"
 )
-
-type CreateInput struct {
-	DueAt   time.Time         `json:"dueAt" dynamodbav:"dueAt,unixtime"`
-	URL     string            `json:"url" dynamodbav:"url"`
-	Method  string            `json:"method" dynamodbav:"method"`
-	Headers map[string]string `json:"headers,omitempty" dynamodbav:"headers,omitempty"`
-	Body    string            `json:"body,omitempty" dynamodbav:"body,omitempty"`
-}
-
-type Schedule struct {
-	ID      string            `json:"id"`
-	DueAt   time.Time         `json:"dueAt" dynamodbav:"dueAt,unixtime"`
-	URL     string            `json:"url" dynamodbav:"url"`
-	Method  string            `json:"method" dynamodbav:"method"`
-	Headers map[string]string `json:"headers,omitempty" dynamodbav:"headers,omitempty"`
-	Body    string            `json:"body,omitempty" dynamodbav:"body,omitempty"`
-}
 
 type Storage interface {
 	Create(context.Context, *CreateInput) (string, error)
@@ -50,61 +34,65 @@ func NewDatabase(dynamodb dynamodbiface.DynamoDBAPI) *Database {
 type (
 	idGenerate func() (string, error)
 	marshal    func(in interface{}) (map[string]*dynamodb.AttributeValue, error)
-	unmarshal  func(m map[string]*dynamodb.AttributeValue, out interface{}) error
+	unmarshal  func(
+		m map[string]*dynamodb.AttributeValue,
+		out interface{}) error
 )
 
 func nanoIDGenerate() (string, error) {
-	return gonanoid.Generate("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 16)
+	return gonanoid.Generate(
+		"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+		16)
 }
 
-func dynamodbMarshal(in interface{}) (map[string]*dynamodb.AttributeValue, error) {
+func dynamoDBMarshal(
+	in interface{}) (map[string]*dynamodb.AttributeValue, error) {
 	return dynamodbattribute.MarshalMap(in)
 }
 
-func dynamodbUnmarshal(m map[string]*dynamodb.AttributeValue, out interface{}) error {
+func dynamoDBUnmarshal(
+	m map[string]*dynamodb.AttributeValue, out interface{}) error {
 	return dynamodbattribute.UnmarshalMap(m, out)
 }
 
 var (
-	generateID   idGenerate = nanoIDGenerate
-	marshalMap   marshal    = dynamodbMarshal
-	unmarshalMap unmarshal  = dynamodbUnmarshal
+	generateID    idGenerate = nanoIDGenerate
+	marshalStruct marshal    = dynamoDBMarshal
+	unmarshalMap  unmarshal  = dynamoDBUnmarshal
 )
 
-func (srv *Database) Create(ctx context.Context, input *CreateInput) (string, error) {
+func (srv *Database) Create(
+	ctx context.Context,
+	input *CreateInput) (string, error) {
+
 	id, err := generateID()
 
 	if err != nil {
 		return "", err
 	}
 
-	item, err := marshalMap(input)
+	item, err := marshalStruct(input)
 
 	if err != nil {
 		return "", err
 	}
 
 	item["id"] = &dynamodb.AttributeValue{S: aws.String(id)}
-	item["dummy"] = &dynamodb.AttributeValue{S: aws.String("s")}
+	item["status"] = &dynamodb.AttributeValue{
+		S: aws.String(ScheduleStatusIdle),
+	}
+	item["createdAt"] = &dynamodb.AttributeValue{
+		N: aws.String(strconv.FormatInt(time.Now().Unix(), 10)),
+	}
 
 	params := &dynamodb.PutItemInput{
 		TableName:                   aws.String(tableName()),
 		Item:                        item,
-		ReturnConsumedCapacity:      aws.String(dynamodb.ReturnConsumedCapacityNone),
-		ReturnItemCollectionMetrics: aws.String(dynamodb.ReturnItemCollectionMetricsNone),
+		ReturnConsumedCapacity:      aws.String(
+			dynamodb.ReturnConsumedCapacityNone),
+		ReturnItemCollectionMetrics: aws.String(
+			dynamodb.ReturnItemCollectionMetricsNone),
 		ReturnValues:                aws.String(dynamodb.ReturnValueNone),
-	}
-
-	if input.Headers != nil && len(input.Headers) > 0 {
-		headers := make(map[string]*dynamodb.AttributeValue, len(input.Headers))
-		for k, v := range input.Headers {
-			headers[k] = &dynamodb.AttributeValue{S: aws.String(v)}
-		}
-		params.Item["headers"] = &dynamodb.AttributeValue{M: headers}
-	}
-
-	if input.Body != "" {
-		params.Item["body"] = &dynamodb.AttributeValue{S: aws.String(input.Body)}
 	}
 
 	if _, err = srv.dynamodb.PutItemWithContext(ctx, params); err != nil {
@@ -120,22 +108,28 @@ func (srv *Database) Cancel(ctx context.Context, id string) (bool, error) {
 		Key: map[string]*dynamodb.AttributeValue{
 			"id": {S: aws.String(id)},
 		},
-		UpdateExpression:    aws.String("SET #c = :c"),
-		ConditionExpression: aws.String("attribute_exists(#u)"),
+		UpdateExpression:    aws.String("SET #s = :s1, #ca = :ca"),
+		ConditionExpression: aws.String("#s = :s2"),
 		ExpressionAttributeNames: map[string]*string{
-			"#c": aws.String("canceled"),
-			"#u": aws.String("url"),
+			"#s":  aws.String("status"),
+			"#ca": aws.String("canceledAt"),
 		},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":c": {BOOL: aws.Bool(true)},
+			":s1": {S: aws.String(ScheduleStatusCanceled)},
+			":s2": {S: aws.String(ScheduleStatusIdle)},
+			":ca": {N: aws.String(strconv.FormatInt(time.Now().Unix(), 10))},
 		},
-		ReturnItemCollectionMetrics: aws.String(dynamodb.ReturnItemCollectionMetricsNone),
-		ReturnConsumedCapacity:      aws.String(dynamodb.ReturnConsumedCapacityNone),
-		ReturnValues:                aws.String(dynamodb.ReturnValueNone),
+		ReturnItemCollectionMetrics: aws.String(
+			dynamodb.ReturnItemCollectionMetricsNone),
+		ReturnConsumedCapacity:      aws.String(
+			dynamodb.ReturnConsumedCapacityNone),
+		ReturnValues:                aws.String(
+			dynamodb.ReturnValueNone),
 	}
 
 	if _, err := srv.dynamodb.UpdateItemWithContext(ctx, params); err != nil {
-		if ccf, ok := err.(awserr.RequestFailure); ok && ccf.Code() == "ConditionalCheckFailedException" {
+		if ccf, ok := err.(awserr.RequestFailure);
+		ok && ccf.Code() == "ConditionalCheckFailedException" {
 			return false, nil
 		}
 

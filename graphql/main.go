@@ -69,7 +69,11 @@ func status(code int, err error) (events.APIGatewayV2HTTPResponse, error) {
 	return res, err
 }
 
-func handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+func handler(
+	ctx context.Context,
+	req events.APIGatewayV2HTTPRequest) (
+	events.APIGatewayV2HTTPResponse, error) {
+
 	body := strings.TrimSpace(req.Body)
 
 	if body == "" {

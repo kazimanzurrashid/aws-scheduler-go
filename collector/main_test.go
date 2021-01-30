@@ -15,7 +15,7 @@ type fakeStorage struct {
 }
 
 //goland:noinspection GoUnusedParameter
-func (srv *fakeStorage) Delete(ctx context.Context) error  {
+func (srv *fakeStorage) Update(ctx context.Context) error  {
 	srv.Called = true
 	return nil
 }
