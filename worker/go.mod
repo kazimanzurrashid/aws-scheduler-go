@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/aws/aws-lambda-go v1.22.0
-	github.com/aws/aws-sdk-go v1.36.32 // indirect
+	github.com/aws/aws-sdk-go v1.37.1 // indirect
 	github.com/aws/aws-xray-sdk-go v1.2.0
 	github.com/hashicorp/go-retryablehttp v0.6.8
 	github.com/stretchr/testify v1.6.1
