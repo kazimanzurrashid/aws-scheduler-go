@@ -202,7 +202,7 @@ func Test_Database_Update_Success_Empty_Records(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func Test_Database_Delete_Fail_Query_Error(t *testing.T) {
+func Test_Database_Update_Fail_Query_Error(t *testing.T) {
 	setTableName(t)
 
 	fake := fakeDynamoDB{
@@ -216,7 +216,7 @@ func Test_Database_Delete_Fail_Query_Error(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func Test_Database_Delete_Fail_Batch_Write_Error(t *testing.T) {
+func Test_Database_Update_Fail_Batch_Write_Error(t *testing.T) {
 	setTableName(t)
 
 	fake := fakeDynamoDB{
