@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/graphql-go/graphql"
 
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/api"
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/storage"
@@ -18,10 +17,7 @@ import (
 )
 
 var _ = Describe("handler", func() {
-	var realSchema graphql.Schema
-
 	BeforeEach(func() {
-		realSchema = schema
 		f := api.NewFactory(&fakeStorage{})
 		s, _ := f.Schema()
 		schema = s
@@ -265,10 +261,6 @@ var _ = Describe("handler", func() {
 				marshalStruct = realMarshal
 			})
 		})
-	})
-
-	AfterEach(func() {
-		schema = realSchema
 	})
 })
 
