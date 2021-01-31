@@ -15,6 +15,7 @@ func CreateRequestInput(
 	input := RequestInput{
 		URL:    attributes["url"].String(),
 		Method: attributes["method"].String(),
+		Headers: make(map[string]string),
 	}
 
 	if attr, found := attributes["headers"]; found && !attr.IsNull() {
