@@ -2,11 +2,33 @@ package main
 
 import (
 	"context"
-	"testing"
-
 	"github.com/kazimanzurrashid/aws-scheduler-go/collector/storage"
-	"github.com/stretchr/testify/assert"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+var _ = Describe("handler", func() {
+	var (
+		storage fakeStorage
+		err error
+	)
+
+	BeforeEach(func() {
+		storage = fakeStorage{}
+		database = &storage
+
+		err = handler(context.TODO())
+	})
+
+	It("calls database update", func() {
+		Expect(storage.Called).To(BeTrue())
+	})
+
+	It("does not return error", func() {
+		Expect(err).To(BeNil())
+	})
+})
 
 type fakeStorage struct {
 	storage.Storage
@@ -18,13 +40,4 @@ type fakeStorage struct {
 func (srv *fakeStorage) Update(ctx context.Context) error  {
 	srv.Called = true
 	return nil
-}
-
-func Test_handler_Success(t *testing.T) {
-	fake := fakeStorage{}
-	database = &fake
-
-	_ = handler(context.TODO())
-
-	assert.True(t, fake.Called)
 }
