@@ -13,8 +13,8 @@ func CreateRequestInput(
 	attributes map[string]events.DynamoDBAttributeValue) *RequestInput {
 
 	input := RequestInput{
-		URL:    attributes["url"].String(),
-		Method: attributes["method"].String(),
+		URL:     attributes["url"].String(),
+		Method:  attributes["method"].String(),
 		Headers: make(map[string]string),
 	}
 

@@ -83,7 +83,7 @@ func Test_HttpClient_Request_Fail_Invalid_Request(t *testing.T) {
 	})
 
 	ro := hc.Request(context.TODO(), &RequestInput{
-		URL:    "~!@#$%",
+		URL: "~!@#$%",
 	})
 
 	assert.Equal(t, ScheduleStatusFailed, ro.Status)

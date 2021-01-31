@@ -39,10 +39,12 @@ func (db *fakeDynamoDB) BatchWriteItemWithContext(
 
 	db.batchWriteOutputs.Remove(output)
 
-	return output.Value.(*dynamodb.BatchWriteItemOutput), db.BatchWriteReturnError
+	return output.Value.(*dynamodb.BatchWriteItemOutput),
+		db.BatchWriteReturnError
 }
 
-func (db *fakeDynamoDB) PushBatchWriteOutput(output *dynamodb.BatchWriteItemOutput) {
+func (db *fakeDynamoDB) PushBatchWriteOutput(
+	output *dynamodb.BatchWriteItemOutput) {
 	db.batchWriteOutputs.PushBack(output)
 }
 
@@ -63,8 +65,6 @@ const (
 	id    = "1234567890"
 )
 
-var ctx = context.TODO()
-
 func setTableName(t *testing.T) {
 	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
 	if err != nil {
@@ -83,7 +83,7 @@ func Test_Database_Update_Success(t *testing.T) {
 				&dynamodb.WriteRequest{
 					PutRequest: &dynamodb.PutRequest{
 						Item: map[string]*dynamodb.AttributeValue{
-							"id":     {S: aws.String(id)},
+							"id": {S: aws.String(id)},
 						},
 					},
 				},
@@ -94,7 +94,7 @@ func Test_Database_Update_Success(t *testing.T) {
 
 	db := NewDatabase(&fake)
 
-	err := db.Update(ctx, []*UpdateInput{
+	err := db.Update(context.TODO(), []*UpdateInput{
 		{
 			ID: id,
 		},
@@ -130,7 +130,7 @@ func Test_Database_Update_Fail_Marshal_Error(t *testing.T) {
 
 	db := NewDatabase(&fake)
 
-	err := db.Update(ctx, []*UpdateInput{
+	err := db.Update(context.TODO(), []*UpdateInput{
 		{
 			ID: id,
 		},
@@ -150,7 +150,7 @@ func Test_Database_Update_Fail_Batch_Write_Error(t *testing.T) {
 
 	db := NewDatabase(&fake)
 
-	err := db.Update(ctx, []*UpdateInput{
+	err := db.Update(context.TODO(), []*UpdateInput{
 		{
 			ID: id,
 		},
