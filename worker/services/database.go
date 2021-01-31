@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"os"
-	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -66,55 +65,6 @@ func (srv *Database) Update(ctx context.Context, inputs []*UpdateInput) error {
 	}
 
 	return g.Wait()
-}
-
-func (srv *Database) update2(
-	ctx context.Context,
-	table string,
-	inputs []*UpdateInput) error {
-
-	items := make([]*dynamodb.TransactWriteItem, len(inputs))
-
-	for index, input := range inputs {
-		items[index] = &dynamodb.TransactWriteItem{
-			Update: &dynamodb.Update{
-				TableName: aws.String(table),
-				Key: map[string]*dynamodb.AttributeValue{
-					"id": {S: aws.String(input.ID)},
-				},
-				UpdateExpression: aws.String(
-					"SET #s = :s1, #sa = :sa, #ca = :ca, #r = :r"),
-				ConditionExpression: aws.String("#s = :s2"),
-				ExpressionAttributeNames: map[string]*string{
-					"#s":  aws.String("status"),
-					"#sa": aws.String("startedAt"),
-					"#ca": aws.String("completedAt"),
-					"#r":  aws.String("result"),
-				},
-				ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-					":s1": {S: aws.String(input.Status)},
-					":s2": {S: aws.String("QUEUED")},
-					":sa": {N: aws.String(
-						strconv.FormatInt(input.StartedAt, 10))},
-					":ca": {N: aws.String(
-						strconv.FormatInt(input.CompletedAt, 10))},
-					":r": {S: aws.String(input.Result)},
-				},
-			},
-		}
-	}
-
-	params := &dynamodb.TransactWriteItemsInput{
-		TransactItems: items,
-		ReturnConsumedCapacity: aws.String(
-			dynamodb.ReturnConsumedCapacityNone),
-		ReturnItemCollectionMetrics: aws.String(
-			dynamodb.ReturnItemCollectionMetricsNone),
-	}
-
-	_, err := srv.dynamodb.TransactWriteItemsWithContext(ctx, params)
-
-	return err
 }
 
 func (srv *Database) update(
