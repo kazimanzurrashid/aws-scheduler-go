@@ -16,3 +16,5 @@ debug
 .vscode/
 vendor/
 dist/
+
+*.coverprofile

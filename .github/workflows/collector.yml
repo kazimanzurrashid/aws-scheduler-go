@@ -27,7 +27,7 @@ jobs:
           cd collector
           go get -t -d ./...
           go install github.com/onsi/ginkgo/ginkgo
-          ginkgo -r
+          ginkgo -r --cover
           mkdir -p dist
           CGO_ENABLED=0 go build -o dist/main
           cd dist
