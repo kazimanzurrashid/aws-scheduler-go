@@ -5,14 +5,272 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"testing"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/graphql-go/graphql"
+
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/api"
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/storage"
-	"github.com/stretchr/testify/assert"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+var _ = Describe("handler", func() {
+	var realSchema graphql.Schema
+
+	BeforeEach(func() {
+		realSchema = schema
+		f := api.NewFactory(&fakeStorage{})
+		s, _ := f.Schema()
+		schema = s
+	})
+
+	Context("single request", func() {
+		var gatewayRequest events.APIGatewayV2HTTPRequest
+
+		BeforeEach(func() {
+			bodyStruct := request{
+				Query: "query Get($id: ID!) { get(id: $id) { id url method } }",
+				Variables: map[string]interface{}{
+					"id": "01234567890",
+				},
+			}
+
+			bodyBuff, _ := json.Marshal(bodyStruct)
+
+			gatewayRequest = events.APIGatewayV2HTTPRequest{
+				Body: string(bodyBuff),
+			}
+		})
+
+		Context("valid", func() {
+			var (
+				gatewayResponse events.APIGatewayV2HTTPResponse
+				gatewayError error
+			)
+
+			BeforeEach(func() {
+				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+			})
+
+			It("returns http status code OK", func() {
+				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusOK))
+			})
+
+			It("returns graphql response", func() {
+				Expect(gatewayResponse.Body).NotTo(Equal(""))
+			})
+
+			It("does not return any error", func() {
+				Expect(gatewayError).To(BeNil())
+			})
+		})
+
+		Context("invalid", func() {
+			var (
+				gatewayResponse events.APIGatewayV2HTTPResponse
+				gatewayError    error
+				realUnmarshal   unmarshal
+			)
+
+			BeforeEach(func() {
+				realUnmarshal = unmarshalStruct
+
+				unmarshalStruct = func(bytes []byte, i interface{}) error {
+					return fmt.Errorf("unmarshal error")
+				}
+
+				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+			})
+
+			It("returns http status code Internal Server Error", func() {
+				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusInternalServerError))
+			})
+
+			It("returns error", func() {
+				Expect(gatewayError).NotTo(BeNil())
+			})
+
+			AfterEach(func() {
+				unmarshalStruct = realUnmarshal
+			})
+		})
+	})
+
+	Context("multiple request", func() {
+		var gatewayRequest events.APIGatewayV2HTTPRequest
+
+		BeforeEach(func() {
+			bodyStruct := []request{
+				{
+					Query: "query Get($id: ID!) { get(id: $id) { id url method } }",
+					Variables: map[string]interface{}{
+						"id": "01234567890",
+					},
+				},
+				{
+					Query: "query Get($id: ID!) { get(id: $id) { id url method } }",
+					Variables: map[string]interface{}{
+						"id": "01234567890",
+					},
+				},
+			}
+
+			bodyBuff, _ := json.Marshal(bodyStruct)
+
+			gatewayRequest = events.APIGatewayV2HTTPRequest{
+				Body: string(bodyBuff),
+			}
+		})
+
+		Context("valid", func() {
+			var (
+				gatewayResponse events.APIGatewayV2HTTPResponse
+				gatewayError error
+			)
+
+			BeforeEach(func() {
+				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+			})
+
+			It("returns http status code OK", func() {
+				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusOK))
+			})
+
+			It("returns graphql response", func() {
+				Expect(gatewayResponse.Body).NotTo(Equal(""))
+			})
+
+			It("does not return any error", func() {
+				Expect(gatewayError).To(BeNil())
+			})
+		})
+
+		Context("invalid", func() {
+			var (
+				gatewayResponse events.APIGatewayV2HTTPResponse
+				gatewayError    error
+				realUnmarshal   unmarshal
+			)
+
+			BeforeEach(func() {
+				realUnmarshal = unmarshalStruct
+
+				unmarshalStruct = func(bytes []byte, i interface{}) error {
+					return fmt.Errorf("unmarshal error")
+				}
+
+				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+			})
+
+			It("returns http status code Internal Server Error", func() {
+				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusInternalServerError))
+			})
+
+			It("returns error", func() {
+				Expect(gatewayError).NotTo(BeNil())
+			})
+
+			AfterEach(func() {
+				unmarshalStruct = realUnmarshal
+			})
+		})
+	})
+
+	Context("any request", func() {
+		Context("empty body", func() {
+			var (
+				gatewayResponse events.APIGatewayV2HTTPResponse
+				gatewayError error
+			)
+
+			BeforeEach(func() {
+				gatewayRequest := events.APIGatewayV2HTTPRequest{}
+				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+			})
+
+			It("returns http status code Bad Request", func() {
+				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusBadRequest))
+			})
+
+			It("does not return any error", func() {
+				Expect(gatewayError).To(BeNil())
+			})
+		})
+
+		Context("unrecognized body", func() {
+			var (
+				gatewayResponse events.APIGatewayV2HTTPResponse
+				gatewayError error
+			)
+
+			BeforeEach(func() {
+				gatewayRequest := events.APIGatewayV2HTTPRequest{
+					Body: "foo-bar",
+				}
+
+				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+			})
+
+			It("returns http status code Bad Request", func() {
+				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusBadRequest))
+			})
+
+			It("does not return any error", func() {
+				Expect(gatewayError).To(BeNil())
+			})
+		})
+
+		Context("error serializing graphql response", func() {
+			var (
+				gatewayResponse events.APIGatewayV2HTTPResponse
+				gatewayError error
+				realMarshal   marshal
+			)
+
+			BeforeEach(func() {
+				realMarshal = marshalStruct
+
+				marshalStruct = func(i interface{}) ([]byte, error) {
+					return nil, fmt.Errorf("marshal error")
+				}
+
+				bodyStruct := request{
+					Query: "query Get($id: ID!) { get(id: $id) { id url method } }",
+					Variables: map[string]interface{}{
+						"id": "01234567890",
+					},
+				}
+
+				bodyBuff, _ := json.Marshal(bodyStruct)
+
+				gatewayRequest := events.APIGatewayV2HTTPRequest{
+					Body: string(bodyBuff),
+				}
+
+				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+			})
+
+			It("returns http status code Internal Server Error", func() {
+				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusInternalServerError))
+			})
+
+			It("returns error", func() {
+				Expect(gatewayError).NotTo(BeNil())
+			})
+
+			AfterEach(func() {
+				marshalStruct = realMarshal
+			})
+		})
+	})
+
+	AfterEach(func() {
+		schema = realSchema
+	})
+})
 
 type fakeStorage struct {
 	storage.Storage
@@ -32,241 +290,4 @@ func (srv *fakeStorage) Get(
 		},
 		Body: "{ \"foo\": \"bar\" }",
 	}, nil
-}
-
-func Test_handler_Single_Request_Success(t *testing.T) {
-	realSchema := schema
-	f := api.NewFactory(&fakeStorage{})
-	s, err := f.Schema()
-	if err != nil {
-		t.Error(err)
-	}
-	schema = s
-
-	bodyStruct := request{
-		Query: "query Get($id: ID!) { get(id: $id) { id url method } }",
-		Variables: map[string]interface{}{
-			"id": "01234567890",
-		},
-	}
-
-	bodyBuff, err := json.Marshal(bodyStruct)
-	if err != nil {
-		t.Error(err)
-	}
-
-	req := events.APIGatewayV2HTTPRequest{
-		Body: string(bodyBuff),
-	}
-
-	res, err := handler(context.TODO(), req)
-
-	assert.NotNil(t, res)
-	//goland:noinspection GoNilness
-	assert.Equal(t, http.StatusOK, res.StatusCode)
-	assert.Nil(t, err)
-
-	schema = realSchema
-}
-
-func Test_handler_Single_Request_Fail_Unmarshal_Error(t *testing.T) {
-	realSchema := schema
-	f := api.NewFactory(&fakeStorage{})
-	s, err := f.Schema()
-	if err != nil {
-		t.Error(err)
-	}
-	schema = s
-
-	realUnmarshal := unmarshalStruct
-
-	unmarshalStruct = func(bytes []byte, i interface{}) error {
-		return fmt.Errorf("unmarshal error")
-	}
-
-	bodyStruct := request{
-		Query: "query Get($id: ID!) { get(id: $id) { id url method } }",
-		Variables: map[string]interface{}{
-			"id": "01234567890",
-		},
-	}
-
-	bodyBuff, err := json.Marshal(bodyStruct)
-	if err != nil {
-		t.Error(err)
-	}
-
-	req := events.APIGatewayV2HTTPRequest{
-		Body: string(bodyBuff),
-	}
-
-	res, err := handler(context.TODO(), req)
-
-	assert.NotNil(t, res)
-	//goland:noinspection GoNilness
-	assert.Equal(t, http.StatusInternalServerError, res.StatusCode)
-	assert.NotNil(t, err)
-
-	unmarshalStruct = realUnmarshal
-	schema = realSchema
-}
-
-func Test_handler_Multi_Request_Success(t *testing.T) {
-	realSchema := schema
-	f := api.NewFactory(&fakeStorage{})
-	s, err := f.Schema()
-	if err != nil {
-		t.Error(err)
-	}
-	schema = s
-
-	bodyStruct := []request{
-		{
-			Query: "query Get($id: ID!) { get(id: $id) { id url method } }",
-			Variables: map[string]interface{}{
-				"id": "01234567890",
-			},
-		},
-		{
-			Query: "query Get($id: ID!) { get(id: $id) { id url method } }",
-			Variables: map[string]interface{}{
-				"id": "01234567890",
-			},
-		},
-	}
-
-	bodyBuff, err := json.Marshal(bodyStruct)
-	if err != nil {
-		t.Error(err)
-	}
-
-	req := events.APIGatewayV2HTTPRequest{
-		Body: string(bodyBuff),
-	}
-
-	res, err := handler(context.TODO(), req)
-
-	assert.NotNil(t, res)
-	//goland:noinspection GoNilness
-	assert.Equal(t, http.StatusOK, res.StatusCode)
-	assert.Nil(t, err)
-
-	schema = realSchema
-}
-
-func Test_handler_Multi_Request_Fail_Unmarshal_Error(t *testing.T) {
-	realSchema := schema
-	f := api.NewFactory(&fakeStorage{})
-	s, err := f.Schema()
-	if err != nil {
-		t.Error(err)
-	}
-	schema = s
-
-	realUnmarshal := unmarshalStruct
-
-	unmarshalStruct = func(bytes []byte, i interface{}) error {
-		return fmt.Errorf("unmarshal error")
-	}
-
-	bodyStruct := []request{
-		{
-			Query: "query Get($id: ID!) { get(id: $id) { id url method } }",
-			Variables: map[string]interface{}{
-				"id": "01234567890",
-			},
-		},
-		{
-			Query: "query Get($id: ID!) { get(id: $id) { id url method } }",
-			Variables: map[string]interface{}{
-				"id": "01234567890",
-			},
-		},
-	}
-
-	bodyBuff, err := json.Marshal(bodyStruct)
-	if err != nil {
-		t.Error(err)
-	}
-
-	req := events.APIGatewayV2HTTPRequest{
-		Body: string(bodyBuff),
-	}
-
-	res, err := handler(context.TODO(), req)
-
-	assert.NotNil(t, res)
-	//goland:noinspection GoNilness
-	assert.Equal(t, http.StatusInternalServerError, res.StatusCode)
-	assert.NotNil(t, err)
-
-	unmarshalStruct = realUnmarshal
-	schema = realSchema
-}
-
-func Test_handler_Fail_Empty_Body(t *testing.T) {
-	req := events.APIGatewayV2HTTPRequest{}
-
-	res, err := handler(context.TODO(), req)
-
-	assert.NotNil(t, res)
-	//goland:noinspection GoNilness
-	assert.Equal(t, http.StatusBadRequest, res.StatusCode)
-	assert.Nil(t, err)
-
-}
-
-func Test_handler_Fail_Invalid_Body(t *testing.T) {
-	req := events.APIGatewayV2HTTPRequest{
-		Body: "foo=bar",
-	}
-
-	res, err := handler(context.TODO(), req)
-
-	assert.NotNil(t, res)
-	//goland:noinspection GoNilness
-	assert.Equal(t, http.StatusBadRequest, res.StatusCode)
-	assert.Nil(t, err)
-}
-
-func Test_handler_Fail_Marshal_Error(t *testing.T) {
-	realSchema := schema
-	f := api.NewFactory(&fakeStorage{})
-	s, err := f.Schema()
-	if err != nil {
-		t.Error(err)
-	}
-	schema = s
-
-	realMarshal := marshalStruct
-
-	marshalStruct = func(i interface{}) ([]byte, error) {
-		return nil, fmt.Errorf("marshal error")
-	}
-
-	bodyStruct := request{
-		Query: "query Get($id: ID!) { get(id: $id) { id url method } }",
-		Variables: map[string]interface{}{
-			"id": "01234567890",
-		},
-	}
-
-	bodyBuff, err := json.Marshal(bodyStruct)
-	if err != nil {
-		t.Error(err)
-	}
-
-	req := events.APIGatewayV2HTTPRequest{
-		Body: string(bodyBuff),
-	}
-
-	res, err := handler(context.TODO(), req)
-
-	assert.NotNil(t, res)
-	//goland:noinspection GoNilness
-	assert.Equal(t, http.StatusInternalServerError, res.StatusCode)
-	assert.NotNil(t, err)
-
-	marshalStruct = realMarshal
-	schema = realSchema
 }

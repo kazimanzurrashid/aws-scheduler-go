@@ -2,12 +2,79 @@ package api
 
 import (
 	"context"
-	"testing"
 
 	"github.com/graphql-go/graphql"
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/storage"
-	"github.com/stretchr/testify/assert"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+var _ = Describe("Cancel", func() {
+	Describe("Resolve", func() {
+		var (
+			field *graphql.Field
+			db    fakeCancelStorage
+		)
+
+		BeforeEach(func() {
+			db = fakeCancelStorage{}
+			factory := NewFactory(&db)
+
+			field = factory.Cancel()
+		})
+
+		Context("valid id", func() {
+			const id = "1234567890"
+
+			var (
+				res interface{}
+				err error
+			)
+
+			BeforeEach(func() {
+				res, err = field.Resolve(graphql.ResolveParams{
+					Args: map[string]interface{}{
+						"id": id,
+					},
+				})
+			})
+
+			It("sends id to db", func() {
+				Expect(db.ID).To(Equal(id))
+			})
+
+			It("returns success", func() {
+				Expect(res).To(Equal(true))
+			})
+
+			It("does not return error", func() {
+				Expect(err).To(BeNil())
+			})
+		})
+
+		Context("missing id", func() {
+			var (
+				res interface{}
+				err error
+			)
+
+			BeforeEach(func() {
+				res, err = field.Resolve(graphql.ResolveParams{
+					Args: map[string]interface{}{},
+				})
+			})
+
+			It("returns fail", func() {
+				Expect(res).To(Equal(false))
+			})
+
+			It("returns error", func() {
+				Expect(err).NotTo(BeNil())
+			})
+		})
+	})
+})
 
 type fakeCancelStorage struct {
 	storage.Storage
@@ -22,35 +89,4 @@ func (srv *fakeCancelStorage) Cancel(
 	srv.ID = id
 
 	return true, nil
-}
-
-func Test_Cancel_Resolve_Success(t *testing.T) {
-	const id = "1234567890"
-
-	db := fakeCancelStorage{}
-	factory := NewFactory(&db)
-	field := factory.Cancel()
-
-	res, err := field.Resolve(graphql.ResolveParams{
-		Args: map[string]interface{}{
-			"id": id,
-		},
-	})
-
-	assert.True(t, res.(bool))
-	assert.Nil(t, err)
-	assert.Equal(t, id, db.ID)
-}
-
-func Test_Cancel_Resolve_Fail_Missing_ID(t *testing.T) {
-	db := fakeCancelStorage{}
-	factory := NewFactory(&db)
-	field := factory.Cancel()
-
-	res, err := field.Resolve(graphql.ResolveParams{
-		Args: map[string]interface{}{},
-	})
-
-	assert.False(t, res.(bool))
-	assert.NotNil(t, err)
 }

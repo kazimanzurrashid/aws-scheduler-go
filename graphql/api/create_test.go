@@ -3,26 +3,162 @@ package api
 import (
 	"context"
 	"fmt"
-	"testing"
 	"time"
 
 	"github.com/graphql-go/graphql"
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/storage"
-	"github.com/stretchr/testify/assert"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+var _ = Describe("Create", func() {
+	Describe("Resolve", func() {
+		const (
+			id     = "1234567890"
+			url    = "https://foo.bar/do"
+			method = "POST"
+			accept = "application/json"
+			body   = "{ \"foo\": \"bar\" }"
+		)
+
+		var (
+			field *graphql.Field
+			db    fakeCreateStorage
+		)
+
+		BeforeEach(func() {
+			db = fakeCreateStorage{}
+			factory := NewFactory(&db)
+
+			field = factory.Create()
+		})
+
+		Describe("valid input", func() {
+			var (
+				res interface{}
+				err error
+
+				dueAt time.Time
+			)
+
+			BeforeEach(func() {
+				db.ReturnID = id
+
+				dueAt = time.Now().Add(time.Minute * 1)
+
+				res, err = field.Resolve(graphql.ResolveParams{
+					Args: map[string]interface{}{
+						"dueAt":  dueAt,
+						"url":    url,
+						"method": method,
+						"headers": map[string]string{
+							"accept": accept,
+						},
+						"body": body,
+					},
+				})
+			})
+
+			It("sends input to db", func() {
+				Expect(db.Input.DueAt.Unix()).To(Equal(dueAt.Unix()))
+				Expect(db.Input.URL).To(Equal(url))
+				Expect(db.Input.Method).To(Equal(method))
+				Expect(db.Input.Headers["accept"]).To(Equal(accept))
+				Expect(db.Input.Body).To(Equal(body))
+			})
+
+			It("returns newly created id", func() {
+				Expect(res).To(Equal(id))
+			})
+
+			It("does not return error", func() {
+				Expect(err).To(BeNil())
+			})
+		})
+
+		Describe("invalid input", func() {
+			Context("not future dua at", func() {
+				var (
+					res interface{}
+					err error
+				)
+
+				BeforeEach(func() {
+					res, err = field.Resolve(graphql.ResolveParams{
+						Args: map[string]interface{}{
+							"dueAt":  time.Now().Add(-time.Minute * 1),
+							"url":    url,
+							"method": method,
+							"headers": map[string]string{
+								"accept": accept,
+							},
+							"body": body,
+						},
+					})
+				})
+
+				It("does not return id", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+			})
+		})
+
+		Describe("any input", func() {
+			Context("deserializing input", func() {
+
+				var (
+					res            interface{}
+					err            error
+					realLoadStruct load
+				)
+
+				BeforeEach(func() {
+					realLoadStruct = loadStruct
+
+					loadStruct = func(i interface{}, i2 interface{}) error {
+						return fmt.Errorf("load struct error")
+					}
+
+					res, err = field.Resolve(graphql.ResolveParams{
+						Args: map[string]interface{}{
+							"dueAt":  time.Now().Add(time.Hour * 1),
+							"url":    url,
+							"method": method,
+							"headers": map[string]string{
+								"accept": accept,
+							},
+							"body": body,
+						},
+					})
+				})
+
+				It("does not return id", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					loadStruct = realLoadStruct
+				})
+			})
+		})
+	})
+})
 
 type fakeCreateStorage struct {
 	storage.Storage
 	Input *storage.CreateInput
-}
 
-const (
-	id     = "1234567890"
-	url    = "https://foo.bar/do"
-	method = "POST"
-	accept = "application/json"
-	body   = "{ \"foo\": \"bar\" }"
-)
+	ReturnID string
+}
 
 //goland:noinspection GoUnusedParameter
 func (srv *fakeCreateStorage) Create(
@@ -31,82 +167,5 @@ func (srv *fakeCreateStorage) Create(
 
 	srv.Input = input
 
-	return id, nil
-}
-
-func Test_Create_Resolve_Success(t *testing.T) {
-	dueAt := time.Now().Add(time.Minute * 1)
-
-	db := fakeCreateStorage{}
-	factory := NewFactory(&db)
-	field := factory.Create()
-
-	res, err := field.Resolve(graphql.ResolveParams{
-		Args: map[string]interface{}{
-			"dueAt":  dueAt,
-			"url":    url,
-			"method": method,
-			"headers": map[string]string{
-				"accept": accept,
-			},
-			"body": body,
-		},
-	})
-
-	assert.Equal(t, id, res.(string))
-	assert.Nil(t, err)
-	assert.Equal(t, dueAt.Unix(), db.Input.DueAt.Unix())
-	assert.Equal(t, url, db.Input.URL)
-	assert.Equal(t, method, db.Input.Method)
-	assert.Equal(t, accept, db.Input.Headers["accept"])
-	assert.Equal(t, body, db.Input.Body)
-}
-
-func Test_Create_Resolve_Fail_Load_Struct_Error(t *testing.T) {
-	realLoadStruct := loadStruct
-	loadStruct = func(i interface{}, i2 interface{}) error {
-		return fmt.Errorf("load struct error")
-	}
-
-	db := fakeCreateStorage{}
-	factory := NewFactory(&db)
-	field := factory.Create()
-
-	res, err := field.Resolve(graphql.ResolveParams{
-		Args: map[string]interface{}{
-			"dueAt":  time.Now().Add(-time.Minute * 1),
-			"url":    url,
-			"method": method,
-			"headers": map[string]string{
-				"accept": accept,
-			},
-			"body": body,
-		},
-	})
-
-	assert.Nil(t, res)
-	assert.NotNil(t, err)
-
-	loadStruct = realLoadStruct
-}
-
-func Test_Create_Resolve_Fail_Not_Future_Date(t *testing.T) {
-	db := fakeCreateStorage{}
-	factory := NewFactory(&db)
-	field := factory.Create()
-
-	res, err := field.Resolve(graphql.ResolveParams{
-		Args: map[string]interface{}{
-			"dueAt":  time.Now().Add(-time.Minute * 1),
-			"url":    url,
-			"method": method,
-			"headers": map[string]string{
-				"accept": accept,
-			},
-			"body": body,
-		},
-	})
-
-	assert.Nil(t, res)
-	assert.NotNil(t, err)
+	return srv.ReturnID, nil
 }

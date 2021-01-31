@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"testing"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -15,8 +14,434 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+var _ = Describe("Database", func() {
+	const (
+		table  = "scheduler_v1"
+		id     = "1234567890"
+		url    = "https://foo.bar/do"
+		method = "POST"
+		accept = "application/json"
+		body   = "{ \"foo\": \"bar\" }"
+	)
+
+	var (
+		dynamo fakeDynamoDB
+		db *Database
+	)
+
+	BeforeEach(func() {
+		_ = os.Setenv("SCHEDULER_TABLE_NAME", table)
+
+		dynamo = fakeDynamoDB{}
+		db = NewDatabase(&dynamo)
+	})
+
+	Describe("NewDatabase", func() {
+		It("returns new database", func() {
+			Expect(db).NotTo(BeNil())
+		})
+	})
+
+	Describe("Create", func() {
+		Describe("success", func() {
+			var (
+				res string
+				err error
+
+				dueAt time.Time
+				headers map[string]string
+			)
+
+			BeforeEach(func() {
+				dueAt = time.Now().Add(time.Minute * 1)
+				headers = map[string]string{
+					"accept": accept,
+				}
+
+				res, err = db.Create(context.TODO(), &CreateInput{
+					DueAt:   dueAt,
+					URL:     url,
+					Method:  method,
+					Headers: headers,
+					Body:    body,
+				})
+			})
+
+			It("reads table name from env", func() {
+				Expect(*dynamo.PutInput.TableName).To(Equal(table))
+			})
+
+			It("includes new id in put", func() {
+				Expect(*dynamo.PutInput.Item["id"].S).NotTo(Equal(""))
+			})
+
+			It("includes status idle in put", func() {
+				Expect(*dynamo.PutInput.Item["status"].S).To(
+					Equal(ScheduleStatusIdle))
+			})
+
+			It("includes createdAt in put", func() {
+				Expect(dynamo.PutInput.Item["createdAt"].N).NotTo(Equal(""))
+			})
+
+			It("sets put from input", func() {
+				Expect(*dynamo.PutInput.Item["dueAt"].N).To(
+					Equal(strconv.FormatInt(dueAt.Unix(), 10)))
+				Expect(*dynamo.PutInput.Item["url"].S).To(Equal(url))
+				Expect(*dynamo.PutInput.Item["method"].S).To(Equal(method))
+				Expect(*dynamo.PutInput.Item["headers"].M["accept"].S).To(
+					Equal(accept))
+				Expect(*dynamo.PutInput.Item["body"].S).To(Equal(body))
+			})
+
+			It("returns new id", func() {
+				Expect(res).NotTo(Equal(""))
+			})
+
+			It("does not return error", func() {
+				Expect(err).To(BeNil())
+			})
+		})
+
+		Describe("fail", func() {
+			Context("id generate error", func() {
+				var (
+					realIdGen idGenerate
+					res string
+					err error
+				)
+
+				BeforeEach(func() {
+					realIdGen = generateID
+					generateID = func() (string, error) {
+						return "", fmt.Errorf("id generate error")
+					}
+
+					res, err = db.Create(context.TODO(), &CreateInput{})
+				})
+
+				It("does not return id", func() {
+					Expect(res).To(Equal(""))
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					generateID = realIdGen
+				})
+			})
+
+			Context("input marshal error", func() {
+				var (
+					realMarshal marshal
+					res string
+					err error
+				)
+
+				BeforeEach(func() {
+					realMarshal = marshalStruct
+					marshalStruct = func(in interface{}) (
+						map[string]*dynamodb.AttributeValue,
+						error) {
+
+						return nil, fmt.Errorf("marshal error")
+					}
+
+					res, err = db.Create(context.TODO(), &CreateInput{})
+				})
+
+				It("does not return id", func() {
+					Expect(res).To(Equal(""))
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					marshalStruct = realMarshal
+				})
+			})
+
+			Context("put error", func() {
+				var (
+					res string
+					err error
+				)
+
+				BeforeEach(func() {
+					dynamo.ReturnError = awserr.New(
+						"InternalError",
+						"InternalError",
+						nil)
+
+					res, err = db.Create(context.TODO(), &CreateInput{
+						DueAt:   time.Now().Add(time.Minute * 5),
+						URL:     url,
+						Method:  method,
+						Body:    body,
+					})
+				})
+
+				It("does not return id", func() {
+					Expect(res).To(Equal(""))
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+			})
+		})
+	})
+
+	Describe("Cancel", func() {
+		Describe("success", func() {
+			var (
+				res bool
+				err error
+			)
+
+			BeforeEach(func() {
+				res, err = db.Cancel(context.TODO(), id)
+			})
+
+			It("reads table name from env", func() {
+				Expect(*dynamo.UpdateInput.TableName).To(Equal(table))
+			})
+
+			It("sets given id to match schedule", func() {
+				Expect(*dynamo.UpdateInput.Key["id"].S).To(Equal(id))
+			})
+
+			It("only cancels idle schedule", func() {
+				Expect(*dynamo.UpdateInput.ConditionExpression).NotTo(Equal(""))
+				Expect(
+					*dynamo.UpdateInput.ExpressionAttributeValues[":s2"].S).To(
+						Equal(ScheduleStatusIdle))
+			})
+
+			It("updates status to canceled", func() {
+				Expect(*dynamo.UpdateInput.UpdateExpression).NotTo(Equal(""))
+				Expect(
+					*dynamo.UpdateInput.ExpressionAttributeValues[":s1"].S).To(
+						Equal(ScheduleStatusCanceled))
+			})
+
+			It("updates sets canceledAt", func() {
+				Expect(dynamo.UpdateInput.UpdateExpression).NotTo(Equal(""))
+				Expect(dynamo.UpdateInput.ExpressionAttributeValues[":ca"].N).NotTo(Equal(""))
+			})
+
+			It("returns success", func() {
+				Expect(res).To(BeTrue())
+			})
+
+			It("does not return error", func() {
+				Expect(err).To(BeNil())
+			})
+		})
+
+		Describe("fail", func() {
+			Context("status is not idle", func() {
+				var (
+					res bool
+					err error
+				)
+
+				BeforeEach(func() {
+					dynamo.ReturnError = awserr.NewRequestFailure(
+						awserr.New(
+							"ConditionalCheckFailedException",
+							"NotFound",
+							nil),
+						400,
+						"")
+
+					res, err = db.Cancel(context.TODO(), id)
+				})
+
+				It("returns fail", func() {
+					Expect(res).To(BeFalse())
+				})
+
+				It("does not return error", func() {
+					Expect(err).To(BeNil())
+				})
+			})
+
+			Context("update error", func() {
+				var (
+					res bool
+					err error
+				)
+
+				BeforeEach(func() {
+					dynamo.ReturnError = awserr.New(
+						"InternalError",
+						"InternalError",
+						nil)
+
+					res, err = db.Cancel(context.TODO(), id)
+				})
+
+				It("returns fail", func() {
+					Expect(res).To(BeFalse())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+			})
+		})
+	})
+
+	Describe("Get", func() {
+		Describe("success", func() {
+			var (
+				res *Schedule
+				err error
+
+				dueAt time.Time
+				item map[string]*dynamodb.AttributeValue
+			)
+
+			BeforeEach(func() {
+				dueAt = time.Now().Add(-time.Hour * 24 * 7)
+
+				item, _ = dynamodbattribute.MarshalMap(Schedule{
+					ID:     id,
+					DueAt:  dueAt,
+					URL:    url,
+					Method: method,
+					Headers: map[string]string{
+						"accept": accept,
+					},
+					Body: body,
+					Status: ScheduleStatusSucceeded,
+				})
+
+				dynamo.GetOutput = &dynamodb.GetItemOutput{Item: item}
+
+				res, err = db.Get(context.TODO(), id)
+			})
+
+			It("reads table name from env", func() {
+				Expect(*dynamo.GetInput.TableName).To(Equal(table))
+			})
+
+			It("sets given id to match schedule", func() {
+				Expect(*dynamo.GetInput.Key["id"].S).To(Equal(id))
+			})
+
+			It("returns matching schedule", func() {
+				Expect(res.ID).To(Equal(id))
+				Expect(res.DueAt.Unix()).To(Equal(dueAt.Unix()))
+				Expect(res.URL).To(Equal(url))
+				Expect(res.Method).To(Equal(method))
+				Expect(res.Headers["accept"]).To(Equal(accept))
+				Expect(res.Body).To(Equal(body))
+				Expect(res.Status).To(Equal(ScheduleStatusSucceeded))
+			})
+
+			It("does not return error", func() {
+				Expect(err).To(BeNil())
+			})
+		})
+
+		Describe("fail", func() {
+			Context("non existent schedule", func() {
+				var (
+					res *Schedule
+					err error
+				)
+
+				BeforeEach(func() {
+					dynamo.GetOutput = &dynamodb.GetItemOutput{}
+
+					res, err = db.Get(context.TODO(), id)
+				})
+
+				It("does not return any schedule", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("does not return error", func() {
+					Expect(err).To(BeNil())
+				})
+			})
+
+			Context("get error", func() {
+				var (
+					res *Schedule
+					err error
+				)
+
+				BeforeEach(func() {
+					dynamo.ReturnError = awserr.New(
+						"InternalError",
+						"InternalError",
+						nil)
+
+					res, err = db.Get(context.TODO(), id)
+				})
+
+				It("does not return any schedule", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+			})
+
+			Context("unmarshal error", func() {
+				var (
+					res *Schedule
+					err error
+
+					realUnmarshal unmarshal
+				)
+
+				BeforeEach(func() {
+					realUnmarshal = unmarshalMap
+
+					unmarshalMap = func(
+						m map[string]*dynamodb.AttributeValue,
+						out interface{}) error {
+
+						return fmt.Errorf("unmarshal error")
+					}
+
+					dynamo.GetOutput = &dynamodb.GetItemOutput{
+						Item: map[string]*dynamodb.AttributeValue{
+							"id": {S: aws.String(id)},
+						},
+					}
+
+					res, err = db.Get(context.TODO(), id)
+				})
+
+				It("does not return any schedule", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					unmarshalMap = realUnmarshal
+				})
+			})
+		})
+	})
+})
 
 type fakeDynamoDB struct {
 	dynamodbiface.DynamoDBAPI
@@ -57,275 +482,4 @@ func (db *fakeDynamoDB) GetItemWithContext(
 
 	db.GetInput = input
 	return db.GetOutput, db.ReturnError
-}
-
-const (
-	table  = "scheduler_v1"
-	id     = "1234567890"
-	url    = "https://foo.bar/do"
-	method = "POST"
-	accept = "application/json"
-	body   = "{ \"foo\": \"bar\" }"
-)
-
-var ctx = context.TODO()
-
-func setTableName(t *testing.T)  {
-	err := os.Setenv("SCHEDULER_TABLE_NAME", table)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func Test_Database_NewDatabase_Success(t *testing.T) {
-	db := NewDatabase(&fakeDynamoDB{})
-
-	assert.NotNil(t, db)
-}
-
-func Test_Database_Create_Success(t *testing.T) {
-	dueAt := time.Now().Add(time.Minute * 1)
-	headers := map[string]string{
-		"accept": accept,
-	}
-
-	setTableName(t)
-
-	fake := fakeDynamoDB{}
-	db := NewDatabase(&fake)
-
-	res, err := db.Create(ctx, &CreateInput{
-		DueAt:   dueAt,
-		URL:     url,
-		Method:  method,
-		Headers: headers,
-		Body:    body,
-	})
-
-	assert.NotEqual(t, res, "")
-	assert.Nil(t, err)
-	assert.Equal(t, table, *fake.PutInput.TableName)
-	assert.Equal(t, res, *fake.PutInput.Item["id"].S)
-	assert.Equal(
-		t,
-		strconv.FormatInt(dueAt.Unix(), 10),
-		*fake.PutInput.Item["dueAt"].N)
-	assert.Equal(t, ScheduleStatusIdle, *fake.PutInput.Item["status"].S)
-	assert.Equal(t, url, *fake.PutInput.Item["url"].S)
-	assert.Equal(t, method, *fake.PutInput.Item["method"].S)
-	assert.Equal(t, accept, *fake.PutInput.Item["headers"].M["accept"].S)
-	assert.Equal(t, body, *fake.PutInput.Item["body"].S)
-	assert.NotEqual(t, "", *fake.PutInput.Item["createdAt"].N)
-}
-
-func Test_Database_Create_Fail_ID_Generate_Error(t *testing.T) {
-	realIdGen := generateID
-	generateID = func() (string, error) {
-		return "", fmt.Errorf("id generate error")
-	}
-
-	fake := fakeDynamoDB{}
-	db := NewDatabase(&fake)
-
-	res, err := db.Create(ctx, &CreateInput{})
-
-	assert.Equal(t, res, "")
-	assert.NotNil(t, err)
-
-	generateID = realIdGen
-}
-
-func Test_Database_Create_Fail_Input_Marshal_Error(t *testing.T) {
-	realMarshal := marshalStruct
-
-	marshalStruct = func(in interface{}) (
-		map[string]*dynamodb.AttributeValue,
-		error) {
-
-		return nil, fmt.Errorf("marshal error")
-	}
-
-	fake := fakeDynamoDB{}
-	db := NewDatabase(&fake)
-
-	res, err := db.Create(ctx, &CreateInput{})
-
-	assert.Equal(t, res, "")
-	assert.NotNil(t, err)
-
-	marshalStruct = realMarshal
-}
-
-func Test_Database_Create_Fail_Internal_Error(t *testing.T) {
-	dueAt := time.Now().Add(time.Minute * 1)
-	headers := map[string]string{
-		"accept": accept,
-	}
-
-	fake := fakeDynamoDB{
-		ReturnError: awserr.New("InternalError", "InternalError", nil),
-	}
-	db := NewDatabase(&fake)
-
-	res, err := db.Create(ctx, &CreateInput{
-		DueAt:   dueAt,
-		URL:     url,
-		Method:  method,
-		Headers: headers,
-		Body:    body,
-	})
-
-	assert.Equal(t, res, "")
-	assert.NotNil(t, err)
-}
-
-func Test_Database_Cancel_Success(t *testing.T) {
-	setTableName(t)
-
-	fake := fakeDynamoDB{}
-	db := NewDatabase(&fake)
-
-	res, err := db.Cancel(ctx, id)
-
-	assert.True(t, res)
-	assert.Nil(t, err)
-	assert.Equal(t, table, *fake.UpdateInput.TableName)
-	assert.Equal(t, id, *fake.UpdateInput.Key["id"].S)
-	assert.NotEqual(t, "", *fake.UpdateInput.UpdateExpression)
-	assert.NotEqual(t, "", *fake.UpdateInput.ConditionExpression)
-	assert.Equal(
-		t,
-		ScheduleStatusCanceled,
-		*fake.UpdateInput.ExpressionAttributeValues[":s1"].S)
-	assert.Equal(
-		t,
-		ScheduleStatusIdle,
-		*fake.UpdateInput.ExpressionAttributeValues[":s2"].S)
-	assert.NotEqual(
-		t,
-		"",
-		*fake.UpdateInput.ExpressionAttributeValues[":ca"].N)
-}
-
-func Test_Database_Cancel_Success_Conditional_Check_Fail(t *testing.T) {
-	fake := fakeDynamoDB{
-		ReturnError: awserr.NewRequestFailure(
-			awserr.New(
-				"ConditionalCheckFailedException",
-				"NotFound",
-				nil),
-			400,
-			""),
-	}
-	db := NewDatabase(&fake)
-
-	res, err := db.Cancel(ctx, id)
-
-	assert.False(t, res)
-	assert.Nil(t, err)
-}
-
-func Test_Database_Cancel_Fail_Internal_Error(t *testing.T) {
-	fake := fakeDynamoDB{
-		ReturnError: awserr.New("InternalError", "InternalError", nil),
-	}
-	db := NewDatabase(&fake)
-
-	res, err := db.Cancel(ctx, id)
-
-	assert.False(t, res)
-	assert.NotNil(t, err)
-}
-
-func Test_Database_Get_Success_Existent_Record(t *testing.T) {
-	dueAt := time.Now().Add(-time.Hour * 24 * 7)
-
-	setTableName(t)
-
-	item, err := dynamodbattribute.MarshalMap(Schedule{
-		ID:     id,
-		DueAt:  dueAt,
-		URL:    url,
-		Method: method,
-		Headers: map[string]string{
-			"accept": accept,
-		},
-		Body: body,
-		Status: ScheduleStatusSucceeded,
-		StartedAt: dueAt.Add(time.Minute * 2),
-		CompletedAt: time.Now().Add(time.Minute * 3),
-		CreatedAt: dueAt.Add(-time.Hour * 24 * 3),
-	})
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	fake := fakeDynamoDB{
-		GetOutput: &dynamodb.GetItemOutput{Item: item},
-	}
-	db := NewDatabase(&fake)
-
-	res, err := db.Get(ctx, id)
-
-	assert.NotNil(t, res)
-	assert.Nil(t, err)
-
-	assert.Equal(t, id, res.ID)
-	assert.Equal(t, dueAt.Unix(), res.DueAt.Unix())
-	assert.Equal(t, url, res.URL)
-	assert.Equal(t, method, res.Method)
-	assert.Equal(t, accept, res.Headers["accept"])
-	assert.Equal(t, body, res.Body)
-	assert.Equal(t, table, *fake.GetInput.TableName)
-	assert.Equal(t, id, *fake.GetInput.Key["id"].S)
-}
-
-func Test_Database_Get_Success_NonExistent_Record(t *testing.T) {
-	fake := fakeDynamoDB{
-		GetOutput: &dynamodb.GetItemOutput{},
-	}
-	db := NewDatabase(&fake)
-
-	res, err := db.Get(ctx, id)
-
-	assert.Nil(t, res)
-	assert.Nil(t, err)
-}
-
-func Test_Database_Get_Fail_Internal_Error(t *testing.T) {
-	fake := fakeDynamoDB{
-		ReturnError: awserr.New("InternalError", "InternalError", nil),
-	}
-	db := NewDatabase(&fake)
-
-	res, err := db.Get(ctx, id)
-
-	assert.Nil(t, res)
-	assert.NotNil(t, err)
-}
-
-func Test_Database_Get_Fail_Output_Unmarshal_Error(t *testing.T) {
-	realUnmarshal := unmarshalMap
-	unmarshalMap = func(
-		m map[string]*dynamodb.AttributeValue,
-		out interface{}) error {
-
-		return fmt.Errorf("unmarshal error")
-	}
-
-	fake := fakeDynamoDB{
-		GetOutput: &dynamodb.GetItemOutput{
-			Item: map[string]*dynamodb.AttributeValue{
-				"id": {S: aws.String(id)},
-		}},
-	}
-	db := NewDatabase(&fake)
-
-	res, err := db.Get(ctx, id)
-
-	assert.Nil(t, res)
-	assert.NotNil(t, err)
-
-	unmarshalMap = realUnmarshal
 }
