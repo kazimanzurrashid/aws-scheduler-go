@@ -5,11 +5,13 @@ on:
       - main
     paths:
       - 'collector/**/**'
+      - '.github/workflows/collector.yml'
   pull_request:
     branches:
       - main
     paths:
       - 'collector/**/**'
+      - '.github/workflows/collector.yml'
 jobs:
   collector:
     runs-on: ubuntu-latest

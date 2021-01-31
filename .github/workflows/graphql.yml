@@ -5,11 +5,13 @@ on:
       - main
     paths:
       - 'graphql/**/**'
+      - '.github/workflows/graphql.yml'
   pull_request:
     branches:
       - main
     paths:
       - 'graphql/**/**'
+      - '.github/workflows/graphql.yml'
 jobs:
   graphql:
     runs-on: ubuntu-latest

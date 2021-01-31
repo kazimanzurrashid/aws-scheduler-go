@@ -5,11 +5,13 @@ on:
       - main
     paths:
       - 'worker/**/**'
+      - '.github/workflows/worker.yml'
   pull_request:
     branches:
       - main
     paths:
       - 'worker/**/**'
+      - '.github/workflows/worker.yml'
 jobs:
   worker:
     runs-on: ubuntu-latest
