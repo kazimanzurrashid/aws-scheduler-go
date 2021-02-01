@@ -39,7 +39,7 @@ func (f *Factory) Create() *graphql.Field {
 				return nil, fmt.Errorf("due at must be in future")
 			}
 
-			return f.storage.Create(p.Context, &input)
+			return f.storage.Create(p.Context, input)
 		},
 		Type: graphql.ID,
 	}

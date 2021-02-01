@@ -40,6 +40,18 @@ class SchedulerStack extends Stack {
       }
     });
 
+    schedulerTable.addGlobalSecondaryIndex({
+      indexName: 'ix_dummy_dueAt',
+      partitionKey: {
+        name: 'dummy',
+        type: AttributeType.STRING
+      },
+      sortKey: {
+        name: 'dueAt',
+        type: AttributeType.NUMBER
+      }
+    });
+
     const graphqlLambda = new Function(this, 'GraphQLFunction', {
       functionName: `${props.name}-graphql-${props.version}`,
       handler: 'main',

@@ -16,11 +16,13 @@ import (
 )
 
 type Storage interface {
-	Create(context.Context, *CreateInput) (string, error)
+	Create(context.Context, CreateInput) (string, error)
 
 	Cancel(context.Context, string) (bool, error)
 
 	Get(context.Context, string) (*Schedule, error)
+
+	List(context.Context, ListInput) (*List, error)
 }
 
 type Database struct {
@@ -31,12 +33,17 @@ func NewDatabase(dynamodb dynamodbiface.DynamoDBAPI) *Database {
 	return &Database{dynamodb}
 }
 
+const dummyValue = "-"
+
 type (
 	idGenerate func() (string, error)
-	marshal    func(in interface{}) (map[string]*dynamodb.AttributeValue, error)
+	marshal    func(interface{}) (map[string]*dynamodb.AttributeValue, error)
 	unmarshal  func(
-		m map[string]*dynamodb.AttributeValue,
-		out interface{}) error
+		map[string]*dynamodb.AttributeValue,
+		interface{}) error
+	unmarshalList func(
+		[]map[string]*dynamodb.AttributeValue,
+		interface{}) error
 )
 
 func nanoIDGenerate() (string, error) {
@@ -45,25 +52,31 @@ func nanoIDGenerate() (string, error) {
 		16)
 }
 
-func dynamoDBMarshal(
+func dynamoDBMarshalStruct(
 	in interface{}) (map[string]*dynamodb.AttributeValue, error) {
 	return dynamodbattribute.MarshalMap(in)
 }
 
-func dynamoDBUnmarshal(
+func dynamoDBUnmarshalMap(
 	m map[string]*dynamodb.AttributeValue, out interface{}) error {
 	return dynamodbattribute.UnmarshalMap(m, out)
 }
 
+func dynamoDBUnmarshalListOfMap(
+	l []map[string]*dynamodb.AttributeValue, out interface{}) error {
+	return dynamodbattribute.UnmarshalListOfMaps(l, out)
+}
+
 var (
-	generateID    idGenerate = nanoIDGenerate
-	marshalStruct marshal    = dynamoDBMarshal
-	unmarshalMap  unmarshal  = dynamoDBUnmarshal
+	generateID         idGenerate    = nanoIDGenerate
+	marshalStruct      marshal       = dynamoDBMarshalStruct
+	unmarshalMap       unmarshal     = dynamoDBUnmarshalMap
+	unmarshalListOfMap unmarshalList = dynamoDBUnmarshalListOfMap
 )
 
 func (srv *Database) Create(
 	ctx context.Context,
-	input *CreateInput) (string, error) {
+	input CreateInput) (string, error) {
 
 	id, err := generateID()
 
@@ -81,18 +94,19 @@ func (srv *Database) Create(
 	item["status"] = &dynamodb.AttributeValue{
 		S: aws.String(ScheduleStatusIdle),
 	}
+	item["dummy"] = &dynamodb.AttributeValue{S: aws.String(dummyValue)}
 	item["createdAt"] = &dynamodb.AttributeValue{
 		N: aws.String(strconv.FormatInt(time.Now().Unix(), 10)),
 	}
 
 	params := &dynamodb.PutItemInput{
-		TableName:                   aws.String(tableName()),
-		Item:                        item,
-		ReturnConsumedCapacity:      aws.String(
+		TableName: aws.String(tableName()),
+		Item:      item,
+		ReturnConsumedCapacity: aws.String(
 			dynamodb.ReturnConsumedCapacityNone),
 		ReturnItemCollectionMetrics: aws.String(
 			dynamodb.ReturnItemCollectionMetricsNone),
-		ReturnValues:                aws.String(dynamodb.ReturnValueNone),
+		ReturnValues: aws.String(dynamodb.ReturnValueNone),
 	}
 
 	if _, err = srv.dynamodb.PutItemWithContext(ctx, params); err != nil {
@@ -121,15 +135,15 @@ func (srv *Database) Cancel(ctx context.Context, id string) (bool, error) {
 		},
 		ReturnItemCollectionMetrics: aws.String(
 			dynamodb.ReturnItemCollectionMetricsNone),
-		ReturnConsumedCapacity:      aws.String(
+		ReturnConsumedCapacity: aws.String(
 			dynamodb.ReturnConsumedCapacityNone),
-		ReturnValues:                aws.String(
+		ReturnValues: aws.String(
 			dynamodb.ReturnValueNone),
 	}
 
 	if _, err := srv.dynamodb.UpdateItemWithContext(ctx, params); err != nil {
 		if ccf, ok := err.(awserr.RequestFailure);
-		ok && ccf.Code() == "ConditionalCheckFailedException" {
+			ok && ccf.Code() == "ConditionalCheckFailedException" {
 			return false, nil
 		}
 
@@ -160,11 +174,108 @@ func (srv *Database) Get(ctx context.Context, id string) (*Schedule, error) {
 
 	var s Schedule
 
-	if err := unmarshalMap(res.Item, &s); err != nil {
+	if err = unmarshalMap(res.Item, &s); err != nil {
 		return nil, err
 	}
 
 	return &s, nil
+}
+
+func (srv *Database) List(ctx context.Context, input ListInput) (*List, error) {
+	params := &dynamodb.QueryInput{
+		TableName:                 aws.String(tableName()),
+		Limit:                     aws.Int64(input.Limit),
+		ReturnConsumedCapacity:    aws.String(
+			dynamodb.ReturnConsumedCapacityNone),
+		ExpressionAttributeNames:  map[string]*string{},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{},
+	}
+
+	if input.Status != "" {
+		params.IndexName = aws.String("ix_status_dueAt")
+	} else if input.DueAt != nil {
+		params.IndexName = aws.String("ix_dummy_dueAt")
+	}
+
+	if input.Status != "" {
+		if input.DueAt == nil {
+			params.KeyConditionExpression = aws.String("#s = :s")
+		} else {
+			params.KeyConditionExpression = aws.String(
+				"#s = :s AND #da BETWEEN :da1 AND :da2")
+		}
+	} else if input.DueAt != nil {
+		params.KeyConditionExpression = aws.String(
+			"#d = :d AND #da BETWEEN :da1 AND :da2")
+	}
+
+	if input.Status != "" {
+		params.ExpressionAttributeNames["#s"] = aws.String("status")
+		params.ExpressionAttributeValues[":s"] = &dynamodb.AttributeValue{
+			S: aws.String(input.Status),
+		}
+	}
+
+	if input.DueAt != nil {
+		params.ExpressionAttributeNames["#da"] = aws.String("dueAt")
+		params.ExpressionAttributeValues[":da1"] = &dynamodb.AttributeValue{
+			N: aws.String(strconv.FormatInt(input.DueAt.From.Unix(), 10)),
+		}
+		params.ExpressionAttributeValues[":da2"] = &dynamodb.AttributeValue{
+			N: aws.String(strconv.FormatInt(input.DueAt.To.Unix(), 10)),
+		}
+
+		if input.Status == "" {
+			params.ExpressionAttributeNames["#d"] = aws.String("dummy")
+			params.ExpressionAttributeValues[":d"] = &dynamodb.AttributeValue{
+				S: aws.String(dummyValue),
+			}
+		}
+	}
+
+	if input.StartKey != nil {
+		startKey, err := marshalStruct(input.StartKey)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if input.Status == "" && input.DueAt != nil {
+			startKey["dummy"] = &dynamodb.AttributeValue{
+				S: aws.String(dummyValue),
+			}
+		}
+
+		params.ExclusiveStartKey = startKey
+	}
+
+	res, err := srv.dynamodb.QueryWithContext(ctx, params)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var nextKey *ListKey
+
+	if len(res.LastEvaluatedKey) > 0 {
+		var nk ListKey
+
+		err = unmarshalMap(res.LastEvaluatedKey, &nk)
+
+		if err != nil {
+			return nil, err
+		}
+
+		nextKey = &nk
+	}
+
+	var schedules []*Schedule
+
+	if err = unmarshalListOfMap(res.Items, &schedules); err != nil {
+		return nil, err
+	}
+
+	return &List{Schedules: schedules, NextKey: nextKey}, nil
 }
 
 func tableName() string {

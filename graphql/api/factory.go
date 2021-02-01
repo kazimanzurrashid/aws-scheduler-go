@@ -18,7 +18,8 @@ func (f *Factory) Schema() (graphql.Schema, error) {
 	query := graphql.NewObject(graphql.ObjectConfig{
 		Name: "Queries",
 		Fields: graphql.Fields{
-			"get": f.Get(),
+			"get":  f.Get(),
+			"list": f.List(),
 		},
 	})
 

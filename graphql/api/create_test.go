@@ -109,7 +109,7 @@ var _ = Describe("Create", func() {
 		})
 
 		Describe("any input", func() {
-			Context("deserializing input", func() {
+			Context("deserializing input error", func() {
 
 				var (
 					res            interface{}
@@ -155,7 +155,7 @@ var _ = Describe("Create", func() {
 
 type fakeCreateStorage struct {
 	storage.Storage
-	Input *storage.CreateInput
+	Input storage.CreateInput
 
 	ReturnID string
 }
@@ -163,7 +163,7 @@ type fakeCreateStorage struct {
 //goland:noinspection GoUnusedParameter
 func (srv *fakeCreateStorage) Create(
 	ctx context.Context,
-	input *storage.CreateInput) (string, error) {
+	input storage.CreateInput) (string, error) {
 
 	srv.Input = input
 

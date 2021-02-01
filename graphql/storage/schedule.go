@@ -3,7 +3,7 @@ package storage
 import "time"
 
 type Schedule struct {
-	ID          string            `json:"id"`
+	ID          string            `json:"id" dynamodbav:"id"`
 	DueAt       time.Time         `json:"dueAt" dynamodbav:"dueAt,unixtime"`
 	URL         string            `json:"url" dynamodbav:"url"`
 	Method      string            `json:"method" dynamodbav:"method"`

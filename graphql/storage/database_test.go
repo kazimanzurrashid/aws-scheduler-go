@@ -30,7 +30,7 @@ var _ = Describe("Database", func() {
 
 	var (
 		dynamo fakeDynamoDB
-		db *Database
+		db     *Database
 	)
 
 	BeforeEach(func() {
@@ -52,7 +52,7 @@ var _ = Describe("Database", func() {
 				res string
 				err error
 
-				dueAt time.Time
+				dueAt   time.Time
 				headers map[string]string
 			)
 
@@ -62,7 +62,7 @@ var _ = Describe("Database", func() {
 					"accept": accept,
 				}
 
-				res, err = db.Create(context.TODO(), &CreateInput{
+				res, err = db.Create(context.TODO(), CreateInput{
 					DueAt:   dueAt,
 					URL:     url,
 					Method:  method,
@@ -82,6 +82,10 @@ var _ = Describe("Database", func() {
 			It("includes status idle in put", func() {
 				Expect(*dynamo.PutInput.Item["status"].S).To(
 					Equal(ScheduleStatusIdle))
+			})
+
+			It("includes dummy in put", func() {
+				Expect(*dynamo.PutInput.Item["dummy"].S).To(Equal(dummyValue))
 			})
 
 			It("includes createdAt in put", func() {
@@ -111,8 +115,8 @@ var _ = Describe("Database", func() {
 			Context("id generate error", func() {
 				var (
 					realIdGen idGenerate
-					res string
-					err error
+					res       string
+					err       error
 				)
 
 				BeforeEach(func() {
@@ -121,7 +125,7 @@ var _ = Describe("Database", func() {
 						return "", fmt.Errorf("id generate error")
 					}
 
-					res, err = db.Create(context.TODO(), &CreateInput{})
+					res, err = db.Create(context.TODO(), CreateInput{})
 				})
 
 				It("does not return id", func() {
@@ -140,8 +144,8 @@ var _ = Describe("Database", func() {
 			Context("input marshal error", func() {
 				var (
 					realMarshal marshal
-					res string
-					err error
+					res         string
+					err         error
 				)
 
 				BeforeEach(func() {
@@ -153,7 +157,7 @@ var _ = Describe("Database", func() {
 						return nil, fmt.Errorf("marshal error")
 					}
 
-					res, err = db.Create(context.TODO(), &CreateInput{})
+					res, err = db.Create(context.TODO(), CreateInput{})
 				})
 
 				It("does not return id", func() {
@@ -176,16 +180,16 @@ var _ = Describe("Database", func() {
 				)
 
 				BeforeEach(func() {
-					dynamo.ReturnError = awserr.New(
+					dynamo.Error = awserr.New(
 						"InternalError",
 						"InternalError",
 						nil)
 
-					res, err = db.Create(context.TODO(), &CreateInput{
-						DueAt:   time.Now().Add(time.Minute * 5),
-						URL:     url,
-						Method:  method,
-						Body:    body,
+					res, err = db.Create(context.TODO(), CreateInput{
+						DueAt:  time.Now().Add(time.Minute * 5),
+						URL:    url,
+						Method: method,
+						Body:   body,
 					})
 				})
 
@@ -195,6 +199,10 @@ var _ = Describe("Database", func() {
 
 				It("returns error", func() {
 					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					dynamo.Error = nil
 				})
 			})
 		})
@@ -223,19 +231,21 @@ var _ = Describe("Database", func() {
 				Expect(*dynamo.UpdateInput.ConditionExpression).NotTo(Equal(""))
 				Expect(
 					*dynamo.UpdateInput.ExpressionAttributeValues[":s2"].S).To(
-						Equal(ScheduleStatusIdle))
+					Equal(ScheduleStatusIdle))
 			})
 
 			It("updates status to canceled", func() {
 				Expect(*dynamo.UpdateInput.UpdateExpression).NotTo(Equal(""))
 				Expect(
 					*dynamo.UpdateInput.ExpressionAttributeValues[":s1"].S).To(
-						Equal(ScheduleStatusCanceled))
+					Equal(ScheduleStatusCanceled))
 			})
 
 			It("updates sets canceledAt", func() {
 				Expect(dynamo.UpdateInput.UpdateExpression).NotTo(Equal(""))
-				Expect(dynamo.UpdateInput.ExpressionAttributeValues[":ca"].N).NotTo(Equal(""))
+				Expect(
+					dynamo.UpdateInput.ExpressionAttributeValues[":ca"].N).NotTo(
+					Equal(""))
 			})
 
 			It("returns success", func() {
@@ -255,7 +265,7 @@ var _ = Describe("Database", func() {
 				)
 
 				BeforeEach(func() {
-					dynamo.ReturnError = awserr.NewRequestFailure(
+					dynamo.Error = awserr.NewRequestFailure(
 						awserr.New(
 							"ConditionalCheckFailedException",
 							"NotFound",
@@ -273,6 +283,10 @@ var _ = Describe("Database", func() {
 				It("does not return error", func() {
 					Expect(err).To(BeNil())
 				})
+
+				AfterEach(func() {
+					dynamo.Error = nil
+				})
 			})
 
 			Context("update error", func() {
@@ -282,7 +296,7 @@ var _ = Describe("Database", func() {
 				)
 
 				BeforeEach(func() {
-					dynamo.ReturnError = awserr.New(
+					dynamo.Error = awserr.New(
 						"InternalError",
 						"InternalError",
 						nil)
@@ -297,6 +311,10 @@ var _ = Describe("Database", func() {
 				It("returns error", func() {
 					Expect(err).NotTo(BeNil())
 				})
+
+				AfterEach(func() {
+					dynamo.Error = nil
+				})
 			})
 		})
 	})
@@ -308,7 +326,7 @@ var _ = Describe("Database", func() {
 				err error
 
 				dueAt time.Time
-				item map[string]*dynamodb.AttributeValue
+				item  map[string]*dynamodb.AttributeValue
 			)
 
 			BeforeEach(func() {
@@ -322,7 +340,7 @@ var _ = Describe("Database", func() {
 					Headers: map[string]string{
 						"accept": accept,
 					},
-					Body: body,
+					Body:   body,
 					Status: ScheduleStatusSucceeded,
 				})
 
@@ -383,7 +401,7 @@ var _ = Describe("Database", func() {
 				)
 
 				BeforeEach(func() {
-					dynamo.ReturnError = awserr.New(
+					dynamo.Error = awserr.New(
 						"InternalError",
 						"InternalError",
 						nil)
@@ -397,6 +415,10 @@ var _ = Describe("Database", func() {
 
 				It("returns error", func() {
 					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					dynamo.Error = nil
 				})
 			})
 
@@ -441,17 +463,477 @@ var _ = Describe("Database", func() {
 			})
 		})
 	})
+
+	Describe("List", func() {
+		Describe("success", func() {
+			Describe("without any condition", func() {
+				Context("empty list", func() {
+					var (
+						res *List
+						err error
+					)
+
+					BeforeEach(func() {
+						dynamo.QueryOutput = &dynamodb.QueryOutput{}
+
+						res, err = db.List(context.TODO(), ListInput{})
+					})
+
+					It("does not use any condition", func() {
+						Expect(dynamo.QueryInput.KeyConditionExpression).To(
+							BeNil())
+						Expect(dynamo.QueryInput.ExpressionAttributeNames).To(
+							HaveLen(0))
+						Expect(dynamo.QueryInput.ExpressionAttributeValues).To(
+							HaveLen(0))
+					})
+
+					It("does not use any index", func() {
+						Expect(dynamo.QueryInput.IndexName).To(BeNil())
+					})
+
+					It("returns empty list", func() {
+						Expect(res.Schedules).To(HaveLen(0))
+					})
+
+					It("does not return next key", func() {
+						Expect(res.NextKey).To(BeNil())
+					})
+
+					It("does not return error", func() {
+						Expect(err).To(BeNil())
+					})
+				})
+
+				Context("non-empty list with large result", func() {
+					var (
+						res *List
+						err error
+					)
+
+					BeforeEach(func() {
+						items := make([]map[string]*dynamodb.AttributeValue, 5)
+
+						for i := 0; i < len(items); i++ {
+							item, _ := dynamodbattribute.MarshalMap(Schedule{
+								ID: "12345",
+							})
+
+							items[i] = item
+						}
+
+						lastKey, _ := dynamodbattribute.MarshalMap(ListKey{
+							ID:     "67890",
+							DueAt:  time.Now().Add(-time.Hour * 100),
+							Status: ScheduleStatusIdle,
+						})
+
+						dynamo.QueryOutput = &dynamodb.QueryOutput{
+							Items:            items,
+							LastEvaluatedKey: lastKey,
+						}
+
+						res, err = db.List(context.TODO(), ListInput{})
+					})
+
+					It("does not use any condition", func() {
+						Expect(dynamo.QueryInput.KeyConditionExpression).To(
+							BeNil())
+						Expect(dynamo.QueryInput.ExpressionAttributeNames).To(
+							HaveLen(0))
+						Expect(dynamo.QueryInput.ExpressionAttributeValues).To(
+							HaveLen(0))
+					})
+
+					It("does not use any index", func() {
+						Expect(dynamo.QueryInput.IndexName).To(BeNil())
+					})
+
+					It("returns non-empty list", func() {
+						Expect(res.Schedules).To(HaveLen(5))
+					})
+
+					It("returns next key", func() {
+						Expect(res.NextKey).NotTo(BeNil())
+					})
+
+					It("does not return error", func() {
+						Expect(err).To(BeNil())
+					})
+				})
+			})
+
+			Describe("with both status and dueAt", func() {
+				var (
+					res *List
+					err error
+				)
+
+				BeforeEach(func() {
+					items := make([]map[string]*dynamodb.AttributeValue, 5)
+
+					for i := 0; i < len(items); i++ {
+						item, _ := dynamodbattribute.MarshalMap(Schedule{
+							ID: "12345",
+						})
+
+						items[i] = item
+					}
+
+					lastKey, _ := dynamodbattribute.MarshalMap(ListKey{
+						ID:     "67890",
+						DueAt:  time.Now().Add(-time.Hour * 100),
+						Status: ScheduleStatusIdle,
+					})
+
+					dynamo.QueryOutput = &dynamodb.QueryOutput{
+						Items:            items,
+						LastEvaluatedKey: lastKey,
+					}
+
+					res, err = db.List(context.TODO(), ListInput{
+						Status: ScheduleStatusIdle,
+						DueAt: &DateRange{
+							From: time.Now().Add(-time.Hour * 100),
+							To:   time.Now().Add(-time.Hour * 50),
+						},
+					})
+				})
+
+				It("uses status and dueAt as condition", func() {
+					Expect(dynamo.QueryInput.KeyConditionExpression).NotTo(
+						BeNil())
+					Expect(
+						*dynamo.QueryInput.ExpressionAttributeValues[":s"].S).ToNot(
+						Equal(""))
+					Expect(dynamo.QueryInput.ExpressionAttributeValues[":d"]).To(
+						BeNil())
+					Expect(
+						*dynamo.QueryInput.ExpressionAttributeValues[":da1"].N).ToNot(
+						Equal(""))
+					Expect(
+						*dynamo.QueryInput.ExpressionAttributeValues[":da2"].N).ToNot(
+						Equal(""))
+				})
+
+				It("uses ix_status_dueAt index", func() {
+					Expect(*dynamo.QueryInput.IndexName).To(
+						Equal("ix_status_dueAt"))
+				})
+
+				It("returns non-empty list", func() {
+					Expect(res.Schedules).To(HaveLen(5))
+				})
+
+				It("returns next key", func() {
+					Expect(res.NextKey).NotTo(BeNil())
+				})
+
+				It("does not return error", func() {
+					Expect(err).To(BeNil())
+				})
+			})
+
+			Describe("with only status", func() {
+				var (
+					res *List
+					err error
+				)
+
+				BeforeEach(func() {
+					items := make([]map[string]*dynamodb.AttributeValue, 5)
+
+					for i := 0; i < len(items); i++ {
+						item, _ := dynamodbattribute.MarshalMap(Schedule{
+							ID: "12345",
+						})
+
+						items[i] = item
+					}
+
+					lastKey, _ := dynamodbattribute.MarshalMap(ListKey{
+						ID:     "67890",
+						DueAt:  time.Now().Add(-time.Hour * 100),
+						Status: ScheduleStatusIdle,
+					})
+
+					dynamo.QueryOutput = &dynamodb.QueryOutput{
+						Items:            items,
+						LastEvaluatedKey: lastKey,
+					}
+
+					res, err = db.List(context.TODO(), ListInput{
+						Status: ScheduleStatusQueued,
+					})
+				})
+
+				It("uses only status as condition", func() {
+					Expect(dynamo.QueryInput.KeyConditionExpression).NotTo(
+						BeNil())
+					Expect(
+						*dynamo.QueryInput.ExpressionAttributeValues[":s"].S).ToNot(
+						Equal(""))
+					Expect(dynamo.QueryInput.ExpressionAttributeValues[":d"]).To(
+						BeNil())
+					Expect(dynamo.QueryInput.ExpressionAttributeValues[":da1"]).To(
+						BeNil())
+					Expect(dynamo.QueryInput.ExpressionAttributeValues[":da2"]).To(
+						BeNil())
+				})
+
+				It("uses ix_status_dueAt index", func() {
+					Expect(*dynamo.QueryInput.IndexName).To(
+						Equal("ix_status_dueAt"))
+				})
+
+				It("returns non-empty list", func() {
+					Expect(res.Schedules).To(HaveLen(5))
+				})
+
+				It("returns next key", func() {
+					Expect(res.NextKey).NotTo(BeNil())
+				})
+
+				It("does not return error", func() {
+					Expect(err).To(BeNil())
+				})
+			})
+
+			Describe("with only dueAt", func() {
+				var (
+					res *List
+					err error
+				)
+
+				BeforeEach(func() {
+					items := make([]map[string]*dynamodb.AttributeValue, 5)
+
+					for i := 0; i < len(items); i++ {
+						item, _ := dynamodbattribute.MarshalMap(Schedule{
+							ID: "12345",
+						})
+
+						items[i] = item
+					}
+
+					lastKey, _ := dynamodbattribute.MarshalMap(ListKey{
+						ID:     "67890",
+						DueAt:  time.Now().Add(-time.Hour * 100),
+						Status: ScheduleStatusIdle,
+					})
+
+					dynamo.QueryOutput = &dynamodb.QueryOutput{
+						Items:            items,
+						LastEvaluatedKey: lastKey,
+					}
+
+					res, err = db.List(context.TODO(), ListInput{
+						DueAt: &DateRange{
+							From: time.Now().Add(-time.Hour * 20),
+							To:   time.Now().Add(-time.Hour * 10),
+						},
+						StartKey: &ListKey{
+							ID:    "6568",
+							DueAt: time.Now().Add(-time.Hour * 5),
+						},
+					})
+				})
+
+				It("uses dummy and dueAt as condition", func() {
+					Expect(dynamo.QueryInput.KeyConditionExpression).NotTo(
+						BeNil())
+					Expect(
+						*dynamo.QueryInput.ExpressionAttributeValues[":d"].S).To(
+						Equal(dummyValue))
+					Expect(
+						*dynamo.QueryInput.ExpressionAttributeValues[":da1"].N).ToNot(
+						Equal(""))
+					Expect(
+						*dynamo.QueryInput.ExpressionAttributeValues[":da2"].N).ToNot(
+						Equal(""))
+					Expect(dynamo.QueryInput.ExpressionAttributeValues[":s"]).To(
+						BeNil())
+				})
+
+				It("uses ix_dummy_dueAt index", func() {
+					Expect(*dynamo.QueryInput.IndexName).To(
+						Equal("ix_dummy_dueAt"))
+				})
+
+				It("auto included dummy value in start key", func() {
+					Expect(
+						*dynamo.QueryInput.ExclusiveStartKey["dummy"].S).To(
+						Equal(dummyValue))
+				})
+
+				It("returns non-empty list", func() {
+					Expect(res.Schedules).To(HaveLen(5))
+				})
+
+				It("returns next key", func() {
+					Expect(res.NextKey).NotTo(BeNil())
+				})
+
+				It("does not return error", func() {
+					Expect(err).To(BeNil())
+				})
+			})
+		})
+
+		Describe("fail", func() {
+			Context("start key marshal error", func() {
+				var (
+					realMarshal marshal
+					res         *List
+					err         error
+				)
+
+				BeforeEach(func() {
+					realMarshal = marshalStruct
+					marshalStruct = func(in interface{}) (
+						map[string]*dynamodb.AttributeValue,
+						error) {
+
+						return nil, fmt.Errorf("marshal error")
+					}
+
+					res, err = db.List(context.TODO(), ListInput{
+						StartKey: &ListKey{
+							ID:    "6568",
+							DueAt: time.Now().Add(-time.Hour * 54),
+						},
+					})
+				})
+
+				It("does not return any result", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					marshalStruct = realMarshal
+				})
+			})
+
+			Context("query error", func() {
+				var (
+					res *List
+					err error
+				)
+
+				BeforeEach(func() {
+					dynamo.Error = awserr.New(
+						"InternalError",
+						"InternalError",
+						nil)
+
+					res, err = db.List(context.TODO(), ListInput{})
+				})
+
+				It("does not return any result", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					dynamo.Error = nil
+				})
+			})
+
+			Context("next key unmarshal error", func() {
+				var (
+					realUnmarshal unmarshal
+					res           *List
+					err           error
+				)
+
+				BeforeEach(func() {
+					realUnmarshal = unmarshalMap
+
+					unmarshalMap = func(
+						m map[string]*dynamodb.AttributeValue,
+						out interface{}) error {
+
+						return fmt.Errorf("unmarshal error")
+					}
+					dynamo.QueryOutput = &dynamodb.QueryOutput{
+						Items: make([]map[string]*dynamodb.AttributeValue, 0),
+						LastEvaluatedKey: map[string]*dynamodb.AttributeValue{
+							"id": {S: aws.String("123")},
+						},
+					}
+
+					res, err = db.List(context.TODO(), ListInput{})
+				})
+
+				It("does not return any result", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					unmarshalMap = realUnmarshal
+				})
+			})
+
+			Context("result unmarshal error", func() {
+				var (
+					realUnmarshalList unmarshalList
+					res               *List
+					err               error
+				)
+
+				BeforeEach(func() {
+					realUnmarshalList = unmarshalListOfMap
+					unmarshalListOfMap = func(
+						l []map[string]*dynamodb.AttributeValue,
+						out interface{}) error {
+						return fmt.Errorf("unmarshal list error")
+					}
+
+					dynamo.QueryOutput = &dynamodb.QueryOutput{
+						Items: make([]map[string]*dynamodb.AttributeValue, 0),
+					}
+
+					res, err = db.List(context.TODO(), ListInput{})
+				})
+
+				It("does not return any result", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					unmarshalListOfMap = realUnmarshalList
+				})
+			})
+		})
+	})
 })
 
 type fakeDynamoDB struct {
 	dynamodbiface.DynamoDBAPI
 
-	ReturnError error
+	Error error
 
 	PutInput    *dynamodb.PutItemInput
 	UpdateInput *dynamodb.UpdateItemInput
 	GetInput    *dynamodb.GetItemInput
 	GetOutput   *dynamodb.GetItemOutput
+	QueryInput  *dynamodb.QueryInput
+	QueryOutput *dynamodb.QueryOutput
 }
 
 //goland:noinspection GoUnusedParameter
@@ -461,7 +943,7 @@ func (db *fakeDynamoDB) PutItemWithContext(
 	options ...request.Option) (*dynamodb.PutItemOutput, error) {
 
 	db.PutInput = input
-	return nil, db.ReturnError
+	return nil, db.Error
 }
 
 //goland:noinspection GoUnusedParameter
@@ -471,7 +953,7 @@ func (db *fakeDynamoDB) UpdateItemWithContext(
 	options ...request.Option) (*dynamodb.UpdateItemOutput, error) {
 
 	db.UpdateInput = input
-	return nil, db.ReturnError
+	return nil, db.Error
 }
 
 //goland:noinspection GoUnusedParameter
@@ -481,5 +963,16 @@ func (db *fakeDynamoDB) GetItemWithContext(
 	options ...request.Option) (*dynamodb.GetItemOutput, error) {
 
 	db.GetInput = input
-	return db.GetOutput, db.ReturnError
+	return db.GetOutput, db.Error
+}
+
+//goland:noinspection GoUnusedParameter
+func (db *fakeDynamoDB) QueryWithContext(
+	ctx aws.Context,
+	input *dynamodb.QueryInput,
+	options ...request.Option) (*dynamodb.QueryOutput, error) {
+
+	db.QueryInput = input
+
+	return db.QueryOutput, db.Error
 }
