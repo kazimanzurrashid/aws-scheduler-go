@@ -5,12 +5,7 @@ import "encoding/json"
 type load func(interface{}, interface{}) error
 
 func jsonBasedLoad(s interface{}, d interface{}) error {
-	j, err := json.Marshal(s)
-
-	if err != nil {
-		return err
-	}
-
+	j, _ := json.Marshal(s)
 	return json.Unmarshal(j, d)
 }
 
