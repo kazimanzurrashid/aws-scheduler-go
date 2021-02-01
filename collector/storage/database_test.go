@@ -109,7 +109,7 @@ var _ = Describe("Database", func() {
 
 			It("uses index to query", func() {
 				for _, queryInput := range queryInputs {
-					Expect(*queryInput.IndexName).NotTo(Equal(""))
+					Expect(*queryInput.IndexName).To(Equal("ix_status_dueAt"))
 				}
 			})
 
