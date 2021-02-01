@@ -14,9 +14,9 @@ func (f *Factory) Get() *graphql.Field {
 			},
 		},
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-			id, ok := p.Args["id"].(string)
+			id := p.Args["id"].(string)
 
-			if !ok {
+			if id == "" {
 				return nil, fmt.Errorf("id is required")
 			}
 

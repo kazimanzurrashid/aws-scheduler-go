@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/graphql-go/graphql"
@@ -36,7 +37,15 @@ func (f *Factory) Create() *graphql.Field {
 			}
 
 			if input.DueAt.Before(time.Now()) {
-				return nil, fmt.Errorf("due at must be in future")
+				return nil, fmt.Errorf("dueAt must be in future")
+			}
+
+			if input.URL == "" {
+				return nil, fmt.Errorf("url is required")
+			}
+
+			if _, err := url.ParseRequestURI(input.URL); err != nil {
+				return nil, fmt.Errorf("invalid url")
 			}
 
 			return f.storage.Create(p.Context, input)

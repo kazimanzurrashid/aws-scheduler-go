@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/graphql-go/graphql"
+
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/storage"
 
 	. "github.com/onsi/ginkgo"
@@ -61,7 +62,9 @@ var _ = Describe("Cancel", func() {
 
 			BeforeEach(func() {
 				res, err = field.Resolve(graphql.ResolveParams{
-					Args: map[string]interface{}{},
+					Args: map[string]interface{}{
+						"id": "",
+					},
 				})
 			})
 

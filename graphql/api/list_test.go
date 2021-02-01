@@ -45,8 +45,8 @@ var _ = Describe("List", func() {
 			BeforeEach(func() {
 				db.ReturnList = &storage.List{}
 
-				from = time.Now().Add(time.Minute * 3)
-				to = time.Now().Add(time.Minute * 2)
+				from = time.Now().Add(-time.Minute * 3)
+				to = time.Now().Add(-time.Minute * 2)
 
 				res, err = field.Resolve(graphql.ResolveParams{
 					Args: map[string]interface{}{
@@ -77,6 +77,80 @@ var _ = Describe("List", func() {
 
 			It("does not return error", func() {
 				Expect(err).To(BeNil())
+			})
+		})
+
+		Describe("invalid input", func() {
+			Context("from is less than to of dueAt", func() {
+				var (
+					res interface{}
+					err error
+				)
+
+				BeforeEach(func() {
+					res, err = field.Resolve(graphql.ResolveParams{
+						Args: map[string]interface{}{
+							"dueAt": map[string]interface{}{
+								"from": time.Now().Add(-time.Minute * 2),
+								"to":   time.Now().Add(-time.Minute * 3),
+							},
+						},
+					})
+				})
+
+				It("does not return result", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+			})
+
+			Context("limit is less than 1", func() {
+				var (
+					res interface{}
+					err error
+				)
+
+				BeforeEach(func() {
+					res, err = field.Resolve(graphql.ResolveParams{
+						Args: map[string]interface{}{
+							"limit": 0,
+						},
+					})
+				})
+
+				It("does not return result", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+			})
+
+			Context("limit is greater than 100", func() {
+				var (
+					res interface{}
+					err error
+				)
+
+				BeforeEach(func() {
+					res, err = field.Resolve(graphql.ResolveParams{
+						Args: map[string]interface{}{
+							"limit": 101,
+						},
+					})
+				})
+
+				It("does not return result", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
 			})
 		})
 

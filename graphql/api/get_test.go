@@ -2,7 +2,9 @@ package api
 
 import (
 	"context"
+
 	"github.com/graphql-go/graphql"
+
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/storage"
 
 	. "github.com/onsi/ginkgo"
@@ -62,7 +64,9 @@ var _ = Describe("Get", func() {
 
 			BeforeEach(func() {
 				res, err = field.Resolve(graphql.ResolveParams{
-					Args: map[string]interface{}{},
+					Args: map[string]interface{}{
+						"id": "",
+					},
 				})
 			})
 
@@ -79,7 +83,7 @@ var _ = Describe("Get", func() {
 
 type fakeGetStorage struct {
 	storage.Storage
-	ID string
+	ID       string
 	Schedule *storage.Schedule
 }
 

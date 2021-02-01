@@ -14,9 +14,9 @@ func (f *Factory) Cancel() *graphql.Field {
 			},
 		},
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-			id, ok := p.Args["id"].(string)
+			id := p.Args["id"].(string)
 
-			if !ok {
+			if id == "" {
 				return false, fmt.Errorf("id is required")
 			}
 

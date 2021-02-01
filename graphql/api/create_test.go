@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/graphql-go/graphql"
+
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/storage"
 
 	. "github.com/onsi/ginkgo"
@@ -89,6 +90,35 @@ var _ = Describe("Create", func() {
 						Args: map[string]interface{}{
 							"dueAt":  time.Now().Add(-time.Minute * 1),
 							"url":    url,
+							"method": method,
+							"headers": map[string]string{
+								"accept": accept,
+							},
+							"body": body,
+						},
+					})
+				})
+
+				It("does not return id", func() {
+					Expect(res).To(BeNil())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+			})
+
+			Context("not future dua at", func() {
+				var (
+					res interface{}
+					err error
+				)
+
+				BeforeEach(func() {
+					res, err = field.Resolve(graphql.ResolveParams{
+						Args: map[string]interface{}{
+							"dueAt":  time.Now().Add(time.Minute * 1),
+							"url":    "~!@#$%",
 							"method": method,
 							"headers": map[string]string{
 								"accept": accept,
