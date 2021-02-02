@@ -31,7 +31,7 @@ jobs:
           go install github.com/onsi/ginkgo/ginkgo
           ginkgo -r --cover
           mkdir -p dist
-          CGO_ENABLED=0 go build -o dist/main
+          CGO_ENABLED=0 GOOS=linux go build -o dist/main
           cd dist
           zip -r -9 scheduler-graphql-v1.zip ./*
 
