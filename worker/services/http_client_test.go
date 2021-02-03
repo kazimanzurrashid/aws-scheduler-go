@@ -32,123 +32,13 @@ var _ = Describe("HttpClient", func() {
 		})
 	})
 
-	Describe("success", func() {
-		var ro *ResponseOutput
-
-		BeforeEach(func() {
-			res := http.Response{
-				StatusCode: http.StatusOK,
-				Header: http.Header{
-					"content-type": []string{mimeType},
-				},
-				Body: ioutil.NopCloser(
-					bytes.NewBufferString("{ \"baz\": \"qux\" }")),
-			}
-
-			ft.Response = &res
-
-			ro = hc.Request(context.TODO(), &RequestInput{
-				URL:    url,
-				Method: method,
-				Headers: map[string]string{
-					"accept": mimeType,
-				},
-				Body: reqBody,
-			})
-		})
-
-		It("sets url", func() {
-			Expect(ft.Request.URL.String()).To(Equal(url))
-		})
-
-		It("sets method", func() {
-			Expect(ft.Request.Method).To(Equal(method))
-		})
-
-		It("sets header", func() {
-			Expect(ft.Request.Header.Get("accept")).To(Equal(mimeType))
-		})
-
-		It("returns succeeded status", func() {
-			Expect(ro.Status, ScheduleStatusSucceeded)
-		})
-
-		It("returns result with http status code", func() {
-			Expect(ro.Result).To(
-				ContainSubstring(
-					fmt.Sprintf(
-						"\"statusCode\":%v",
-						http.StatusOK)))
-		})
-
-		It("returns result with header", func() {
-			Expect(ro.Result).To(
-				ContainSubstring(
-					fmt.Sprintf(
-						"\"headers\":{\"content-type\":\"%v\"}",
-						mimeType)))
-		})
-
-		It("returns result with body", func() {
-			Expect(ro.Result).To(
-				ContainSubstring("\"body\":\"{ \\\"baz\\\": \\\"qux\\\" }\""))
-		})
-
-		AfterEach(func() {
-			ft.Response = nil
-		})
-	})
-
-	Describe("fail", func() {
-		Context("invalid request", func() {
-			var ro *ResponseOutput
-
-			BeforeEach(func() {
-				ro = hc.Request(context.TODO(), &RequestInput{
-					URL: "~!@#$%",
-				})
-			})
-
-			It("returns failed status", func() {
-				Expect(ro.Status, ScheduleStatusFailed)
-			})
-
-			It("returns result with with", func() {
-				Expect(ro.Result).To(ContainSubstring("\"error\":"))
-			})
-		})
-
-		Context("internal error", func() {
-			var ro *ResponseOutput
-
-			BeforeEach(func() {
-				ft.Error = fmt.Errorf("internal error")
-
-				ro = hc.Request(context.TODO(), &RequestInput{
-					URL:    url,
-					Method: method,
-				})
-			})
-
-			It("returns failed status", func() {
-				Expect(ro.Status, ScheduleStatusFailed)
-			})
-
-			It("returns result with with", func() {
-				Expect(ro.Result).To(ContainSubstring("\"error\":"))
-			})
-
-			AfterEach(func() {
-				ft.Error = nil
-			})
-		})
-
-		Context("unsuccessful http status code", func() {
+	Describe("Request", func() {
+		Describe("success", func() {
 			var ro *ResponseOutput
 
 			BeforeEach(func() {
 				res := http.Response{
-					StatusCode: http.StatusInternalServerError,
+					StatusCode: http.StatusOK,
 					Header: http.Header{
 						"content-type": []string{mimeType},
 					},
@@ -168,8 +58,20 @@ var _ = Describe("HttpClient", func() {
 				})
 			})
 
-			It("returns failed status", func() {
-				Expect(ro.Status, ScheduleStatusFailed)
+			It("sets url", func() {
+				Expect(ft.Request.URL.String()).To(Equal(url))
+			})
+
+			It("sets method", func() {
+				Expect(ft.Request.Method).To(Equal(method))
+			})
+
+			It("sets header", func() {
+				Expect(ft.Request.Header.Get("accept")).To(Equal(mimeType))
+			})
+
+			It("returns succeeded status", func() {
+				Expect(ro.Status, ScheduleStatusSucceeded)
 			})
 
 			It("returns result with http status code", func() {
@@ -177,7 +79,7 @@ var _ = Describe("HttpClient", func() {
 					ContainSubstring(
 						fmt.Sprintf(
 							"\"statusCode\":%v",
-							http.StatusInternalServerError)))
+							http.StatusOK)))
 			})
 
 			It("returns result with header", func() {
@@ -190,12 +92,112 @@ var _ = Describe("HttpClient", func() {
 
 			It("returns result with body", func() {
 				Expect(ro.Result).To(
-					ContainSubstring(
-						"\"body\":\"{ \\\"baz\\\": \\\"qux\\\" }\""))
+					ContainSubstring("\"body\":\"{ \\\"baz\\\": \\\"qux\\\" }\""))
 			})
 
 			AfterEach(func() {
 				ft.Response = nil
+			})
+		})
+
+		Describe("fail", func() {
+			Context("invalid request", func() {
+				var ro *ResponseOutput
+
+				BeforeEach(func() {
+					ro = hc.Request(context.TODO(), &RequestInput{
+						URL: "~!@#$%",
+					})
+				})
+
+				It("returns failed status", func() {
+					Expect(ro.Status, ScheduleStatusFailed)
+				})
+
+				It("returns result with with", func() {
+					Expect(ro.Result).To(ContainSubstring("\"error\":"))
+				})
+			})
+
+			Context("internal error", func() {
+				var ro *ResponseOutput
+
+				BeforeEach(func() {
+					ft.Error = fmt.Errorf("internal error")
+
+					ro = hc.Request(context.TODO(), &RequestInput{
+						URL:    url,
+						Method: method,
+					})
+				})
+
+				It("returns failed status", func() {
+					Expect(ro.Status, ScheduleStatusFailed)
+				})
+
+				It("returns result with with", func() {
+					Expect(ro.Result).To(ContainSubstring("\"error\":"))
+				})
+
+				AfterEach(func() {
+					ft.Error = nil
+				})
+			})
+
+			Context("unsuccessful http status code", func() {
+				var ro *ResponseOutput
+
+				BeforeEach(func() {
+					res := http.Response{
+						StatusCode: http.StatusInternalServerError,
+						Header: http.Header{
+							"content-type": []string{mimeType},
+						},
+						Body: ioutil.NopCloser(
+							bytes.NewBufferString("{ \"baz\": \"qux\" }")),
+					}
+
+					ft.Response = &res
+
+					ro = hc.Request(context.TODO(), &RequestInput{
+						URL:    url,
+						Method: method,
+						Headers: map[string]string{
+							"accept": mimeType,
+						},
+						Body: reqBody,
+					})
+				})
+
+				It("returns failed status", func() {
+					Expect(ro.Status, ScheduleStatusFailed)
+				})
+
+				It("returns result with http status code", func() {
+					Expect(ro.Result).To(
+						ContainSubstring(
+							fmt.Sprintf(
+								"\"statusCode\":%v",
+								http.StatusInternalServerError)))
+				})
+
+				It("returns result with header", func() {
+					Expect(ro.Result).To(
+						ContainSubstring(
+							fmt.Sprintf(
+								"\"headers\":{\"content-type\":\"%v\"}",
+								mimeType)))
+				})
+
+				It("returns result with body", func() {
+					Expect(ro.Result).To(
+						ContainSubstring(
+							"\"body\":\"{ \\\"baz\\\": \\\"qux\\\" }\""))
+				})
+
+				AfterEach(func() {
+					ft.Response = nil
+				})
 			})
 		})
 	})

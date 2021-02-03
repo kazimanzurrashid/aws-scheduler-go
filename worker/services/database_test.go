@@ -26,122 +26,187 @@ var _ = Describe("Database", func() {
 		db     *Database
 	)
 
-	BeforeEach(func() {
-		_ = os.Setenv("SCHEDULER_TABLE_NAME", table)
-
-		dynamo = fakeDynamoDB{}
-		db = NewDatabase(&dynamo)
-	})
-
-	Describe("success", func() {
-		var (
-			err              error
-			batchWriteInputs []*dynamodb.BatchWriteItemInput
-		)
-
+	Describe("Update", func() {
 		BeforeEach(func() {
-			dynamo.PushBatchWriteOutput(&dynamodb.BatchWriteItemOutput{
-				UnprocessedItems: map[string][]*dynamodb.WriteRequest{
-					table: {
-						&dynamodb.WriteRequest{
-							PutRequest: &dynamodb.PutRequest{
-								Item: map[string]*dynamodb.AttributeValue{
-									"id": {S: aws.String(id)},
+			_ = os.Setenv("SCHEDULER_TABLE_NAME", table)
+
+			dynamo = fakeDynamoDB{}
+			db = NewDatabase(&dynamo)
+		})
+
+		Describe("success", func() {
+			var (
+				err              error
+				batchWriteInputs []*dynamodb.BatchWriteItemInput
+			)
+
+			BeforeEach(func() {
+				dynamo.PushBatchWriteOutput(&dynamodb.BatchWriteItemOutput{
+					UnprocessedItems: map[string][]*dynamodb.WriteRequest{
+						table: {
+							&dynamodb.WriteRequest{
+								PutRequest: &dynamodb.PutRequest{
+									Item: map[string]*dynamodb.AttributeValue{
+										"id": {S: aws.String(id)},
+									},
 								},
 							},
 						},
 					},
-				},
-			})
-			dynamo.PushBatchWriteOutput(&dynamodb.BatchWriteItemOutput{})
+				})
+				dynamo.PushBatchWriteOutput(&dynamodb.BatchWriteItemOutput{})
 
-			err = db.Update(context.TODO(), []*UpdateInput{
-				{
-					ID: id,
-				},
-			})
+				err = db.Update(context.TODO(), []*UpdateInput{
+					{
+						ID: id,
+					},
+				})
 
-			batchWriteInputs = []*dynamodb.BatchWriteItemInput{
-				dynamo.PullBatchWriteInput(),
-				dynamo.PullBatchWriteInput(),
-			}
-		})
-
-		It("reads table name from env", func() {
-			for _, batchWriteInput := range batchWriteInputs {
-				Expect(batchWriteInput.RequestItems[table]).NotTo(BeNil())
-			}
-		})
-
-		It("sets put item form input", func() {
-			for _, batchWriteInput := range batchWriteInputs {
-				for _, r := range batchWriteInput.RequestItems[table] {
-					Expect(*r.PutRequest.Item["id"].S).To(Equal(id))
+				batchWriteInputs = []*dynamodb.BatchWriteItemInput{
+					dynamo.PullBatchWriteInput(),
+					dynamo.PullBatchWriteInput(),
 				}
-			}
+			})
+
+			It("reads table name from env", func() {
+				for _, batchWriteInput := range batchWriteInputs {
+					Expect(batchWriteInput.RequestItems[table]).NotTo(BeNil())
+				}
+			})
+
+			It("sets put item form input", func() {
+				for _, batchWriteInput := range batchWriteInputs {
+					for _, r := range batchWriteInput.RequestItems[table] {
+						Expect(*r.PutRequest.Item["id"].S).To(Equal(id))
+					}
+				}
+			})
+
+			It("does not return error", func() {
+				Expect(err).To(BeNil())
+			})
+
+			AfterEach(func() {
+				dynamo.ClearState()
+			})
 		})
 
-		It("does not return error", func() {
-			Expect(err).To(BeNil())
-		})
+		Describe("fail", func() {
+			Context("marshal error", func() {
+				var (
+					realMarshal marshalStorage
+					err         error
+				)
 
-		AfterEach(func() {
-			dynamo.ClearState()
+				BeforeEach(func() {
+					realMarshal = marshalStorageStruct
+
+					marshalStorageStruct = func(
+						in interface{}) (
+						map[string]*dynamodb.AttributeValue, error) {
+
+						return nil, fmt.Errorf("marshal error")
+					}
+
+					err = db.Update(context.TODO(), []*UpdateInput{
+						{
+							ID: id,
+						},
+					})
+				})
+
+				It("return error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					marshalStorageStruct = realMarshal
+				})
+			})
+
+			Context("batch write error", func() {
+				var err error
+
+				BeforeEach(func() {
+					dynamo.BatchWriteError = fmt.Errorf("batch write error")
+
+					err = db.Update(context.TODO(), []*UpdateInput{
+						{
+							ID: id,
+						},
+					})
+				})
+
+				It("return error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					dynamo.BatchWriteError = nil
+				})
+			})
 		})
 	})
-
-	Describe("fail", func() {
-		Context("marshal error", func() {
-			var (
-				realMarshal marshalStorage
-				err         error
-			)
+	Describe("chunkBy", func() {
+		Context("100 by 25", func() {
+			var items []*UpdateInput
+			var ret [][]*UpdateInput
 
 			BeforeEach(func() {
-				realMarshal = marshalStorageStruct
+				items = make([]*UpdateInput, 100)
+				ret = chunkBy(items, 25)
+			})
 
-				marshalStorageStruct = func(
-					in interface{}) (
-					map[string]*dynamodb.AttributeValue, error) {
+			It("returns 4 chunk", func() {
+				Expect(ret).To(HaveLen(4))
+			})
 
-					return nil, fmt.Errorf("marshal error")
+			It("each chunk have 25 items", func() {
+				for _, chunk := range ret {
+					Expect(chunk).To(HaveLen(25))
 				}
-
-				err = db.Update(context.TODO(), []*UpdateInput{
-					{
-						ID: id,
-					},
-				})
-			})
-
-			It("return error", func() {
-				Expect(err).NotTo(BeNil())
-			})
-
-			AfterEach(func() {
-				marshalStorageStruct = realMarshal
 			})
 		})
 
-		Context("batch write error", func() {
-			var err error
+		Context("73 by 25", func() {
+			var items []*UpdateInput
+			var ret [][]*UpdateInput
 
 			BeforeEach(func() {
-				dynamo.BatchWriteError = fmt.Errorf("batch write error")
-
-				err = db.Update(context.TODO(), []*UpdateInput{
-					{
-						ID: id,
-					},
-				})
+				items = make([]*UpdateInput, 73)
+				ret = chunkBy(items, 25)
 			})
 
-			It("return error", func() {
-				Expect(err).NotTo(BeNil())
+			It("returns 3 chunk", func() {
+				Expect(ret).To(HaveLen(3))
 			})
 
-			AfterEach(func() {
-				dynamo.BatchWriteError = nil
+			It("first two chunk 25 and last one 23", func() {
+				for i, chunk := range ret {
+					if i < 2 {
+						Expect(chunk).To(HaveLen(25))
+					} else {
+						Expect(chunk).To(HaveLen(23))
+					}
+				}
+			})
+		})
+
+		Context("20 by 25", func() {
+			var items []*UpdateInput
+			var ret [][]*UpdateInput
+
+			BeforeEach(func() {
+				items = make([]*UpdateInput, 20)
+				ret = chunkBy(items, 25)
+			})
+
+			It("returns 1 chunk", func() {
+				Expect(ret).To(HaveLen(1))
+			})
+
+			It("chunk has 20", func() {
+				Expect(ret[0]).To(HaveLen(20))
 			})
 		})
 	})

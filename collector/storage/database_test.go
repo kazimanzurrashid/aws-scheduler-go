@@ -23,7 +23,7 @@ var _ = Describe("Database", func() {
 
 	var (
 		dynamo fakeDynamoDB
-		db *Database
+		db     *Database
 	)
 
 	BeforeEach(func() {
@@ -33,180 +33,246 @@ var _ = Describe("Database", func() {
 		db = NewDatabase(&dynamo)
 	})
 
-	Describe("success", func() {
-		Context("matching schedules", func() {
-			var (
-				err error
-				queryInputs []*dynamodb.QueryInput
-				batchWriteInputs []*dynamodb.BatchWriteItemInput
-			)
+	Describe("Update", func() {
+		Describe("success", func() {
+			Context("matching schedules", func() {
+				var (
+					err              error
+					queryInputs      []*dynamodb.QueryInput
+					batchWriteInputs []*dynamodb.BatchWriteItemInput
+				)
 
-			BeforeEach(func() {
-				dynamo.PushQueryOutput(&dynamodb.QueryOutput{
-					Items: []map[string]*dynamodb.AttributeValue{
-						{
+				BeforeEach(func() {
+					dynamo.PushQueryOutput(&dynamodb.QueryOutput{
+						Items: []map[string]*dynamodb.AttributeValue{
+							{
+								"id":     {S: aws.String(id)},
+								"status": {S: aws.String(scheduleStatusIdle)},
+							},
+						},
+						LastEvaluatedKey: map[string]*dynamodb.AttributeValue{
 							"id":     {S: aws.String(id)},
+							"dueAt":  {N: aws.String("77627362")},
 							"status": {S: aws.String(scheduleStatusIdle)},
 						},
-					},
-					LastEvaluatedKey: map[string]*dynamodb.AttributeValue{
-						"id":     {S: aws.String(id)},
-						"dueAt":  {N: aws.String("77627362")},
-						"status": {S: aws.String(scheduleStatusIdle)},
-					},
-				})
+					})
 
-				dynamo.PushQueryOutput(&dynamodb.QueryOutput{
-					Items: []map[string]*dynamodb.AttributeValue{
-						{
-							"id":     {S: aws.String(id)},
-							"status": {S: aws.String(scheduleStatusIdle)},
+					dynamo.PushQueryOutput(&dynamodb.QueryOutput{
+						Items: []map[string]*dynamodb.AttributeValue{
+							{
+								"id":     {S: aws.String(id)},
+								"status": {S: aws.String(scheduleStatusIdle)},
+							},
 						},
-					},
-				})
+					})
 
-				dynamo.PushBatchWriteOutput(&dynamodb.BatchWriteItemOutput{})
-				dynamo.PushBatchWriteOutput(&dynamodb.BatchWriteItemOutput{
-					UnprocessedItems: map[string][]*dynamodb.WriteRequest{
-						table: {
-							&dynamodb.WriteRequest{
-								PutRequest: &dynamodb.PutRequest{
-									Item: map[string]*dynamodb.AttributeValue{
-										"id":     {S: aws.String(id)},
-										"status": {S: aws.String(
-											scheduleStatusQueued)},
+					dynamo.PushBatchWriteOutput(&dynamodb.BatchWriteItemOutput{})
+					dynamo.PushBatchWriteOutput(&dynamodb.BatchWriteItemOutput{
+						UnprocessedItems: map[string][]*dynamodb.WriteRequest{
+							table: {
+								&dynamodb.WriteRequest{
+									PutRequest: &dynamodb.PutRequest{
+										Item: map[string]*dynamodb.AttributeValue{
+											"id": {S: aws.String(id)},
+											"status": {S: aws.String(
+												scheduleStatusQueued)},
+										},
 									},
 								},
 							},
 						},
-					},
-				})
-				dynamo.PushBatchWriteOutput(&dynamodb.BatchWriteItemOutput{})
+					})
+					dynamo.PushBatchWriteOutput(&dynamodb.BatchWriteItemOutput{})
 
-				err = db.Update(context.TODO())
+					err = db.Update(context.TODO())
 
-				queryInputs = []*dynamodb.QueryInput{
-					dynamo.PullQueryInput(),
-					dynamo.PullQueryInput(),
-				}
-
-				batchWriteInputs = []*dynamodb.BatchWriteItemInput{
-					dynamo.PullBatchWriteInput(),
-					dynamo.PullBatchWriteInput(),
-					dynamo.PullBatchWriteInput(),
-				}
-			})
-
-			It("reads table name from env", func() {
-				for _, queryInput := range queryInputs {
-					Expect(*queryInput.TableName).To(Equal(table))
-				}
-
-				for _, batchWriteInput := range batchWriteInputs {
-					Expect(batchWriteInput.RequestItems[table]).NotTo(BeNil())
-				}
-			})
-
-			It("uses index to query", func() {
-				for _, queryInput := range queryInputs {
-					Expect(*queryInput.IndexName).To(Equal("ix_status_dueAt"))
-				}
-			})
-
-			It("uses idle status to match", func() {
-				for _, queryInput := range queryInputs {
-					Expect(*queryInput.ExpressionAttributeValues[":s"].S).To(
-						Equal(scheduleStatusIdle))
-				}
-			})
-
-			It("uses dueAt to match", func() {
-				for _, queryInput := range queryInputs {
-					Expect(
-						*queryInput.ExpressionAttributeValues[":da"].N).NotTo(
-						Equal(""))
-				}
-			})
-
-			It("updates status to queued", func() {
-				for _, batchWriteInput := range batchWriteInputs {
-					for _, r := range batchWriteInput.RequestItems[table] {
-						Expect(*r.PutRequest.Item["status"].S).To(
-							Equal(scheduleStatusQueued))
+					queryInputs = []*dynamodb.QueryInput{
+						dynamo.PullQueryInput(),
+						dynamo.PullQueryInput(),
 					}
-				}
+
+					batchWriteInputs = []*dynamodb.BatchWriteItemInput{
+						dynamo.PullBatchWriteInput(),
+						dynamo.PullBatchWriteInput(),
+						dynamo.PullBatchWriteInput(),
+					}
+				})
+
+				It("reads table name from env", func() {
+					for _, queryInput := range queryInputs {
+						Expect(*queryInput.TableName).To(Equal(table))
+					}
+
+					for _, batchWriteInput := range batchWriteInputs {
+						Expect(batchWriteInput.RequestItems[table]).NotTo(BeNil())
+					}
+				})
+
+				It("uses index to query", func() {
+					for _, queryInput := range queryInputs {
+						Expect(*queryInput.IndexName).To(Equal("ix_status_dueAt"))
+					}
+				})
+
+				It("uses idle status to match", func() {
+					for _, queryInput := range queryInputs {
+						Expect(*queryInput.ExpressionAttributeValues[":s"].S).To(
+							Equal(scheduleStatusIdle))
+					}
+				})
+
+				It("uses dueAt to match", func() {
+					for _, queryInput := range queryInputs {
+						Expect(
+							*queryInput.ExpressionAttributeValues[":da"].N).NotTo(
+							Equal(""))
+					}
+				})
+
+				It("updates status to queued", func() {
+					for _, batchWriteInput := range batchWriteInputs {
+						for _, r := range batchWriteInput.RequestItems[table] {
+							Expect(*r.PutRequest.Item["status"].S).To(
+								Equal(scheduleStatusQueued))
+						}
+					}
+				})
+
+				It("does not return error", func() {
+					Expect(err).To(BeNil())
+				})
+
+				AfterEach(func() {
+					dynamo.ClearState()
+				})
 			})
 
-			It("does not return error", func() {
-				Expect(err).To(BeNil())
-			})
+			Context("no matching schedule", func() {
+				var err error
 
-			AfterEach(func() {
-				dynamo.ClearState()
+				BeforeEach(func() {
+					dynamo.PushQueryOutput(&dynamodb.QueryOutput{})
+
+					err = db.Update(context.TODO())
+				})
+
+				It("does not return error", func() {
+					Expect(err).To(BeNil())
+				})
+
+				AfterEach(func() {
+					dynamo.ClearState()
+				})
 			})
 		})
 
-		Context("no matching schedule", func() {
-			var err error
+		Describe("fail", func() {
+			Context("query error", func() {
+				var err error
 
-			BeforeEach(func() {
-				dynamo.PushQueryOutput(&dynamodb.QueryOutput{})
+				BeforeEach(func() {
+					dynamo.QueryError = fmt.Errorf("query error")
 
-				err = db.Update(context.TODO())
+					err = db.Update(context.TODO())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					dynamo.ClearState()
+				})
 			})
 
-			It("does not return error", func() {
-				Expect(err).To(BeNil())
-			})
+			Context("batch write error", func() {
+				var err error
 
-			AfterEach(func() {
-				dynamo.ClearState()
+				BeforeEach(func() {
+					dynamo.BatchWriteError = fmt.Errorf("batch write error")
+
+					dynamo.PushQueryOutput(&dynamodb.QueryOutput{
+						Items: []map[string]*dynamodb.AttributeValue{
+							{
+								"id": {S: aws.String(id)},
+							},
+						},
+					})
+
+					err = db.Update(context.TODO())
+				})
+
+				It("returns error", func() {
+					Expect(err).NotTo(BeNil())
+				})
+
+				AfterEach(func() {
+					dynamo.ClearState()
+				})
 			})
 		})
 	})
 
-	Describe("fail", func() {
-		Context("query error", func() {
-			var err error
+	Describe("chunkBy", func() {
+		Context("100 by 25", func() {
+			var items []map[string]*dynamodb.AttributeValue
+			var ret [][]map[string]*dynamodb.AttributeValue
 
 			BeforeEach(func() {
-				dynamo.QueryError = fmt.Errorf("query error")
-
-				err = db.Update(context.TODO())
+				items = make([]map[string]*dynamodb.AttributeValue, 100)
+				ret = chunkBy(items, 25)
 			})
 
-			It("returns error", func() {
-				Expect(err).NotTo(BeNil())
+			It("returns 4 chunk", func() {
+				Expect(ret).To(HaveLen(4))
 			})
 
-			AfterEach(func() {
-				dynamo.ClearState()
+			It("each chunk have 25 items", func() {
+				for _, chunk := range ret {
+					Expect(chunk).To(HaveLen(25))
+				}
 			})
 		})
 
-		Context("batch write error", func() {
-			var err error
+		Context("73 by 25", func() {
+			var items []map[string]*dynamodb.AttributeValue
+			var ret [][]map[string]*dynamodb.AttributeValue
 
 			BeforeEach(func() {
-				dynamo.BatchWriteError = fmt.Errorf("batch write error")
-
-				dynamo.PushQueryOutput(&dynamodb.QueryOutput{
-					Items: []map[string]*dynamodb.AttributeValue{
-						{
-							"id": {S: aws.String(id)},
-						},
-					},
-				})
-
-				err = db.Update(context.TODO())
+				items = make([]map[string]*dynamodb.AttributeValue, 73)
+				ret = chunkBy(items, 25)
 			})
 
-			It("returns error", func() {
-				Expect(err).NotTo(BeNil())
+			It("returns 3 chunk", func() {
+				Expect(ret).To(HaveLen(3))
 			})
 
-			AfterEach(func() {
-				dynamo.ClearState()
+			It("first two chunk 25 and last one 23", func() {
+				for i, chunk := range ret {
+					if i < 2 {
+						Expect(chunk).To(HaveLen(25))
+					} else {
+						Expect(chunk).To(HaveLen(23))
+					}
+				}
+			})
+		})
+
+		Context("20 by 25", func() {
+			var items []map[string]*dynamodb.AttributeValue
+			var ret [][]map[string]*dynamodb.AttributeValue
+
+			BeforeEach(func() {
+				items = make([]map[string]*dynamodb.AttributeValue, 20)
+				ret = chunkBy(items, 25)
+			})
+
+			It("returns 1 chunk", func() {
+				Expect(ret).To(HaveLen(1))
+			})
+
+			It("chunk has 20", func() {
+				Expect(ret[0]).To(HaveLen(20))
 			})
 		})
 	})
