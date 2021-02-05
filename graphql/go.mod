@@ -8,6 +8,6 @@ require (
 	github.com/aws/aws-xray-sdk-go v1.2.0
 	github.com/graphql-go/graphql v0.7.9
 	github.com/matoous/go-nanoid v1.5.0
-	github.com/onsi/ginkgo v1.14.2
+	github.com/onsi/ginkgo v1.15.0
 	github.com/onsi/gomega v1.10.4
 )
