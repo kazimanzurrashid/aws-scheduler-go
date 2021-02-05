@@ -1,6 +1,24 @@
-import { App, Construct, Duration, RemovalPolicy, Stack, StackProps } from '@aws-cdk/core';
-import { AttributeType, BillingMode, StreamViewType, Table } from '@aws-cdk/aws-dynamodb';
-import { Code, Function, Runtime, StartingPosition, Tracing } from '@aws-cdk/aws-lambda';
+import {
+  App,
+  Construct,
+  Duration,
+  RemovalPolicy,
+  Stack,
+  StackProps
+} from '@aws-cdk/core';
+import {
+  AttributeType,
+  BillingMode,
+  StreamViewType,
+  Table
+} from '@aws-cdk/aws-dynamodb';
+import {
+  Code,
+  Function,
+  Runtime,
+  StartingPosition,
+  Tracing
+} from '@aws-cdk/aws-lambda';
 import { DynamoEventSource } from '@aws-cdk/aws-lambda-event-sources';
 import { Rule, RuleTargetInput, Schedule } from '@aws-cdk/aws-events';
 import { LambdaFunction } from '@aws-cdk/aws-events-targets';
@@ -84,7 +102,10 @@ class SchedulerStack extends Stack {
 
     new Rule(this, 'SchedulerRule', {
       schedule: Schedule.rate(Duration.minutes(1)),
-      targets: [new LambdaFunction(collectorLambda, { event: RuleTargetInput.fromObject({ })})]
+      targets: [new LambdaFunction(
+        collectorLambda, {
+          event: RuleTargetInput.fromObject({ })
+        })]
     });
 
     const workerLambda = new Function(this, 'WorkerFunction', {
