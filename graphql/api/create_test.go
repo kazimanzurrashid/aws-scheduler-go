@@ -14,6 +14,49 @@ import (
 )
 
 var _ = Describe("Create", func() {
+	var (
+		field *graphql.Field
+		db    fakeCreateStorage
+	)
+
+	BeforeEach(func() {
+		db = fakeCreateStorage{}
+		factory := NewFactory(&db)
+
+		field = factory.Create()
+	})
+
+	Describe("Args", func() {
+		It("has dueAt as non-nullable DateTime", func() {
+			t := field.Args["dueAt"].Type
+
+			Expect(t).To(BeAssignableToTypeOf(&graphql.NonNull{}))
+			Expect(t.(*graphql.NonNull).OfType).To(Equal(graphql.DateTime))
+		})
+
+		It("has url as non-nullable String", func() {
+			t := field.Args["url"].Type
+
+			Expect(t).To(BeAssignableToTypeOf(&graphql.NonNull{}))
+			Expect(t.(*graphql.NonNull).OfType).To(Equal(graphql.String))
+		})
+
+		It("has method as non-nullable HTTPMethod", func() {
+			t := field.Args["method"].Type
+
+			Expect(t).To(BeAssignableToTypeOf(&graphql.NonNull{}))
+			Expect(t.(*graphql.NonNull).OfType).To(Equal(httpMethodType))
+		})
+
+		It("has headers as nullable StringMap", func() {
+			Expect(field.Args["headers"].Type).To(Equal(stringMapType))
+		})
+
+		It("has body as nullable String", func() {
+			Expect(field.Args["body"].Type).To(Equal(graphql.String))
+		})
+	})
+
 	Describe("Resolve", func() {
 		const (
 			id     = "1234567890"
@@ -22,18 +65,6 @@ var _ = Describe("Create", func() {
 			accept = "application/json"
 			body   = "{ \"foo\": \"bar\" }"
 		)
-
-		var (
-			field *graphql.Field
-			db    fakeCreateStorage
-		)
-
-		BeforeEach(func() {
-			db = fakeCreateStorage{}
-			factory := NewFactory(&db)
-
-			field = factory.Create()
-		})
 
 		Describe("valid input", func() {
 			var (
@@ -208,6 +239,12 @@ var _ = Describe("Create", func() {
 					loadStruct = realLoadStruct
 				})
 			})
+		})
+	})
+
+	Describe("Type", func() {
+		It("returns ID", func() {
+			Expect(field.Type).To(Equal(graphql.ID))
 		})
 	})
 })

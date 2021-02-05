@@ -14,24 +14,46 @@ import (
 )
 
 var _ = Describe("List", func() {
+	var (
+		field *graphql.Field
+		db    fakeListStorage
+	)
+
+	BeforeEach(func() {
+		db = fakeListStorage{}
+		factory := NewFactory(&db)
+
+		field = factory.List()
+	})
+
+	Describe("Args", func() {
+		It("has status as nullable ScheduleStatus", func() {
+			Expect(field.Args["status"].Type).To(Equal(scheduleStatusType))
+		})
+
+		It("has dueAt as nullable DateRange", func() {
+			Expect(field.Args["dueAt"].Type).To(Equal(dataRangeType))
+		})
+
+		It("has startKey as nullable ScheduleListStartKey", func() {
+			Expect(field.Args["startKey"].Type).To(
+				Equal(scheduleListStartKeyType))
+		})
+
+		It("has limit as nullable Int with default value", func() {
+			a := field.Args["limit"]
+
+			Expect(a.Type).To(Equal(graphql.Int))
+			Expect(a.DefaultValue).To(Equal(25))
+		})
+	})
+
 	Describe("Resolve", func() {
 		const (
 			id     = "1234567890"
 			status = storage.ScheduleStatusIdle
 			limit  = int64(10)
 		)
-
-		var (
-			field *graphql.Field
-			db    fakeListStorage
-		)
-
-		BeforeEach(func() {
-			db = fakeListStorage{}
-			factory := NewFactory(&db)
-
-			field = factory.List()
-		})
 
 		Describe("valid input", func() {
 			var (
@@ -187,6 +209,12 @@ var _ = Describe("List", func() {
 					loadStruct = realLoadStruct
 				})
 			})
+		})
+	})
+
+	Describe("Type", func() {
+		It("returns ScheduleList", func() {
+			Expect(field.Type).To(Equal(scheduleListType))
 		})
 	})
 })

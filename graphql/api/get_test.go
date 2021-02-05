@@ -12,19 +12,28 @@ import (
 )
 
 var _ = Describe("Get", func() {
-	Describe("Resolve", func() {
-		var (
-			field *graphql.Field
-			db    fakeGetStorage
-		)
+	var (
+		field *graphql.Field
+		db    fakeGetStorage
+	)
 
-		BeforeEach(func() {
-			db = fakeGetStorage{}
-			factory := NewFactory(&db)
+	BeforeEach(func() {
+		db = fakeGetStorage{}
+		factory := NewFactory(&db)
 
-			field = factory.Get()
+		field = factory.Get()
+	})
+
+	Describe("Args", func() {
+		It("has id as non-nullable ID", func() {
+			t := field.Args["id"].Type
+
+			Expect(t).To(BeAssignableToTypeOf(&graphql.NonNull{}))
+			Expect(t.(*graphql.NonNull).OfType).To(Equal(graphql.ID))
 		})
+	})
 
+	Describe("Resolve", func() {
 		Context("valid id", func() {
 			const id = "1234567890"
 
@@ -77,6 +86,12 @@ var _ = Describe("Get", func() {
 			It("returns error", func() {
 				Expect(err).NotTo(BeNil())
 			})
+		})
+	})
+
+	Describe("Type", func() {
+		It("returns Schedule", func() {
+			Expect(field.Type).To(Equal(scheduleType))
 		})
 	})
 })

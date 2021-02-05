@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/graphql-go/graphql"
+
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/storage"
 
 	. "github.com/onsi/ginkgo"
@@ -41,6 +42,22 @@ var _ = Describe("Factory", func() {
 
 		It("does not return error", func() {
 			Expect(err).To(BeNil())
+		})
+
+		It("has get in query", func() {
+			Expect(schema.QueryType().Fields()["get"]).NotTo(BeNil())
+		})
+
+		It("has list in query", func() {
+			Expect(schema.QueryType().Fields()["list"]).NotTo(BeNil())
+		})
+
+		It("has create in mutation", func() {
+			Expect(schema.MutationType().Fields()["create"]).NotTo(BeNil())
+		})
+
+		It("has cancel in mutation", func() {
+			Expect(schema.MutationType().Fields()["cancel"]).NotTo(BeNil())
 		})
 	})
 })
