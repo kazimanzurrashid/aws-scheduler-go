@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/graphql-go/graphql"
+
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/storage"
 )
 
