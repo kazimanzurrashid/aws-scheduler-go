@@ -1,9 +1,9 @@
 const Create = () => {
   return(
     <>
-      Create!
+      Create
     </>
-  )
-}
+  );
+};
 
 export default Create;

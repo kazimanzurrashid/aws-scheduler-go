@@ -1,9 +1,9 @@
 const View = () => {
   return(
     <>
-      View!
+      View
     </>
-  )
+  );
 }
 
 export default View;
