@@ -19,13 +19,15 @@ import View from './pages/View';
 import Create from './pages/Create';
 import Home from './pages/Home';
 
-const Style = makeStyles((theme) =>({
-  title: {
-    flexGrow: 1,
+const Styles = makeStyles((theme) =>({
+  toolbar: {
     '& a': {
       color: theme.palette.common.white,
       textDecoration: 'none',
     }
+  },
+  title: {
+    flexGrow: 1,
   },
   main: {
     marginTop: theme.spacing(4)
@@ -33,23 +35,27 @@ const Style = makeStyles((theme) =>({
 }));
 
 const App = () => {
-  const style = Style();
+  const styles = Styles();
 
   return (
     <Router>
       <CssBaseline/>
       <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" className={style.title}>
+        <Toolbar className={styles.toolbar}>
+          <Typography variant="h6" className={styles.title}>
             <Link to="/">
               AWS Scheduler
             </Link>
           </Typography>
-          <Button variant="contained" color="secondary" size="medium">Create</Button>
+          <Link to="/new">
+            <Button variant="contained" color="secondary" size="medium">
+              Create
+            </Button>
+          </Link>
         </Toolbar>
       </AppBar>
       <Container maxWidth="lg">
-        <main className={style.main}>
+        <main className={styles.main}>
           <Switch>
             <Route path="/new">
               <Create/>

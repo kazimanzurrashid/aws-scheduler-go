@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import Api from '../api';
+// import Api from '../api';
 import Spinner from '../components/Spinner';
 
 const Home = () => {
@@ -10,7 +10,7 @@ const Home = () => {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const { schedules } = await Api.list();
+      const { schedules } = Promise.resolve([]);//await Api.list();
       setList(schedules);
       setLoading(false);
     })();
