@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 import dayjs from 'dayjs';
 import get from 'lodash.get';
+import DateFnsUtils from '@date-io/dayjs';
 
 import {
   Button,
@@ -12,8 +13,9 @@ import {
   Typography
 } from '@material-ui/core';
 
-import { useFormik } from 'formik';
 import { makeStyles } from '@material-ui/core/styles';
+import { MuiPickersUtilsProvider, DateTimePicker } from '@material-ui/pickers';
+import { useFormik } from 'formik';
 
 const HttpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
@@ -24,7 +26,7 @@ const Styles = makeStyles(theme => {
       marginLeft: theme.spacing(2),
       marginRight: theme.spacing(2),
       [theme.breakpoints.up(600 + theme.spacing(2) * 2)]: {
-        width: 600,
+        width: 620,
         marginLeft: 'auto',
         marginRight: 'auto',
       },
@@ -45,7 +47,7 @@ const Create = () => {
     method: yup.string().required().oneOf(HttpMethods),
   });
 
-  const { values, errors, touched, isSubmitting, handleSubmit, handleChange } = useFormik({
+  const { values, setFieldValue, errors, touched, isSubmitting, handleSubmit, handleChange } = useFormik({
     initialValues: {
       dueAt: dayjs().add(1, 'day').toDate(),
       method: HttpMethods[0],
@@ -56,6 +58,8 @@ const Create = () => {
       console.log(fields);
     },
   });
+
+  const handleDueAtChange = value => setFieldValue('dueAt', value, true);
 
   const showError = name => !!get(errors, name) && (!!get(touched, name) || isSubmitting);
 
@@ -69,48 +73,65 @@ const Create = () => {
         <CardContent>
           <Typography variant="h6" gutterBottom>Create</Typography>
           <Divider/>
-          <form className={styles.form} onSubmit={handleSubmit} noValidate>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={3}>
-                <TextField
-                  id="method"
-                  name="method"
-                  label="Method"
-                  value={values.method}
-                  onChange={handleChange}
-                  error={showError('method')}
-                  helperText={errorText('method')}
-                  select
-                  fullWidth
-                  required
-                >
-                  {HttpMethods.map(method => (
-                    <MenuItem key={method} value={method}>
-                      {method}
-                    </MenuItem>
-                  ))}
-                </TextField>
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <form className={styles.form} onSubmit={handleSubmit} noValidate>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <DateTimePicker
+                    id="dueAt"
+                    name="dueAt"
+                    label="Due At"
+                    disablePast={true}
+                    minDate={dayjs().toDate()}
+                    minutesStep={5}
+                    format="DD-MMM-YYYY hh:mm a"
+                    value={values.dueAt}
+                    onChange={handleDueAtChange}
+                    fullWidth
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    id="method"
+                    name="method"
+                    label="Method"
+                    value={values.method}
+                    onChange={handleChange}
+                    error={showError('method')}
+                    helperText={errorText('method')}
+                    select
+                    fullWidth
+                    required
+                  >
+                    {HttpMethods.map(method => (
+                      <MenuItem key={method} value={method}>
+                        {method}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} md={9}>
+                  <TextField
+                    id="url"
+                    name="url"
+                    label="URL"
+                    value={values.url}
+                    onChange={handleChange}
+                    error={showError('url')}
+                    helperText={errorText('url')}
+                    fullWidth
+                    required
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12} md={9}>
-                <TextField
-                  id="url"
-                  name="url"
-                  label="URL"
-                  value={values.url}
-                  onChange={handleChange}
-                  error={showError('url')}
-                  helperText={errorText('url')}
-                  fullWidth
-                  required
-                />
+              <Grid item xs={12} md={12} style={{ textAlign: 'right' }}>
+                <Button type="submit" variant="contained" color="primary">
+                  Submit
+                </Button>
               </Grid>
-            </Grid>
-            <Grid item xs={12} md={12} style={{ textAlign: 'right' }}>
-              <Button type="submit" variant="contained" color="primary">
-                Submit
-              </Button>
-            </Grid>
-          </form>
+            </form>
+          </MuiPickersUtilsProvider>
         </CardContent>
       </Card>
     </>
