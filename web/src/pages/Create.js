@@ -51,7 +51,9 @@ const Create = () => {
     initialValues: {
       dueAt: dayjs().add(1, 'day').toDate(),
       method: HttpMethods[0],
-      url: undefined
+      url: undefined,
+      headers: {},
+      body: undefined
     },
     validationSchema: formSchema,
     onSubmit: fields => {
@@ -76,17 +78,19 @@ const Create = () => {
           <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <form className={styles.form} onSubmit={handleSubmit} noValidate>
               <Grid container spacing={3}>
-                <Grid item xs={12}>
+                <Grid item xs={12} md={12}>
                   <DateTimePicker
                     id="dueAt"
                     name="dueAt"
                     label="Due At"
+                    format="DD-MMM-YYYY hh:mm a"
                     disablePast={true}
                     minDate={dayjs().toDate()}
                     minutesStep={5}
-                    format="DD-MMM-YYYY hh:mm a"
                     value={values.dueAt}
                     onChange={handleDueAtChange}
+                    error={showError('dueAt')}
+                    helperText={errorText('dueAt')}
                     fullWidth
                     required
                   />
