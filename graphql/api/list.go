@@ -34,7 +34,7 @@ func (f *Factory) List() *graphql.Field {
 
 			if input.DueAt != nil {
 				if !input.DueAt.To.After(input.DueAt.From) {
-					return nil, fmt.Errorf("dueAt to must be after from")
+					return nil, fmt.Errorf("dueAt to must be after dueAt from")
 				}
 			}
 

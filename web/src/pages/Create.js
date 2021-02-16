@@ -42,12 +42,21 @@ const Styles = makeStyles(theme => {
 
 const Create = () => {
   const formSchema = yup.object({
-    dueAt: yup.date().required().min(dayjs().add(5, 'minutes').toDate()),
+    dueAt: yup.date().required().min(dayjs()
+      .add(5, 'minutes').toDate()),
     url: yup.string().required().url(),
     method: yup.string().required().oneOf(HttpMethods),
   });
 
-  const { values, setFieldValue, errors, touched, isSubmitting, handleSubmit, handleChange } = useFormik({
+  const {
+    values,
+    setFieldValue,
+    errors,
+    touched,
+    isSubmitting,
+    handleSubmit,
+    handleChange
+  } = useFormik({
     initialValues: {
       dueAt: dayjs().add(1, 'day').toDate(),
       method: HttpMethods[0],
@@ -61,9 +70,11 @@ const Create = () => {
     },
   });
 
-  const handleDueAtChange = value => setFieldValue('dueAt', value, true);
+  const handleDueAtChange = value =>
+    setFieldValue('dueAt', value, true);
 
-  const showError = name => !!get(errors, name) && (!!get(touched, name) || isSubmitting);
+  const showError = name =>
+    !!get(errors, name) && (!!get(touched, name) || isSubmitting);
 
   const errorText = name => showError(name) ? get(errors, name) : undefined;
 
