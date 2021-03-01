@@ -9,7 +9,7 @@
     "@material-ui/pickers": "^3.2.10",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
-    "@testing-library/user-event": "^12.7.3",
+    "@testing-library/user-event": "^12.8.0",
     "dayjs": "^1.10.4",
     "formik": "^2.2.6",
     "lodash.get": "^4.4.2",
