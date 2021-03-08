@@ -9,6 +9,6 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.6.8
 	github.com/onsi/ginkgo v1.15.0
-	github.com/onsi/gomega v1.10.5
+	github.com/onsi/gomega v1.11.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 )
