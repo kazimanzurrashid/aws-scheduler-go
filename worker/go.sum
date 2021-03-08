@@ -1,11 +1,9 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DATA-DOG/go-sqlmock v1.4.1 h1:ThlnYciV1iM/V0OSF/dtkqWb6xo5qITT1TJBG1MRDJM=
 github.com/DATA-DOG/go-sqlmock v1.4.1/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
-github.com/aws/aws-lambda-go v1.22.0 h1:X7BKqIdfoJcbsEIi+Lrt5YjX1HnZexIbNWOQgkYKgfE=
-github.com/aws/aws-lambda-go v1.22.0/go.mod h1:jJmlefzPfGnckuHdXX7/80O3BvUUi12XOkbv4w9SGLU=
+github.com/aws/aws-lambda-go v1.23.0 h1:Vjwow5COkFJp7GePkk9kjAo/DyX36b7wVPKwseQZbRo=
+github.com/aws/aws-lambda-go v1.23.0/go.mod h1:jJmlefzPfGnckuHdXX7/80O3BvUUi12XOkbv4w9SGLU=
 github.com/aws/aws-sdk-go v1.17.12/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
-github.com/aws/aws-sdk-go v1.37.20 h1:CJCXpMYmBJrRH8YwoSE0oB9S3J5ax+62F14sYlDCztg=
-github.com/aws/aws-sdk-go v1.37.20/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/aws/aws-sdk-go v1.37.21 h1:h3DUhpeOT0TQIwaSzXsBl+jwppfNR/Pc2T5k3SHVKPA=
 github.com/aws/aws-sdk-go v1.37.21/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/aws/aws-xray-sdk-go v1.3.0 h1:O+jtGCD4nl8CkZPWpj2O6RqNXw1v4WTtRSJhFrniQ8s=
