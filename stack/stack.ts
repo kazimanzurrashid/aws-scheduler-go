@@ -6,12 +6,14 @@ import {
   Stack,
   StackProps
 } from '@aws-cdk/core';
+
 import {
   AttributeType,
   BillingMode,
   StreamViewType,
   Table
 } from '@aws-cdk/aws-dynamodb';
+
 import {
   Code,
   Function,
@@ -19,10 +21,15 @@ import {
   StartingPosition,
   Tracing
 } from '@aws-cdk/aws-lambda';
+
 import { DynamoEventSource } from '@aws-cdk/aws-lambda-event-sources';
+
 import { Rule, RuleTargetInput, Schedule } from '@aws-cdk/aws-events';
+
 import { LambdaFunction } from '@aws-cdk/aws-events-targets';
-import { HttpApi, PayloadFormatVersion } from '@aws-cdk/aws-apigatewayv2';
+
+import { HttpApi } from '@aws-cdk/aws-apigatewayv2';
+
 import { LambdaProxyIntegration } from '@aws-cdk/aws-apigatewayv2-integrations';
 
 interface SchedulerProps extends StackProps {
@@ -85,6 +92,15 @@ class SchedulerStack extends Stack {
 
     schedulerTable.grantReadWriteData(graphqlLambda);
 
+    const integration = new LambdaProxyIntegration({
+      handler: graphqlLambda
+    });
+
+    new HttpApi(this, 'Api', {
+      apiName: `${props.name}-api-${props.version}`,
+      defaultIntegration: integration
+    });
+
     const collectorLambda = new Function(this, 'CollectorFunction', {
       functionName: `${props.name}-collector-${props.version}`,
       handler: 'main',
@@ -127,16 +143,6 @@ class SchedulerStack extends Stack {
 
     schedulerTable.grantStreamRead(workerLambda);
     schedulerTable.grantWriteData(workerLambda);
-
-    const integration = new LambdaProxyIntegration({
-      handler: graphqlLambda,
-      payloadFormatVersion: PayloadFormatVersion.VERSION_2_0
-    });
-
-    new HttpApi(this, 'Api', {
-      apiName: `${props.name}-api-${props.version}`,
-      defaultIntegration: integration
-    });
   }
 }
 
