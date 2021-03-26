@@ -28,7 +28,7 @@ import { Rule, RuleTargetInput, Schedule } from '@aws-cdk/aws-events';
 
 import { LambdaFunction } from '@aws-cdk/aws-events-targets';
 
-import { HttpApi } from '@aws-cdk/aws-apigatewayv2';
+import { CorsHttpMethod, HttpApi } from '@aws-cdk/aws-apigatewayv2';
 
 import { LambdaProxyIntegration } from '@aws-cdk/aws-apigatewayv2-integrations';
 
@@ -98,6 +98,16 @@ class SchedulerStack extends Stack {
 
     new HttpApi(this, 'Api', {
       apiName: `${props.name}-api-${props.version}`,
+      corsPreflight: {
+        allowOrigins: ['*'],
+        allowMethods: [
+          CorsHttpMethod.GET,
+          CorsHttpMethod.POST,
+          CorsHttpMethod.OPTIONS
+        ],
+        allowHeaders: ['Content-Type'],
+        maxAge: Duration.days(365),
+      },
       defaultIntegration: integration
     });
 
