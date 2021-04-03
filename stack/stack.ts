@@ -28,7 +28,7 @@ import { Rule, RuleTargetInput, Schedule } from '@aws-cdk/aws-events';
 
 import { LambdaFunction } from '@aws-cdk/aws-events-targets';
 
-import { CorsHttpMethod, HttpApi } from '@aws-cdk/aws-apigatewayv2';
+import { CorsHttpMethod, HttpApi, HttpMethod } from '@aws-cdk/aws-apigatewayv2';
 
 import { LambdaProxyIntegration } from '@aws-cdk/aws-apigatewayv2-integrations';
 
@@ -43,9 +43,9 @@ class SchedulerStack extends Stack {
 
     const schedulerTable = new Table(this, 'Table', {
       tableName: `${props.name}-${props.version}`,
-      removalPolicy: RemovalPolicy.RETAIN,
+      removalPolicy: RemovalPolicy.DESTROY,
       billingMode: BillingMode.PAY_PER_REQUEST,
-      pointInTimeRecovery: true,
+      pointInTimeRecovery: false,
       partitionKey: {
         name: 'id',
         type: AttributeType.STRING
@@ -96,7 +96,7 @@ class SchedulerStack extends Stack {
       handler: graphqlLambda
     });
 
-    new HttpApi(this, 'Api', {
+    const api = new HttpApi(this, 'Api', {
       apiName: `${props.name}-api-${props.version}`,
       corsPreflight: {
         allowOrigins: ['*'],
@@ -105,9 +105,27 @@ class SchedulerStack extends Stack {
           CorsHttpMethod.POST,
           CorsHttpMethod.OPTIONS
         ],
-        maxAge: Duration.days(365),
+        allowHeaders: ['Content-Type'],
+        maxAge: Duration.days(365)
       },
-      defaultIntegration: integration
+      createDefaultStage: false
+    });
+
+    api.addRoutes({
+      integration,
+      methods: [HttpMethod.GET],
+      path: '/'
+    });
+
+    api.addRoutes({
+      integration,
+      methods: [HttpMethod.POST],
+      path: '/graphql'
+    });
+
+    api.addStage('ApiStage', {
+      stageName: props.version,
+      autoDeploy: true
     });
 
     const collectorLambda = new Function(this, 'CollectorFunction', {

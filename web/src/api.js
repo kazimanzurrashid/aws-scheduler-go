@@ -1,5 +1,5 @@
 const request = async (operation, body) => {
-  const response = await fetch('https://api.schedules.my-domain.com/v1/graphql', {
+  const response = await fetch('https://sthzefwik4.execute-api.ap-south-1.amazonaws.com/v1/graphql', {
     method: 'POST',
     mode: 'cors',
     headers: {

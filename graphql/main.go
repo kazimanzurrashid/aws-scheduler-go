@@ -30,7 +30,8 @@ type request struct {
 var schema graphql.Schema
 
 var headers = map[string]string{
-	"Content-Type": "application/json;charset=utf-8",
+	"Access-Control-Allow-Origin": "*",
+	"Content-Type":                "application/json;charset=utf-8",
 }
 
 type (

@@ -108,7 +108,6 @@ const Create = () => {
                   inputVariant="outlined"
                   disablePast={true}
                   minDate={dayjs().toDate()}
-                  minutesStep={5}
                   value={values.dueAt}
                   onChange={handleDueAtChange}
                   error={showError('dueAt')}
