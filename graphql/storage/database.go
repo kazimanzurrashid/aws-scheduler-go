@@ -142,8 +142,7 @@ func (srv *Database) Cancel(ctx context.Context, id string) (bool, error) {
 	}
 
 	if _, err := srv.dynamodb.UpdateItemWithContext(ctx, params); err != nil {
-		if ccf, ok := err.(awserr.RequestFailure);
-			ok && ccf.Code() == "ConditionalCheckFailedException" {
+		if ccf, ok := err.(awserr.RequestFailure); ok && ccf.Code() == "ConditionalCheckFailedException" {
 			return false, nil
 		}
 
@@ -182,10 +181,18 @@ func (srv *Database) Get(ctx context.Context, id string) (*Schedule, error) {
 }
 
 func (srv *Database) List(ctx context.Context, input ListInput) (*List, error) {
+	if input.Status != "" || input.DueAt != nil {
+		return srv.query(ctx, input)
+	}
+
+	return srv.scan(ctx, input)
+}
+
+func (srv *Database) query(ctx context.Context, input ListInput) (*List, error) {
 	params := &dynamodb.QueryInput{
-		TableName:                 aws.String(tableName()),
-		Limit:                     aws.Int64(input.Limit),
-		ReturnConsumedCapacity:    aws.String(
+		TableName: aws.String(tableName()),
+		Limit:     aws.Int64(input.Limit),
+		ReturnConsumedCapacity: aws.String(
 			dynamodb.ReturnConsumedCapacityNone),
 		ExpressionAttributeNames:  map[string]*string{},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{},
@@ -250,6 +257,53 @@ func (srv *Database) List(ctx context.Context, input ListInput) (*List, error) {
 	}
 
 	res, err := srv.dynamodb.QueryWithContext(ctx, params)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var nextKey *ListKey
+
+	if len(res.LastEvaluatedKey) > 0 {
+		var nk ListKey
+
+		err = unmarshalMap(res.LastEvaluatedKey, &nk)
+
+		if err != nil {
+			return nil, err
+		}
+
+		nextKey = &nk
+	}
+
+	var schedules []*Schedule
+
+	if err = unmarshalListOfMap(res.Items, &schedules); err != nil {
+		return nil, err
+	}
+
+	return &List{Schedules: schedules, NextKey: nextKey}, nil
+}
+
+func (srv *Database) scan(ctx context.Context, input ListInput) (*List, error) {
+	params := &dynamodb.ScanInput{
+		TableName: aws.String(tableName()),
+		Limit:     aws.Int64(input.Limit),
+		ReturnConsumedCapacity: aws.String(
+			dynamodb.ReturnConsumedCapacityNone),
+	}
+
+	if input.StartKey != nil {
+		startKey, err := marshalStruct(input.StartKey)
+
+		if err != nil {
+			return nil, err
+		}
+
+		params.ExclusiveStartKey = startKey
+	}
+
+	res, err := srv.dynamodb.ScanWithContext(ctx, params)
 
 	if err != nil {
 		return nil, err
