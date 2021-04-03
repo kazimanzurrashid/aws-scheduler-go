@@ -340,7 +340,7 @@ var _ = Describe("Database", func() {
 					Headers: map[string]string{
 						"accept": accept,
 					},
-					Body:   body,
+					Body:   aws.String(body),
 					Status: ScheduleStatusSucceeded,
 				})
 
@@ -363,7 +363,7 @@ var _ = Describe("Database", func() {
 				Expect(res.URL).To(Equal(url))
 				Expect(res.Method).To(Equal(method))
 				Expect(res.Headers["accept"]).To(Equal(accept))
-				Expect(res.Body).To(Equal(body))
+				Expect(*res.Body).To(Equal(body))
 				Expect(res.Status).To(Equal(ScheduleStatusSucceeded))
 			})
 

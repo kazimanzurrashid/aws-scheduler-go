@@ -10,7 +10,7 @@ import (
 var _ = Describe("CreateUpdateInput", func() {
 	var (
 		attrs map[string]events.DynamoDBAttributeValue
-		ui *UpdateInput
+		ui    *UpdateInput
 	)
 
 	BeforeEach(func() {
@@ -56,7 +56,7 @@ var _ = Describe("CreateUpdateInput", func() {
 	})
 
 	It("sets body", func() {
-		Expect(ui.Body).To(Equal("{ \"foo\": \"bar\" }"))
+		Expect(*ui.Body).To(Equal("{ \"foo\": \"bar\" }"))
 	})
 
 	It("sets createdAt", func() {
@@ -68,14 +68,14 @@ var _ = Describe("CreateUpdateInput", func() {
 	})
 
 	It("never sets result", func() {
-		Expect(ui.Result).To(Equal(""))
+		Expect(ui.Result).To(BeNil())
 	})
 
 	It("never sets startedAt", func() {
-		Expect(ui.StartedAt).To(BeEquivalentTo(0))
+		Expect(ui.StartedAt).To(BeNil())
 	})
 
 	It("never sets completedAt", func() {
-		Expect(ui.CompletedAt).To(BeEquivalentTo(0))
+		Expect(ui.CompletedAt).To(BeNil())
 	})
 })

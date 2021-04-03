@@ -8,11 +8,11 @@ type UpdateInput struct {
 	URL         string            `dynamodbav:"url"`
 	Method      string            `dynamodbav:"method"`
 	Headers     map[string]string `dynamodbav:"headers,omitempty"`
-	Body        string            `dynamodbav:"body,omitempty"`
-	StartedAt   int64             `dynamodbav:"startedAt"`
-	CompletedAt int64             `dynamodbav:"completedAt"`
+	Body        *string           `dynamodbav:"body,omitempty"`
+	StartedAt   *int64            `dynamodbav:"startedAt"`
+	CompletedAt *int64            `dynamodbav:"completedAt"`
 	Status      string            `dynamodbav:"status"`
-	Result      string            `dynamodbav:"result"`
+	Result      *string           `dynamodbav:"result"`
 	CreatedAt   int64             `dynamodbav:"createdAt"`
 }
 
@@ -42,7 +42,7 @@ func CreateUpdateInput(
 		URL:       attributes["url"].String(),
 		Method:    attributes["method"].String(),
 		Headers:   headers,
-		Body:      body,
+		Body:      &body,
 		CreatedAt: createdAt,
 	}
 

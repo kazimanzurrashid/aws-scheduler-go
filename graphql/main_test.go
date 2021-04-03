@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go/aws"
 
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/api"
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/storage"
@@ -44,7 +45,7 @@ var _ = Describe("handler", func() {
 		Context("valid", func() {
 			var (
 				gatewayResponse events.APIGatewayV2HTTPResponse
-				gatewayError error
+				gatewayError    error
 			)
 
 			BeforeEach(func() {
@@ -124,7 +125,7 @@ var _ = Describe("handler", func() {
 		Context("valid", func() {
 			var (
 				gatewayResponse events.APIGatewayV2HTTPResponse
-				gatewayError error
+				gatewayError    error
 			)
 
 			BeforeEach(func() {
@@ -179,7 +180,7 @@ var _ = Describe("handler", func() {
 		Context("empty body", func() {
 			var (
 				gatewayResponse events.APIGatewayV2HTTPResponse
-				gatewayError error
+				gatewayError    error
 			)
 
 			BeforeEach(func() {
@@ -199,7 +200,7 @@ var _ = Describe("handler", func() {
 		Context("unrecognized body", func() {
 			var (
 				gatewayResponse events.APIGatewayV2HTTPResponse
-				gatewayError error
+				gatewayError    error
 			)
 
 			BeforeEach(func() {
@@ -222,8 +223,8 @@ var _ = Describe("handler", func() {
 		Context("error serializing graphql response", func() {
 			var (
 				gatewayResponse events.APIGatewayV2HTTPResponse
-				gatewayError error
-				realMarshal   marshal
+				gatewayError    error
+				realMarshal     marshal
 			)
 
 			BeforeEach(func() {
@@ -280,6 +281,6 @@ func (srv *fakeStorage) Get(
 		Headers: map[string]string{
 			"accept": "application/json",
 		},
-		Body: "{ \"foo\": \"bar\" }",
+		Body: aws.String("{ \"foo\": \"bar\" }"),
 	}, nil
 }

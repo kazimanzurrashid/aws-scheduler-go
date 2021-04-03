@@ -142,7 +142,8 @@ func (srv *Database) Cancel(ctx context.Context, id string) (bool, error) {
 	}
 
 	if _, err := srv.dynamodb.UpdateItemWithContext(ctx, params); err != nil {
-		if ccf, ok := err.(awserr.RequestFailure); ok && ccf.Code() == "ConditionalCheckFailedException" {
+		if ccf, ok := err.(awserr.RequestFailure); ok &&
+			ccf.Code() == "ConditionalCheckFailedException" {
 			return false, nil
 		}
 

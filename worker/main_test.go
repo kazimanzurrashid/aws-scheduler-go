@@ -51,11 +51,11 @@ var _ = Describe("handler", func() {
 					EventName: "MODIFY",
 					Change: events.DynamoDBStreamRecord{
 						NewImage: map[string]events.DynamoDBAttributeValue{
-							"id":     events.NewStringAttribute("1234"),
-							"dueAt":  events.NewNumberAttribute("9876543"),
-							"url":    events.NewStringAttribute(
+							"id":    events.NewStringAttribute("1234"),
+							"dueAt": events.NewNumberAttribute("9876543"),
+							"url": events.NewStringAttribute(
 								"https://foo.bar/do"),
-							"method": events.NewStringAttribute("POST"),
+							"method":    events.NewStringAttribute("POST"),
 							"createdAt": events.NewNumberAttribute("343334232"),
 							"status": events.NewStringAttribute(
 								services.ScheduleStatusQueued),
@@ -96,19 +96,19 @@ var _ = Describe("handler", func() {
 
 	It("updates result of completed schedules", func() {
 		for _, input := range fs.Inputs {
-			Expect(input.Result).To(Equal(ro.Result))
+			Expect(*input.Result).To(Equal(ro.Result))
 		}
 	})
 
 	It("updates startedAt of completed schedules", func() {
 		for _, input := range fs.Inputs {
-			Expect(input.StartedAt).NotTo(Equal(0))
+			Expect(*input.StartedAt).NotTo(Equal(0))
 		}
 	})
 
 	It("updates completedAt of completed schedules", func() {
 		for _, input := range fs.Inputs {
-			Expect(input.CompletedAt).NotTo(Equal(0))
+			Expect(*input.CompletedAt).NotTo(Equal(0))
 		}
 	})
 

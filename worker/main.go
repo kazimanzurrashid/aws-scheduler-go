@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-xray-sdk-go/xray"
@@ -41,13 +42,13 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			ri := services.CreateRequestInput(attrs)
 			ui := services.CreateUpdateInput(attrs)
 
-			ui.StartedAt = time.Now().Unix()
+			ui.StartedAt = aws.Int64(time.Now().Unix())
 
 			ro := httpClient.Request(ctx, ri)
 
 			ui.Status = ro.Status
-			ui.Result = ro.Result
-			ui.CompletedAt = time.Now().Unix()
+			ui.Result = aws.String(ro.Result)
+			ui.CompletedAt = aws.Int64(time.Now().Unix())
 
 			uis = append(uis, ui)
 		}(record.Change.NewImage)
