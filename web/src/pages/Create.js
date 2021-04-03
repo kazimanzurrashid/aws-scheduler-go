@@ -24,20 +24,11 @@ const HttpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
 const Styles = makeStyles(theme => {
   return {
-    title: {
-      marginBottom: theme.spacing(3)
-    },
     form: {
-      marginTop: theme.spacing(2),
-      '& button': {
-        marginTop: theme.spacing(2),
-      },
+      marginTop: theme.spacing(3),
     },
     headerValueContainer: {
       flexGrow: 1
-    },
-    deleteButton: {
-      marginTop: '0 !important'
     },
     submitButtonContainer: {
       textAlign: 'right'
@@ -54,7 +45,8 @@ const Create = () => {
     headers: yup.array().of(yup.object({
       key: yup.string().label('Key').required(),
       value: yup.string().label('Value').required()
-    }))
+    })),
+    body: yup.string().label('Body').optional()
   });
 
   const {
@@ -104,10 +96,10 @@ const Create = () => {
   return(
     <Card>
       <CardContent>
-        <Typography variant="h6" component="h2" gutterBottom className={styles.title}>Create</Typography>
+        <Typography variant="h6" component="h2">Create</Typography>
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
           <form className={styles.form} onSubmit={handleSubmit} noValidate>
-            <Grid container spacing={3}>
+            <Grid container spacing={2}>
               <Grid item xs={12}>
                 <DateTimePicker
                   id="dueAt"
@@ -160,6 +152,9 @@ const Create = () => {
                   required
                 />
               </Grid>
+              <Grid item xs={12}>
+                <Typography component="h3" color="textSecondary">Headers</Typography>
+              </Grid>
               {values.headers.map((header, index) => (
                 <Fragment key={index}>
                   <Grid item xs={12} md={5}>
@@ -193,7 +188,7 @@ const Create = () => {
                         />
                       </Grid>
                       <Grid item >
-                        <IconButton type="button" className={styles.deleteButton} onClick={handleRemoveClick(index)}>
+                        <IconButton type="button" onClick={handleRemoveClick(index)}>
                           <DeleteIcon />
                         </IconButton>
                       </Grid>
@@ -207,14 +202,31 @@ const Create = () => {
                   variant="outlined"
                   color="primary"
                   startIcon={<AddCircleOutlineIcon />}
+                  size="medium"
                   fullWidth
                   onClick={handleAddClick}
                 >
                   Add Header
                 </Button>
               </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  id="body"
+                  name="body"
+                  type="text"
+                  label="Body"
+                  variant="outlined"
+                  value={values.body}
+                  onChange={handleChange}
+                  error={showError('body')}
+                  helperText={errorText('body')}
+                  rows={8}
+                  fullWidth
+                  multiline
+                />
+              </Grid>
               <Grid item xs={12} className={styles.submitButtonContainer}>
-                <Button type="submit" variant="contained" color="primary">
+                <Button type="submit" variant="contained" color="primary" size="large" fullWidth>
                   Submit
                 </Button>
               </Grid>
