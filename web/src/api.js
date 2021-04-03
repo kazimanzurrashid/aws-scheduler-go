@@ -8,9 +8,9 @@ const request = async (operation, body) => {
     body: JSON.stringify(body)
   });
 
-  const { [operation]: data } = await response.json();
+  const { data: { [operation]: result } } = await response.json();
 
-  return data;
+  return result;
 };
 
 const Api = {

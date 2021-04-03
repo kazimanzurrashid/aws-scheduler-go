@@ -30,8 +30,7 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			continue
 		}
 
-		if status := record.Change.NewImage["status"];
-			status.String() != services.ScheduleStatusQueued {
+		if status := record.Change.NewImage["status"]; status.String() != services.ScheduleStatusQueued {
 			continue
 		}
 
@@ -55,6 +54,10 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 	}
 
 	wg.Wait()
+
+	if len(uis) == 0 {
+		return nil
+	}
 
 	return database.Update(ctx, uis)
 }

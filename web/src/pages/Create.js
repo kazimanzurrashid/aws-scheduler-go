@@ -4,6 +4,7 @@ import get from 'lodash.get';
 import DateFnsUtils from '@date-io/dayjs';
 
 import { Fragment } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
@@ -19,6 +20,8 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import { MuiPickersUtilsProvider, DateTimePicker } from '@material-ui/pickers';
 
 import { useFormik } from 'formik';
+
+import Api from '../api';
 
 const HttpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
@@ -49,6 +52,8 @@ const Create = () => {
     body: yup.string().label('Body').optional()
   });
 
+  const history = useHistory();
+
   const {
     values,
     setFieldValue,
@@ -67,7 +72,19 @@ const Create = () => {
     },
     validationSchema: formSchema,
     onSubmit: fields => {
-      console.log(fields);
+      (async () => {
+        const model = {
+          ...fields,
+          headers: fields.headers.reduce((a, c) => {
+            a[c.key] = c.value;
+            return a;
+          }, {})
+        };
+
+        const id = await Api.create(model);
+
+        history.push(`/${id}`);
+      })();
     },
   });
 
