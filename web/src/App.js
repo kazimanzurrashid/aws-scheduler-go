@@ -1,19 +1,17 @@
 import {
-  BrowserRouter as Router,
+  BrowserRouter,
   Link,
-  Route,
-  Switch
+  Switch,
+  Route
 } from "react-router-dom";
 
-import {
-  AppBar,
-  Button,
-  Container,
-  CssBaseline,
-  makeStyles,
-  Toolbar,
-  Typography
-} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import Container from '@material-ui/core/Container';
 
 import View from './pages/View';
 import Create from './pages/Create';
@@ -38,26 +36,26 @@ const App = () => {
   const styles = Styles();
 
   return (
-    <Router>
+    <BrowserRouter>
       <CssBaseline/>
       <AppBar position="static">
         <Toolbar className={styles.toolbar}>
-          <Typography variant="h6" className={styles.title}>
+          <Typography variant="h6" component="h1" className={styles.title}>
             <Link to="/">
               AWS Scheduler
             </Link>
           </Typography>
-          <Link to="/new">
+          <Link to="/create">
             <Button variant="contained" color="secondary" size="medium">
               Create
             </Button>
           </Link>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="lg">
+      <Container maxWidth="md">
         <main className={styles.main}>
           <Switch>
-            <Route path="/new">
+            <Route path="/create">
               <Create/>
             </Route>
             <Route path="/:id">
@@ -69,7 +67,7 @@ const App = () => {
           </Switch>
         </main>
       </Container>
-    </Router>
+    </BrowserRouter>
   );
 };
 

@@ -1,5 +1,5 @@
-const http = async (operation, body) => {
-  const res = await fetch('https://api.schedules.my-domain.com/v1/graphql', {
+const request = async (operation, body) => {
+  const response = await fetch('https://api.schedules.my-domain.com/v1/graphql', {
     method: 'POST',
     mode: 'cors',
     headers: {
@@ -8,7 +8,7 @@ const http = async (operation, body) => {
     body: JSON.stringify(body)
   });
 
-  const { [operation]: data } = await res.json();
+  const { [operation]: data } = await response.json();
 
   return data;
 };
@@ -50,7 +50,7 @@ const Api = {
       }
     }
 
-    return http('list', body);
+    return request('list', body);
   },
 
   get: async (id) => {
@@ -78,7 +78,7 @@ const Api = {
       }
     };
 
-    return http('get', body);
+    return request('get', body);
   },
 
   create: async (model) => {
@@ -91,7 +91,7 @@ const Api = {
       variables: model
     };
 
-    return http('create', body);
+    return request('create', body);
   },
 
   cancel: async (id) => {
@@ -106,7 +106,7 @@ const Api = {
       }
     };
 
-    return http('cancel', body);
+    return request('cancel', body);
   }
 };
 
