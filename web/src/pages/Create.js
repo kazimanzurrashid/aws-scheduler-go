@@ -44,7 +44,7 @@ const Styles = makeStyles(theme => {
 const Create = () => {
   const formSchema = yup.object({
     dueAt: yup.date().label('Due At').required().min(dayjs()
-      .add(1, 'minutes').toDate(), 'Due At must be in future.'),
+      .add(1, 'minute').toDate(), 'Due At must be in future.'),
     url: yup.string().label('URL').required().url(),
     method: yup.string().label('Method').required().oneOf(HttpMethods),
     headers: yup.array().of(yup.object({

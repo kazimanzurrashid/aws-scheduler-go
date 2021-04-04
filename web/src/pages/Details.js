@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -18,8 +18,9 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 
-import Spinner from '../components/Spinner';
 import Api from '../api';
+import Spinner from '../components/Spinner';
+import CopyToClipboardButton from '../components/CopyToClipboardButton';
 
 const Styles = makeStyles(theme => ({
   breadcrumbs: {
@@ -41,8 +42,23 @@ const Styles = makeStyles(theme => ({
   value: {
     width: '100%',
     '& pre': {
+      display: 'inline-block',
+      fontFamily: 'Menlo, Monaco, monospace',
       margin: 0
+    },
+    '& button': {
+      marginLeft: theme.spacing(1),
+      visibility: 'hidden'
+    },
+    '&:hover': {
+      '& button': {
+        visibility: 'visible'
+      }
     }
+  },
+  clipboard: {
+    left: '-100%',
+    position: 'absolute'
   }
 }));
 
@@ -51,9 +67,10 @@ const Details = () => {
   const { id } = useParams();
   const [item, setItem] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const clipboard = useRef();
 
   useEffect(() => {
-    (async() => {
+    (async () => {
       const schedule = await Api.get(id);
       setItem(schedule);
     })();
@@ -62,6 +79,15 @@ const Details = () => {
   const formatDateTime = value =>
     dayjs(value).format('DD-MMMM-YYYY hh:mm:ss a');
 
+  const formatJSON = value => JSON.stringify(value, undefined, 2);
+
+  const copyToClipboard = value => () => {
+    clipboard.current.textContent = value;
+    // noinspection JSUnresolvedFunction
+    clipboard.current.select();
+    document.execCommand('copy');
+  };
+
   const handleCancel = () => {
     (async () => {
       await Api.cancel(item.id);
@@ -69,12 +95,12 @@ const Details = () => {
         ...item,
         status: 'CANCELED',
         canceledAt: dayjs().toDate()
-      })
+      });
     })();
   };
 
   // noinspection JSUnresolvedVariable
-  return(
+  return (
     <>
       <Breadcrumbs className={styles.breadcrumbs}>
         <RouterLink to="/">
@@ -93,7 +119,8 @@ const Details = () => {
                     ID
                   </TableCell>
                   <TableCell component="div" className={styles.value}>
-                    {item.id}
+                    <pre>{item.id}</pre>
+                    <CopyToClipboardButton onClick={copyToClipboard(item.id)}/>
                   </TableCell>
                 </TableRow>
                 <TableRow component="div">
@@ -145,7 +172,7 @@ const Details = () => {
                     Method
                   </TableCell>
                   <TableCell component="div" className={styles.value}>
-                    {item.method}
+                    <pre>{item.method}</pre>
                   </TableCell>
                 </TableRow>
                 <TableRow component="div">
@@ -153,7 +180,8 @@ const Details = () => {
                     URL
                   </TableCell>
                   <TableCell component="div" className={styles.value}>
-                    {item.url}
+                    <pre>{item.url}</pre>
+                    <CopyToClipboardButton onClick={copyToClipboard(item.url)}/>
                   </TableCell>
                 </TableRow>
                 {
@@ -164,8 +192,9 @@ const Details = () => {
                       </TableCell>
                       <TableCell component="div" className={styles.value}>
                         <pre>
-                          { JSON.stringify(item.headers, undefined, 2) }
+                          {formatJSON(item.headers)}
                         </pre>
+                        <CopyToClipboardButton onClick={copyToClipboard(formatJSON(item.headers))}/>
                       </TableCell>
                     </TableRow>
                   )
@@ -178,6 +207,7 @@ const Details = () => {
                       </TableCell>
                       <TableCell component="div" className={styles.value}>
                         <pre>{item.body}</pre>
+                        <CopyToClipboardButton onClick={copyToClipboard(item.body)}/>
                       </TableCell>
                     </TableRow>
                   )
@@ -190,8 +220,9 @@ const Details = () => {
                       </TableCell>
                       <TableCell component="div" className={styles.value}>
                         <pre>
-                          { JSON.stringify(JSON.parse(item.result), undefined, 2) }
+                          {formatJSON(JSON.parse(item.result))}
                         </pre>
+                        <CopyToClipboardButton onClick={copyToClipboard(formatJSON(JSON.parse(item.result)))}/>
                       </TableCell>
                     </TableRow>
                   )
@@ -224,7 +255,8 @@ const Details = () => {
                       fullWidth>
                       Cancel
                     </Button>
-                    <Dialog open={showConfirmation} onClose={() => setShowConfirmation(false)}>
+                    <Dialog open={showConfirmation}
+                            onClose={() => setShowConfirmation(false)}>
                       <DialogTitle>Confirm?</DialogTitle>
                       <DialogContent>
                         <DialogContentText>
@@ -232,8 +264,10 @@ const Details = () => {
                         </DialogContentText>
                       </DialogContent>
                       <DialogActions>
-                        <Button color="primary" onClick={handleCancel}>Yes</Button>
-                        <Button color="primary" autoFocus onClick={() => setShowConfirmation(false)}>No</Button>
+                        <Button color="primary"
+                                onClick={handleCancel}>Yes</Button>
+                        <Button color="primary" autoFocus
+                                onClick={() => setShowConfirmation(false)}>No</Button>
                       </DialogActions>
                     </Dialog>
                   </>
@@ -245,8 +279,9 @@ const Details = () => {
           <Spinner/>
         )
       }
+      <textarea ref={clipboard} className={styles.clipboard}/>
     </>
   );
-}
+};
 
 export default Details;
