@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -9,7 +9,8 @@ import MuiLink from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
-import Grid from '@material-ui/core/Grid';
+import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@material-ui/core/TableCell';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -25,7 +26,23 @@ const Styles = makeStyles(theme => ({
     marginBottom: theme.spacing(2)
   },
   details: {
-    marginTop: theme.spacing(3)
+    marginTop: theme.spacing(3),
+    '& div:first-child > div': {
+      borderTopColor: theme.palette.divider,
+      borderTopStyle: 'solid',
+      borderTopWidth: '1px'
+    }
+  },
+  key: {
+    backgroundColor: theme.palette.background.default,
+    whiteSpace: 'nowrap',
+    verticalAlign: 'top'
+  },
+  value: {
+    width: '100%',
+    '& pre': {
+      margin: 0
+    }
   }
 }));
 
@@ -70,121 +87,158 @@ const Details = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" component="h2">Details</Typography>
-              <Grid container spacing={3} className={styles.details}>
-                <Grid item md={2} xs={12}>ID</Grid>
-                <Grid item md={10} xs={12}>{item.id}</Grid>
-
-                <Grid item md={2} xs={12}>Due At</Grid>
-                <Grid item md={10} xs={12}>{formatDateTime(item.dueAt)}</Grid>
-
+              <div className={styles.details}>
+                <TableRow component="div">
+                  <TableCell component="div" className={styles.key}>
+                    ID
+                  </TableCell>
+                  <TableCell component="div" className={styles.value}>
+                    {item.id}
+                  </TableCell>
+                </TableRow>
+                <TableRow component="div">
+                  <TableCell component="div" className={styles.key}>
+                    Due At
+                  </TableCell>
+                  <TableCell component="div" className={styles.value}>
+                    {formatDateTime(item.dueAt)}
+                  </TableCell>
+                </TableRow>
                 {
                   item.startedAt && (
-                    <>
-                      <Grid item md={2} xs={12}>Started At</Grid>
-                      <Grid item md={10} xs={12}>
+                    <TableRow component="div">
+                      <TableCell component="div" className={styles.key}>
+                        Started At
+                      </TableCell>
+                      <TableCell component="div" className={styles.value}>
                         {formatDateTime(item.startedAt)}
-                      </Grid>
-                    </>
+                      </TableCell>
+                    </TableRow>
                   )
                 }
-
                 {
                   item.completedAt && (
-                    <>
-                      <Grid item md={2} xs={12}>Completed At</Grid>
-                      <Grid item md={10} xs={12}>
+                    <TableRow component="div">
+                      <TableCell component="div" className={styles.key}>
+                        Completed At
+                      </TableCell>
+                      <TableCell component="div" className={styles.value}>
                         {formatDateTime(item.completedAt)}
-                      </Grid>
-                    </>
+                      </TableCell>
+                    </TableRow>
                   )
                 }
-
                 {
                   item.canceledAt && (
-                    <>
-                      <Grid item md={2} xs={12}>Canceled At</Grid>
-                      <Grid item md={10} xs={12}>
+                    <TableRow component="div">
+                      <TableCell component="div" className={styles.key}>
+                        Canceled At
+                      </TableCell>
+                      <TableCell component="div" className={styles.value}>
                         {formatDateTime(item.canceledAt)}
-                      </Grid>
-                    </>
+                      </TableCell>
+                    </TableRow>
                   )
                 }
-
-                <Grid item md={2} xs={12}>Method</Grid>
-                <Grid item md={10} xs={12}>{item.method}</Grid>
-
-                <Grid item md={2} xs={12}>URL</Grid>
-                <Grid item md={10} xs={12}>{item.url}</Grid>
-
+                <TableRow component="div">
+                  <TableCell component="div" className={styles.key}>
+                    Method
+                  </TableCell>
+                  <TableCell component="div" className={styles.value}>
+                    {item.method}
+                  </TableCell>
+                </TableRow>
+                <TableRow component="div">
+                  <TableCell component="div" className={styles.key}>
+                    URL
+                  </TableCell>
+                  <TableCell component="div" className={styles.value}>
+                    {item.url}
+                  </TableCell>
+                </TableRow>
                 {
                   item.headers && (
-                    <>
-                      <Grid item md={2} xs={12}>Headers</Grid>
-                      <Grid item container md={10} xs={12} spacing={2} >
-                        {Object.keys(item.headers).map(key => (
-                          <Fragment key={key}>
-                            <Grid item md={3} xs={12}>{key}</Grid>
-                            <Grid item md={9} xs={12}>{item.headers[key]}</Grid>
-                          </Fragment>
-                        ))}
-                      </Grid>
-                    </>
+                    <TableRow component="div">
+                      <TableCell component="div" className={styles.key}>
+                        Headers
+                      </TableCell>
+                      <TableCell component="div" className={styles.value}>
+                        <pre>
+                          { JSON.stringify(item.headers, undefined, 2) }
+                        </pre>
+                      </TableCell>
+                    </TableRow>
                   )
                 }
-
                 {
                   item.body && (
-                    <>
-                      <Grid item md={2} xs={12}>Body</Grid>
-                      <Grid item md={10} xs={12}>{item.body}</Grid>
-                    </>
+                    <TableRow component="div">
+                      <TableCell component="div" className={styles.key}>
+                        Body
+                      </TableCell>
+                      <TableCell component="div" className={styles.value}>
+                        <pre>{item.body}</pre>
+                      </TableCell>
+                    </TableRow>
                   )
                 }
-
                 {
                   item.result && (
-                    <>
-                      <Grid item md={2} xs={12}>Result</Grid>
-                      <Grid item md={10} xs={12}>{item.result}</Grid>
-                    </>
+                    <TableRow component="div">
+                      <TableCell component="div" className={styles.key}>
+                        Result
+                      </TableCell>
+                      <TableCell component="div" className={styles.value}>
+                        <pre>
+                          { JSON.stringify(JSON.parse(item.result), undefined, 2) }
+                        </pre>
+                      </TableCell>
+                    </TableRow>
                   )
                 }
-
-                <Grid item md={2} xs={12}>Status</Grid>
-                <Grid item md={10} xs={12}>{item.status}</Grid>
-
-                <Grid item md={2} xs={12}>Created At</Grid>
-                <Grid item md={10} xs={12}>{formatDateTime(item.createdAt)}</Grid>
-                
-                {
-                  item.status === 'IDLE' && (
-                    <>
-                      <Grid item xs={12}>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          size="large"
-                          onClick={() => setShowConfirmation(true)}
-                          fullWidth>
-                          Cancel
-                        </Button>
-                      </Grid>
-                      <Dialog open={showConfirmation} onClose={() => setShowConfirmation(false)}>
-                        <DialogTitle>Confirm?</DialogTitle>
-                        <DialogContent>
-                          <DialogContentText>
-                            Are you sure you want to Cancel?
-                          </DialogContentText>
-                        </DialogContent>
-                        <DialogActions>
-                          <Button color="primary" onClick={handleCancel}>Yes</Button>
-                          <Button color="primary" autoFocus onClick={() => setShowConfirmation(false)}>No</Button>
-                        </DialogActions>
-                      </Dialog>
-                    </>
-                  )
-                }
-              </Grid>
+                <TableRow component="div">
+                  <TableCell component="div" className={styles.key}>
+                    Status
+                  </TableCell>
+                  <TableCell component="div" className={styles.value}>
+                    {item.status}
+                  </TableCell>
+                </TableRow>
+                <TableRow component="div">
+                  <TableCell component="div" className={styles.key}>
+                    Created At
+                  </TableCell>
+                  <TableCell component="div" className={styles.value}>
+                    {formatDateTime(item.createdAt)}
+                  </TableCell>
+                </TableRow>
+              </div>
+              {
+                item.status === 'IDLE' && (
+                  <>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      size="large"
+                      onClick={() => setShowConfirmation(true)}
+                      fullWidth>
+                      Cancel
+                    </Button>
+                    <Dialog open={showConfirmation} onClose={() => setShowConfirmation(false)}>
+                      <DialogTitle>Confirm?</DialogTitle>
+                      <DialogContent>
+                        <DialogContentText>
+                          Are you sure you want to Cancel?
+                        </DialogContentText>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button color="primary" onClick={handleCancel}>Yes</Button>
+                        <Button color="primary" autoFocus onClick={() => setShowConfirmation(false)}>No</Button>
+                      </DialogActions>
+                    </Dialog>
+                  </>
+                )
+              }
             </CardContent>
           </Card>
         ) : (
