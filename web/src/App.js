@@ -13,9 +13,9 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
 
-import View from './pages/View';
 import Create from './pages/Create';
-import Home from './pages/Home';
+import Details from './pages/Details';
+import List from './pages/List';
 
 const Styles = makeStyles((theme) =>({
   toolbar: {
@@ -59,10 +59,10 @@ const App = () => {
               <Create/>
             </Route>
             <Route path="/:id">
-              <View/>
+              <Details/>
             </Route>
             <Route exact path="/">
-              <Home/>
+              <List/>
             </Route>
           </Switch>
         </main>

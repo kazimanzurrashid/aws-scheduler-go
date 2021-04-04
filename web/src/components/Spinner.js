@@ -24,4 +24,8 @@ const Spinner = props => {
   );
 };
 
+Spinner.defaultProps = {
+  size: 80
+};
+
 export default Spinner;

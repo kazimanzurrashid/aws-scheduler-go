@@ -15,6 +15,22 @@ const request = async (operation, body) => {
 
 const Api = {
   list: async (model) => {
+    const variables = {};
+
+    if (model) {
+      if (model.status) {
+        variables.status = model.status;
+      }
+
+      if (model.dueAt) {
+        variables.dueAt = model.dueAt;
+      }
+
+      if (model.startKey) {
+        variables.startKey = model.startKey;
+      }
+    }
+
     const body = {
       query: `
         query List($status: ScheduleStatus, $dueAt: DateRange, $startKey: ScheduleListStartKey) {
@@ -32,23 +48,10 @@ const Api = {
               status
             }
           }
-        }`,
-      variables: {}
+        }
+      `,
+      variables
     };
-
-    if (model) {
-      if (model.status) {
-        body.variables.status = model.status;
-      }
-
-      if (model.dueAt) {
-        body.variables.dueAt = model.dueAt;
-      }
-
-      if (model.startKey) {
-        body.variables.startKey = model.startKey;
-      }
-    }
 
     return request('list', body);
   },
@@ -73,9 +76,7 @@ const Api = {
           }
         }
       `,
-      variables: {
-        id
-      }
+      variables: { id }
     };
 
     return request('get', body);
@@ -101,9 +102,7 @@ const Api = {
           cancel(id: $id)
         }
       `,
-      variables: {
-        id
-      }
+      variables: { id }
     };
 
     return request('cancel', body);

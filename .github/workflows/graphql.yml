@@ -24,12 +24,11 @@ jobs:
         with:
           go-version: 1.15.x
 
-      - name: Build
+      - name: Pack
         run: |
           cd graphql
           go get -t -d ./...
-          go install github.com/onsi/ginkgo/ginkgo
-          ginkgo -r --cover
+          go test
           mkdir -p dist
           CGO_ENABLED=0 GOOS=linux go build -o dist/main
           cd dist
