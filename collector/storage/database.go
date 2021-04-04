@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	scheduleStatusIdle = "IDLE"
+	scheduleStatusIdle   = "IDLE"
 	scheduleStatusQueued = "QUEUED"
 )
 
@@ -33,21 +33,31 @@ func NewDatabase(dynamodb dynamodbiface.DynamoDBAPI) *Database {
 func (srv *Database) Update(ctx context.Context) error {
 	table := tableName()
 	startKey := make(map[string]*dynamodb.AttributeValue)
-	now := strconv.FormatInt(time.Now().Unix(), 10)
+	now := time.Now()
+	end := strconv.FormatInt(time.Date(
+		now.Year(),
+		now.Month(),
+		now.Day(),
+		now.Hour(),
+		now.Minute(),
+		0,
+		0,
+		time.UTC).Add(1*time.Minute).Unix(), 10)
+
 	g, _ := errgroup.WithContext(ctx)
 
 	for {
 		params := &dynamodb.QueryInput{
 			TableName:              aws.String(table),
 			IndexName:              aws.String("ix_status_dueAt"),
-			KeyConditionExpression: aws.String("#s = :s AND #da < :da"),
+			KeyConditionExpression: aws.String("#s = :s AND #da <= :da"),
 			ExpressionAttributeNames: map[string]*string{
 				"#s":  aws.String("status"),
 				"#da": aws.String("dueAt"),
 			},
 			ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 				":s":  {S: aws.String(scheduleStatusIdle)},
-				":da": {N: aws.String(now)},
+				":da": {N: aws.String(end)},
 			},
 			ReturnConsumedCapacity: aws.String(
 				dynamodb.ReturnConsumedCapacityNone),
@@ -74,7 +84,7 @@ func (srv *Database) Update(ctx context.Context) error {
 				writes := make([]*dynamodb.WriteRequest, len(localItems))
 
 				for index, item := range localItems {
-					item["status"] = &dynamodb.AttributeValue {
+					item["status"] = &dynamodb.AttributeValue{
 						S: aws.String(scheduleStatusQueued),
 					}
 
@@ -107,10 +117,10 @@ func (srv *Database) update(
 	writes []*dynamodb.WriteRequest) error {
 
 	params := &dynamodb.BatchWriteItemInput{
-		RequestItems:                map[string][]*dynamodb.WriteRequest{},
+		RequestItems: map[string][]*dynamodb.WriteRequest{},
 		ReturnItemCollectionMetrics: aws.String(
 			dynamodb.ReturnItemCollectionMetricsNone),
-		ReturnConsumedCapacity:      aws.String(
+		ReturnConsumedCapacity: aws.String(
 			dynamodb.ReturnConsumedCapacityNone),
 	}
 
