@@ -33,16 +33,7 @@ func NewDatabase(dynamodb dynamodbiface.DynamoDBAPI) *Database {
 func (srv *Database) Update(ctx context.Context) error {
 	table := tableName()
 	startKey := make(map[string]*dynamodb.AttributeValue)
-	now := time.Now()
-	end := strconv.FormatInt(time.Date(
-		now.Year(),
-		now.Month(),
-		now.Day(),
-		now.Hour(),
-		now.Minute(),
-		0,
-		0,
-		time.UTC).Add(1*time.Minute).Unix(), 10)
+	now := strconv.FormatInt(time.Now().Unix(), 10)
 
 	g, _ := errgroup.WithContext(ctx)
 
@@ -57,7 +48,7 @@ func (srv *Database) Update(ctx context.Context) error {
 			},
 			ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 				":s":  {S: aws.String(scheduleStatusIdle)},
-				":da": {N: aws.String(end)},
+				":da": {N: aws.String(now)},
 			},
 			ReturnConsumedCapacity: aws.String(
 				dynamodb.ReturnConsumedCapacityNone),
