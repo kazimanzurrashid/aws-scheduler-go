@@ -51,6 +51,8 @@ func (srv *Database) Update(ctx context.Context, inputs []*UpdateInput) error {
 					return err
 				}
 
+				item["dummy"] = &dynamodb.AttributeValue{S: aws.String("-")}
+
 				write := &dynamodb.WriteRequest{
 					PutRequest: &dynamodb.PutRequest{
 						Item: item,
