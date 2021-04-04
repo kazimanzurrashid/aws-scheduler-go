@@ -28,7 +28,7 @@ jobs:
         run: |
           cd collector
           go get -t -d ./...
-          go test
+          go test ./...
           mkdir -p dist
           CGO_ENABLED=0 GOOS=linux go build -o dist/main
           cd dist
