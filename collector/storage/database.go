@@ -50,7 +50,7 @@ func (srv *Database) Update(ctx context.Context) error {
 		params := &dynamodb.QueryInput{
 			TableName:              aws.String(table),
 			IndexName:              aws.String("ix_status_dueAt"),
-			KeyConditionExpression: aws.String("#s = :s AND #da <= :da"),
+			KeyConditionExpression: aws.String("#s = :s AND #da < :da"),
 			ExpressionAttributeNames: map[string]*string{
 				"#s":  aws.String("status"),
 				"#da": aws.String("dueAt"),

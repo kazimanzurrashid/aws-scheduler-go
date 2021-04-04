@@ -84,6 +84,13 @@ const Create = () => {
           }, {})
         };
 
+        if ([HttpMethods[0], HttpMethods[HttpMethods.length - 1]]
+          .includes(values.method)) {
+          model.body = undefined;
+        }
+
+        model.dueAt = dayjs(model.dueAt).second(0).toISOString();
+
         const id = await Api.create(model);
 
         history.push(`/${id}`);
@@ -93,6 +100,9 @@ const Create = () => {
 
   const handleDueAtChange = value =>
     setFieldValue('dueAt', value, true);
+
+  const canShowBody = () =>
+    ![HttpMethods[0], HttpMethods[HttpMethods.length - 1]].includes(values.method);
 
   const showError = name =>
     !!get(errors, name) && (!!get(touched, name) || isSubmitting);
@@ -236,22 +246,26 @@ const Create = () => {
                     Add Header
                   </Button>
                 </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    id="body"
-                    name="body"
-                    type="text"
-                    label="Body"
-                    variant="outlined"
-                    value={values.body}
-                    onChange={handleChange}
-                    error={showError('body')}
-                    helperText={errorText('body')}
-                    rows={8}
-                    fullWidth
-                    multiline
-                  />
-                </Grid>
+                {
+                  canShowBody() && (
+                    <Grid item xs={12}>
+                      <TextField
+                        id="body"
+                        name="body"
+                        type="text"
+                        label="Body"
+                        variant="outlined"
+                        value={values.body}
+                        onChange={handleChange}
+                        error={showError('body')}
+                        helperText={errorText('body')}
+                        rows={8}
+                        fullWidth
+                        multiline
+                      />
+                    </Grid>
+                  )
+                }
                 <Grid item xs={12}>
                   <Button
                     type="submit"

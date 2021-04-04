@@ -77,6 +77,39 @@ const Details = () => {
                 <Grid item md={2} xs={12}>Due At</Grid>
                 <Grid item md={10} xs={12}>{formatDateTime(item.dueAt)}</Grid>
 
+                {
+                  item.startedAt && (
+                    <>
+                      <Grid item md={2} xs={12}>Started At</Grid>
+                      <Grid item md={10} xs={12}>
+                        {formatDateTime(item.startedAt)}
+                      </Grid>
+                    </>
+                  )
+                }
+
+                {
+                  item.completedAt && (
+                    <>
+                      <Grid item md={2} xs={12}>Completed At</Grid>
+                      <Grid item md={10} xs={12}>
+                        {formatDateTime(item.completedAt)}
+                      </Grid>
+                    </>
+                  )
+                }
+
+                {
+                  item.canceledAt && (
+                    <>
+                      <Grid item md={2} xs={12}>Canceled At</Grid>
+                      <Grid item md={10} xs={12}>
+                        {formatDateTime(item.canceledAt)}
+                      </Grid>
+                    </>
+                  )
+                }
+
                 <Grid item md={2} xs={12}>Method</Grid>
                 <Grid item md={10} xs={12}>{item.method}</Grid>
 
@@ -122,40 +155,7 @@ const Details = () => {
 
                 <Grid item md={2} xs={12}>Created At</Grid>
                 <Grid item md={10} xs={12}>{formatDateTime(item.createdAt)}</Grid>
-
-                {
-                  item.startedAt && (
-                    <>
-                      <Grid item md={2} xs={12}>Started At</Grid>
-                      <Grid item md={10} xs={12}>
-                        {formatDateTime(item.startedAt)}
-                      </Grid>
-                    </>
-                  )
-                }
-
-                {
-                  item.completedAt && (
-                    <>
-                      <Grid item md={2} xs={12}>Completed At</Grid>
-                      <Grid item md={10} xs={12}>
-                        {formatDateTime(item.completedAt)}
-                      </Grid>
-                    </>
-                  )
-                }
-
-                {
-                  item.canceledAt && (
-                    <>
-                      <Grid item md={2} xs={12}>Canceled At</Grid>
-                      <Grid item md={10} xs={12}>
-                        {formatDateTime(item.canceledAt)}
-                      </Grid>
-                    </>
-                  )
-                }
-
+                
                 {
                   item.status === 'IDLE' && (
                     <>
