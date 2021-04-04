@@ -182,49 +182,41 @@ func (srv *Database) Get(ctx context.Context, id string) (*Schedule, error) {
 }
 
 func (srv *Database) List(ctx context.Context, input ListInput) (*List, error) {
-	if input.Status != "" || input.DueAt != nil {
-		return srv.query(ctx, input)
-	}
-
-	return srv.scan(ctx, input)
-}
-
-func (srv *Database) query(ctx context.Context, input ListInput) (*List, error) {
 	params := &dynamodb.QueryInput{
-		TableName: aws.String(tableName()),
-		Limit:     aws.Int64(input.Limit),
-		ReturnConsumedCapacity: aws.String(
-			dynamodb.ReturnConsumedCapacityNone),
+		TableName:                 aws.String(tableName()),
+		IndexName:                 aws.String("ix_dummy_dueAt"),
+		Limit:                     aws.Int64(input.Limit),
+		ReturnConsumedCapacity:    aws.String(dynamodb.ReturnConsumedCapacityNone),
 		ExpressionAttributeNames:  map[string]*string{},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{},
+		ScanIndexForward:          aws.Bool(true),
 	}
 
 	if input.Status != "" {
 		params.IndexName = aws.String("ix_status_dueAt")
-	} else if input.DueAt != nil {
-		params.IndexName = aws.String("ix_dummy_dueAt")
-	}
-
-	if input.Status != "" {
-		if input.DueAt == nil {
-			params.KeyConditionExpression = aws.String("#s = :s")
-		} else {
-			params.KeyConditionExpression = aws.String(
-				"#s = :s AND #da BETWEEN :da1 AND :da2")
-		}
-	} else if input.DueAt != nil {
-		params.KeyConditionExpression = aws.String(
-			"#d = :d AND #da BETWEEN :da1 AND :da2")
-	}
-
-	if input.Status != "" {
 		params.ExpressionAttributeNames["#s"] = aws.String("status")
 		params.ExpressionAttributeValues[":s"] = &dynamodb.AttributeValue{
 			S: aws.String(input.Status),
 		}
-	}
 
-	if input.DueAt != nil {
+		if input.DueAt == nil {
+			params.KeyConditionExpression = aws.String("#s = :s")
+		} else {
+			params.ExpressionAttributeNames["#da"] = aws.String("dueAt")
+			params.ExpressionAttributeValues[":da1"] = &dynamodb.AttributeValue{
+				N: aws.String(strconv.FormatInt(input.DueAt.From.Unix(), 10)),
+			}
+			params.ExpressionAttributeValues[":da2"] = &dynamodb.AttributeValue{
+				N: aws.String(strconv.FormatInt(input.DueAt.To.Unix(), 10)),
+			}
+			params.KeyConditionExpression = aws.String(
+				"#s = :s AND #da BETWEEN :da1 AND :da2")
+		}
+	} else if input.DueAt != nil {
+		params.ExpressionAttributeNames["#d"] = aws.String("dummy")
+		params.ExpressionAttributeValues[":d"] = &dynamodb.AttributeValue{
+			S: aws.String(dummyValue),
+		}
 		params.ExpressionAttributeNames["#da"] = aws.String("dueAt")
 		params.ExpressionAttributeValues[":da1"] = &dynamodb.AttributeValue{
 			N: aws.String(strconv.FormatInt(input.DueAt.From.Unix(), 10)),
@@ -232,12 +224,13 @@ func (srv *Database) query(ctx context.Context, input ListInput) (*List, error) 
 		params.ExpressionAttributeValues[":da2"] = &dynamodb.AttributeValue{
 			N: aws.String(strconv.FormatInt(input.DueAt.To.Unix(), 10)),
 		}
-
-		if input.Status == "" {
-			params.ExpressionAttributeNames["#d"] = aws.String("dummy")
-			params.ExpressionAttributeValues[":d"] = &dynamodb.AttributeValue{
-				S: aws.String(dummyValue),
-			}
+		params.KeyConditionExpression = aws.String(
+			"#d = :d AND #da BETWEEN :da1 AND :da2")
+	} else {
+		params.KeyConditionExpression = aws.String("#d = :d")
+		params.ExpressionAttributeNames["#d"] = aws.String("dummy")
+		params.ExpressionAttributeValues[":d"] = &dynamodb.AttributeValue{
+			S: aws.String(dummyValue),
 		}
 	}
 
@@ -258,53 +251,6 @@ func (srv *Database) query(ctx context.Context, input ListInput) (*List, error) 
 	}
 
 	res, err := srv.dynamodb.QueryWithContext(ctx, params)
-
-	if err != nil {
-		return nil, err
-	}
-
-	var nextKey *ListKey
-
-	if len(res.LastEvaluatedKey) > 0 {
-		var nk ListKey
-
-		err = unmarshalMap(res.LastEvaluatedKey, &nk)
-
-		if err != nil {
-			return nil, err
-		}
-
-		nextKey = &nk
-	}
-
-	var schedules []*Schedule
-
-	if err = unmarshalListOfMap(res.Items, &schedules); err != nil {
-		return nil, err
-	}
-
-	return &List{Schedules: schedules, NextKey: nextKey}, nil
-}
-
-func (srv *Database) scan(ctx context.Context, input ListInput) (*List, error) {
-	params := &dynamodb.ScanInput{
-		TableName: aws.String(tableName()),
-		Limit:     aws.Int64(input.Limit),
-		ReturnConsumedCapacity: aws.String(
-			dynamodb.ReturnConsumedCapacityNone),
-	}
-
-	if input.StartKey != nil {
-		startKey, err := marshalStruct(input.StartKey)
-
-		if err != nil {
-			return nil, err
-		}
-
-		params.ExclusiveStartKey = startKey
-	}
-
-	res, err := srv.dynamodb.ScanWithContext(ctx, params)
 
 	if err != nil {
 		return nil, err
