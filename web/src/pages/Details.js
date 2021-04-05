@@ -9,8 +9,6 @@ import MuiLink from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
-import TableRow from '@material-ui/core/TableRow';
-import TableCell from '@material-ui/core/TableCell';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -27,32 +25,56 @@ const Styles = makeStyles(theme => ({
     marginBottom: theme.spacing(2)
   },
   details: {
+    display: 'flex',
+    flexDirection: 'column',
     marginTop: theme.spacing(3),
-    '& div:first-child > div': {
-      borderTopColor: theme.palette.divider,
-      borderTopStyle: 'solid',
-      borderTopWidth: '1px'
-    }
-  },
-  key: {
-    backgroundColor: theme.palette.background.default,
-    whiteSpace: 'nowrap',
-    verticalAlign: 'top'
-  },
-  value: {
-    width: '100%',
-    '& pre': {
-      display: 'inline-block',
-      fontFamily: 'Menlo, Monaco, monospace',
-      margin: 0
+    '& > div': {
+      display: 'flex',
+      flexDirection: 'row',
+      '& > div': {
+        borderBottomColor: theme.palette.divider,
+        borderBottomStyle: 'solid',
+        borderBottomWidth: '1px',
+        paddingTop: 0,
+        paddingRight: theme.spacing(1.5),
+        paddingBottom: 0,
+        paddingLeft: theme.spacing(1.5)
+      },
+      '& > div:first-child': {
+        backgroundColor: theme.palette.background.default,
+        minWidth: '120px',
+        '& span': {
+          display: 'inline-flex',
+          marginTop: theme.spacing(1.5),
+          marginBottom: theme.spacing(1.5)
+        }
+      },
+      '& > div:last-child': {
+        alignItems: 'center',
+        display: 'flex',
+        flexGrow: 1,
+        overflow: 'auto',
+        '& pre': {
+          fontFamily: 'Menlo, Monaco, monospace',
+          marginTop: theme.spacing(1.5),
+          marginBottom: theme.spacing(1.5)
+        },
+        '& button': {
+          marginLeft: theme.spacing(1),
+          visibility: 'hidden'
+        },
+        '&:hover': {
+          '& button': {
+            visibility: 'visible'
+          }
+        }
+      }
     },
-    '& button': {
-      marginLeft: theme.spacing(1),
-      visibility: 'hidden'
-    },
-    '&:hover': {
-      '& button': {
-        visibility: 'visible'
+    '& > div:first-child': {
+      '& > div': {
+        borderTopColor: theme.palette.divider,
+        borderTopStyle: 'solid',
+        borderTopWidth: '1px'
       }
     }
   },
@@ -114,135 +136,97 @@ const Details = () => {
             <CardContent>
               <Typography variant="h6" component="h2">Details</Typography>
               <div className={styles.details}>
-                <TableRow component="div">
-                  <TableCell component="div" className={styles.key}>
-                    ID
-                  </TableCell>
-                  <TableCell component="div" className={styles.value}>
+                <div>
+                  <div><span>ID</span></div>
+                  <div>
                     <pre>{item.id}</pre>
                     <CopyToClipboardButton onClick={copyToClipboard(item.id)}/>
-                  </TableCell>
-                </TableRow>
-                <TableRow component="div">
-                  <TableCell component="div" className={styles.key}>
-                    Due At
-                  </TableCell>
-                  <TableCell component="div" className={styles.value}>
-                    {formatDateTime(item.dueAt)}
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </div>
+                <div>
+                  <div><span>Due At</span></div>
+                  <div>{formatDateTime(item.dueAt)}</div>
+                </div>
+                <div>
+                  <div><span>Due At</span></div>
+                  <div>{formatDateTime(item.dueAt)}</div>
+                </div>
                 {
                   item.startedAt && (
-                    <TableRow component="div">
-                      <TableCell component="div" className={styles.key}>
-                        Started At
-                      </TableCell>
-                      <TableCell component="div" className={styles.value}>
-                        {formatDateTime(item.startedAt)}
-                      </TableCell>
-                    </TableRow>
+                    <div>
+                      <div><span>Started At</span></div>
+                      <div>{formatDateTime(item.startedAt)}</div>
+                    </div>
                   )
                 }
                 {
                   item.completedAt && (
-                    <TableRow component="div">
-                      <TableCell component="div" className={styles.key}>
-                        Completed At
-                      </TableCell>
-                      <TableCell component="div" className={styles.value}>
-                        {formatDateTime(item.completedAt)}
-                      </TableCell>
-                    </TableRow>
+                    <div>
+                      <div><span>Completed At</span></div>
+                      <div>{formatDateTime(item.completedAt)}</div>
+                    </div>
                   )
                 }
                 {
                   item.canceledAt && (
-                    <TableRow component="div">
-                      <TableCell component="div" className={styles.key}>
-                        Canceled At
-                      </TableCell>
-                      <TableCell component="div" className={styles.value}>
-                        {formatDateTime(item.canceledAt)}
-                      </TableCell>
-                    </TableRow>
+                    <div>
+                      <div><span>Canceled At</span></div>
+                      <div>{formatDateTime(item.canceledAt)}</div>
+                    </div>
                   )
                 }
-                <TableRow component="div">
-                  <TableCell component="div" className={styles.key}>
-                    Method
-                  </TableCell>
-                  <TableCell component="div" className={styles.value}>
-                    <pre>{item.method}</pre>
-                  </TableCell>
-                </TableRow>
-                <TableRow component="div">
-                  <TableCell component="div" className={styles.key}>
-                    URL
-                  </TableCell>
-                  <TableCell component="div" className={styles.value}>
+                <div>
+                  <div><span>Method</span></div>
+                  <div><pre>{item.method}</pre></div>
+                </div>
+                <div>
+                  <div><span>URL</span></div>
+                  <div>
                     <pre>{item.url}</pre>
                     <CopyToClipboardButton onClick={copyToClipboard(item.url)}/>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </div>
                 {
                   item.headers && (
-                    <TableRow component="div">
-                      <TableCell component="div" className={styles.key}>
-                        Headers
-                      </TableCell>
-                      <TableCell component="div" className={styles.value}>
-                        <pre>
-                          {formatJSON(item.headers)}
-                        </pre>
+                    <div>
+                      <div><span>Headers</span></div>
+                      <div>
+                        <pre>{formatJSON(item.headers)}</pre>
                         <CopyToClipboardButton onClick={copyToClipboard(formatJSON(item.headers))}/>
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                    </div>
                   )
                 }
                 {
                   item.body && (
-                    <TableRow component="div">
-                      <TableCell component="div" className={styles.key}>
-                        Body
-                      </TableCell>
-                      <TableCell component="div" className={styles.value}>
+                    <div>
+                      <div><span>Body</span></div>
+                      <div>
                         <pre>{item.body}</pre>
                         <CopyToClipboardButton onClick={copyToClipboard(item.body)}/>
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                    </div>
                   )
                 }
                 {
                   item.result && (
-                    <TableRow component="div">
-                      <TableCell component="div" className={styles.key}>
-                        Result
-                      </TableCell>
-                      <TableCell component="div" className={styles.value}>
-                        <pre>
-                          {formatJSON(JSON.parse(item.result))}
-                        </pre>
+                    <div>
+                      <div><span>Result</span></div>
+                      <div>
+                        <pre>{formatJSON(JSON.parse(item.result))}</pre>
                         <CopyToClipboardButton onClick={copyToClipboard(formatJSON(JSON.parse(item.result)))}/>
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                    </div>
                   )
                 }
-                <TableRow component="div">
-                  <TableCell component="div" className={styles.key}>
-                    Status
-                  </TableCell>
-                  <TableCell component="div" className={styles.value}>
-                    {item.status}
-                  </TableCell>
-                </TableRow>
-                <TableRow component="div">
-                  <TableCell component="div" className={styles.key}>
-                    Created At
-                  </TableCell>
-                  <TableCell component="div" className={styles.value}>
-                    {formatDateTime(item.createdAt)}
-                  </TableCell>
-                </TableRow>
+                <div>
+                  <div><span>Status</span></div>
+                  <div>{item.status}</div>
+                </div>
+                <div>
+                  <div><span>Created At</span></div>
+                  <div>{formatDateTime(item.createdAt)}</div>
+                </div>
               </div>
               {
                 item.status === 'IDLE' && (
@@ -264,7 +248,7 @@ const Details = () => {
                         </DialogContentText>
                       </DialogContent>
                       <DialogActions>
-                        <Button color="primary"
+                        <Button color="secondary"
                                 onClick={handleCancel}>Yes</Button>
                         <Button color="primary" autoFocus
                                 onClick={() => setShowConfirmation(false)}>No</Button>
