@@ -27,19 +27,17 @@ import Api from '../api';
 
 const HttpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
-const Styles = makeStyles(theme => {
-  return {
-    breadcrumbs: {
-      marginBottom: theme.spacing(2)
-    },
-    form: {
-      marginTop: theme.spacing(3)
-    },
-    headerValueContainer: {
-      flexGrow: 1
-    }
-  };
-});
+const Styles = makeStyles(theme => ({
+  breadcrumbs: {
+    marginBottom: theme.spacing(2)
+  },
+  form: {
+    marginTop: theme.spacing(3)
+  },
+  headerValueContainer: {
+    flexGrow: 1
+  }
+}));
 
 const Create = () => {
   const formSchema = yup.object({

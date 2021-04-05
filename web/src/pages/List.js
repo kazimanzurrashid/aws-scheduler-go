@@ -21,7 +21,7 @@ const Styles = makeStyles(theme => ({
   breadcrumbs: {
     marginBottom: theme.spacing(2)
   },
-  table: {
+  records: {
     maxHeight: 650
   },
   row: {
@@ -39,10 +39,19 @@ const List = () => {
   };
 
   useEffect(() => {
-    (async () => {
+    const load = async () => {
       const { schedules } = await Api.list();
       setList(schedules);
-    })();
+    };
+
+    (async () => await load())();
+
+    const handle = setInterval(
+      async () => await load(),
+      1000 * 60 * 5);
+
+    return () => clearInterval(handle);
+
   }, []);
 
   return (
@@ -52,8 +61,8 @@ const List = () => {
       </Breadcrumbs>
       {
         list ? (
-          <TableContainer component={Paper}>
-            <Table className={styles.table} stickyHeader>
+          <TableContainer component={Paper} className={styles.records}>
+            <Table stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell>ID</TableCell>

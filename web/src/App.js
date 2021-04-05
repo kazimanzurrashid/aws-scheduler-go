@@ -21,14 +21,14 @@ const Styles = makeStyles((theme) =>({
   toolbar: {
     '& a': {
       color: theme.palette.common.white,
-      textDecoration: 'none',
+      textDecoration: 'none'
     }
   },
   title: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   main: {
-    marginTop: theme.spacing(4)
+    margin: theme.spacing(4, 0)
   }
 }));
 

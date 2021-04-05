@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -27,26 +27,22 @@ const Styles = makeStyles(theme => ({
   details: {
     display: 'flex',
     flexDirection: 'column',
-    marginTop: theme.spacing(3),
+    margin: theme.spacing(3, 0),
     '& > div': {
       display: 'flex',
       flexDirection: 'row',
       '& > div': {
         borderBottomColor: theme.palette.divider,
         borderBottomStyle: 'solid',
-        borderBottomWidth: '1px',
-        paddingTop: 0,
-        paddingRight: theme.spacing(1.5),
-        paddingBottom: 0,
-        paddingLeft: theme.spacing(1.5)
+        borderBottomWidth: 1,
+        padding: theme.spacing(0, 1.5)
       },
       '& > div:first-child': {
         backgroundColor: theme.palette.background.default,
-        minWidth: '120px',
+        minWidth: 120,
         '& span': {
           display: 'inline-flex',
-          marginTop: theme.spacing(1.5),
-          marginBottom: theme.spacing(1.5)
+          margin: theme.spacing(1.5, 0)
         }
       },
       '& > div:last-child': {
@@ -56,8 +52,7 @@ const Styles = makeStyles(theme => ({
         overflow: 'auto',
         '& pre': {
           fontFamily: 'Menlo, Monaco, monospace',
-          marginTop: theme.spacing(1.5),
-          marginBottom: theme.spacing(1.5)
+          margin: theme.spacing(1.5, 0)
         },
         '& button': {
           marginLeft: theme.spacing(1),
@@ -74,13 +69,9 @@ const Styles = makeStyles(theme => ({
       '& > div': {
         borderTopColor: theme.palette.divider,
         borderTopStyle: 'solid',
-        borderTopWidth: '1px'
+        borderTopWidth: 1
       }
     }
-  },
-  clipboard: {
-    left: '-100%',
-    position: 'absolute'
   }
 }));
 
@@ -89,7 +80,6 @@ const Details = () => {
   const { id } = useParams();
   const [item, setItem] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const clipboard = useRef();
 
   useEffect(() => {
     (async () => {
@@ -102,13 +92,6 @@ const Details = () => {
     dayjs(value).format('DD-MMMM-YYYY hh:mm:ss a');
 
   const formatJSON = value => JSON.stringify(value, undefined, 2);
-
-  const copyToClipboard = value => () => {
-    clipboard.current.textContent = value;
-    // noinspection JSUnresolvedFunction
-    clipboard.current.select();
-    document.execCommand('copy');
-  };
 
   const handleCancel = () => {
     (async () => {
@@ -140,7 +123,7 @@ const Details = () => {
                   <div><span>ID</span></div>
                   <div>
                     <pre>{item.id}</pre>
-                    <CopyToClipboardButton onClick={copyToClipboard(item.id)}/>
+                    <CopyToClipboardButton value={item.id}/>
                   </div>
                 </div>
                 <div>
@@ -177,13 +160,16 @@ const Details = () => {
                 }
                 <div>
                   <div><span>Method</span></div>
-                  <div><pre>{item.method}</pre></div>
+                  <div>
+                    <pre>{item.method}</pre>
+                    <CopyToClipboardButton value={item.method}/>
+                  </div>
                 </div>
                 <div>
                   <div><span>URL</span></div>
                   <div>
                     <pre>{item.url}</pre>
-                    <CopyToClipboardButton onClick={copyToClipboard(item.url)}/>
+                    <CopyToClipboardButton value={item.url}/>
                   </div>
                 </div>
                 {
@@ -192,7 +178,8 @@ const Details = () => {
                       <div><span>Headers</span></div>
                       <div>
                         <pre>{formatJSON(item.headers)}</pre>
-                        <CopyToClipboardButton onClick={copyToClipboard(formatJSON(item.headers))}/>
+                        <CopyToClipboardButton
+                          value={formatJSON(item.headers)}/>
                       </div>
                     </div>
                   )
@@ -203,7 +190,7 @@ const Details = () => {
                       <div><span>Body</span></div>
                       <div>
                         <pre>{item.body}</pre>
-                        <CopyToClipboardButton onClick={copyToClipboard(item.body)}/>
+                        <CopyToClipboardButton value={item.body}/>
                       </div>
                     </div>
                   )
@@ -214,7 +201,8 @@ const Details = () => {
                       <div><span>Result</span></div>
                       <div>
                         <pre>{formatJSON(JSON.parse(item.result))}</pre>
-                        <CopyToClipboardButton onClick={copyToClipboard(formatJSON(JSON.parse(item.result)))}/>
+                        <CopyToClipboardButton
+                          value={formatJSON(JSON.parse(item.result))}/>
                       </div>
                     </div>
                   )
@@ -251,7 +239,9 @@ const Details = () => {
                         <Button color="secondary"
                                 onClick={handleCancel}>Yes</Button>
                         <Button color="primary" autoFocus
-                                onClick={() => setShowConfirmation(false)}>No</Button>
+                                onClick={() => setShowConfirmation(false)}>
+                          No
+                        </Button>
                       </DialogActions>
                     </Dialog>
                   </>
@@ -263,7 +253,6 @@ const Details = () => {
           <Spinner/>
         )
       }
-      <textarea ref={clipboard} className={styles.clipboard}/>
     </>
   );
 };
