@@ -100,12 +100,15 @@ const Create = () => {
     setFieldValue('dueAt', value, true);
 
   const canShowBody = () =>
-    ![HttpMethods[0], HttpMethods[HttpMethods.length - 1]].includes(values.method);
+    ![
+      HttpMethods[0],
+      HttpMethods[HttpMethods.length - 1]
+    ].includes(values.method);
 
   const showError = name =>
     !!get(errors, name) && (!!get(touched, name) || isSubmitting);
 
-  const errorText = name => showError(name) ? get(errors, name) : undefined;
+  const errorText = name => showError(name) ? get(errors, name) : null;
 
   const handleRemoveClick = index => () => {
     const headers = values.headers;
@@ -223,7 +226,8 @@ const Create = () => {
                           />
                         </Grid>
                         <Grid item >
-                          <IconButton type="button" onClick={handleRemoveClick(index)}>
+                          <IconButton type="button"
+                                      onClick={handleRemoveClick(index)}>
                             <DeleteIcon />
                           </IconButton>
                         </Grid>

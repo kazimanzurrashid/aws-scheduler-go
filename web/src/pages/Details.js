@@ -130,10 +130,6 @@ const Details = () => {
                   <div><span>Due At</span></div>
                   <div>{formatDateTime(item.dueAt)}</div>
                 </div>
-                <div>
-                  <div><span>Due At</span></div>
-                  <div>{formatDateTime(item.dueAt)}</div>
-                </div>
                 {
                   item.startedAt && (
                     <div>

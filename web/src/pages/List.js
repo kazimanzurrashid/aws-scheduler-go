@@ -11,12 +11,13 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
-import TableContainer from '@material-ui/core/TableContainer';
 import Paper from '@material-ui/core/Paper';
+import TableContainer from '@material-ui/core/TableContainer';
 import Table from '@material-ui/core/Table';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
 import TableBody from '@material-ui/core/TableBody';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 
@@ -45,22 +46,47 @@ const Styles = makeStyles(theme => ({
     marginBottom: theme.spacing(2)
   },
   records: {
-    maxHeight: 650
+    maxHeight: 650,
+    '& tbody tr': {
+      cursor: 'pointer'
+    }
   },
-  row: {
-    cursor: 'pointer'
+  urlColumn: {
+    width: theme.spacing(35),
+    wordBreak: 'break-all'
   }
 }));
 
 const List = () => {
   const styles = Styles();
   const history = useHistory();
+
+  const [orderBy, setOrderBy] = useState('dueAt');
+  const [direction, setDirection] = useState('asc');
   const [list, setList] = useState(null);
+  const [startKey, setStartKey] = useState(null);
+
+  const sort = (target, { column, direction}) => {
+    const sorted = target.sort((x, y) => {
+      if (x[column] === y[column]) {
+        return 0;
+      }
+
+      if (direction === 'desc') {
+        return y[column] > x[column] ? 1 : -1;
+      }
+
+      return x[column] > y[column] ? 1 : -1;
+    });
+
+    setList(sorted);
+  };
 
   useEffect(() => {
     (async () => {
-      const { schedules } = await Api.list();
+      const { schedules, nextKey } = await Api.list();
       setList(schedules);
+      setStartKey(nextKey);
     })();
   }, []);
 
@@ -98,8 +124,9 @@ const List = () => {
           };
         }
 
-        const { schedules } = await Api.list(model);
-        setList(schedules);
+        const { schedules, nextKey } = await Api.list(model);
+        sort(schedules, { column: orderBy, direction });
+        setStartKey(nextKey);
       })();
     },
   });
@@ -110,16 +137,33 @@ const List = () => {
   const showError = name =>
     !!get(errors, name) && (!!get(touched, name) || isSubmitting);
 
-  const errorText = name => showError(name) ? get(errors, name) : undefined;
+  const errorText = name => showError(name) ? get(errors, name) : null;
 
   const handleClearClick = () => {
     setFieldValue('status', Statuses[0], false);
     setFieldValue('from', null, false);
     setFieldValue('to', null, false);
+
     (async () => {
-      const { schedules } = await Api.list();
-      setList(schedules);
+      const { schedules, nextKey } = await Api.list();
+      sort(schedules, { column: orderBy, direction });
+      setStartKey(nextKey);
     })();
+  };
+
+  const handleSort = column => () => {
+    const localColumn = column;
+    let localDirection;
+
+    if (column === orderBy) {
+      localDirection = direction === 'desc' ? 'asc' : 'desc';
+    } else {
+      localDirection = 'asc';
+    }
+
+    setOrderBy(localColumn);
+    setDirection(localDirection);
+    sort(list,{ column: localColumn, direction: localDirection });
   };
 
   const handleRowClick = item => {
@@ -186,9 +230,15 @@ const List = () => {
                     fullWidth
                   />
                 </Grid>
-                <Grid item container direction="column" spacing={1} md={1} xs={12}>
-                  <Button type="submit" variant="contained" color="primary">Go</Button>
-                  <Button type="button" color="default" onClick={handleClearClick}>Clear</Button>
+                <Grid item container direction="column" spacing={1} md={1}
+                      xs={12}>
+                  <Button type="submit" variant="contained" color="primary">
+                    Go
+                  </Button>
+                  <Button type="button" color="default"
+                          onClick={handleClearClick}>
+                    Clear
+                  </Button>
                 </Grid>
               </Grid>
             </form>
@@ -201,23 +251,60 @@ const List = () => {
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Due At</TableCell>
-                  <TableCell>Method</TableCell>
-                  <TableCell>URL</TableCell>
-                  <TableCell>Status</TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={orderBy === 'id'}
+                      direction={direction}
+                      onClick={handleSort('id')}>
+                      ID
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={orderBy === 'dueAt'}
+                      direction={direction}
+                      onClick={handleSort('dueAt')}>
+                      Due At
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={orderBy === 'method'}
+                      direction={direction}
+                      onClick={handleSort('method')}>
+                      Method
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell className={styles.urlColumn}>
+                    <TableSortLabel
+                      active={orderBy === 'url'}
+                      direction={direction}
+                      onClick={handleSort('url')}>
+                      URL
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel
+                      active={orderBy === 'status'}
+                      direction={direction}
+                      onClick={handleSort('status')}>
+                      Status
+                    </TableSortLabel>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {list.map(item => (
-                  <TableRow key={item.id} hover={true} className={styles.row}
+                  <TableRow key={item.id} hover={true}
                             onClick={() => handleRowClick(item)}>
                     <TableCell>{item.id}</TableCell>
                     <TableCell>
                       {dayjs(item.dueAt).format('MMMM D, h:mm a')}
                     </TableCell>
                     <TableCell>{item.method}</TableCell>
-                    <TableCell>{item.url}</TableCell>
+                    <TableCell className={styles.urlColumn}>
+                      {item.url}
+                    </TableCell>
                     <TableCell>{item.status}</TableCell>
                   </TableRow>
                 ))}
