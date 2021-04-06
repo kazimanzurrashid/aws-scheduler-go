@@ -87,7 +87,7 @@ const Create = () => {
           model.body = undefined;
         }
 
-        model.dueAt = dayjs(model.dueAt).second(0).toISOString();
+        model.dueAt = dayjs(model.dueAt).startOf('minute').toISOString();
 
         const id = await Api.create(model);
 
