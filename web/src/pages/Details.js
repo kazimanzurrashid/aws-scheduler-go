@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 
 import { useEffect, useState } from 'react';
-import { Link as RouterLink, useParams } from 'react-router-dom';
+import { Link as RouterLink, useHistory, useParams } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
@@ -9,6 +9,9 @@ import MuiLink from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
+import CloneIcon from '@material-ui/icons/Launch';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -24,13 +27,19 @@ const Styles = makeStyles(theme => ({
   breadcrumbs: {
     marginBottom: theme.spacing(2)
   },
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    '& button': {
+      marginLeft: theme.spacing(1)
+    }
+  },
   details: {
     display: 'flex',
     flexDirection: 'column',
     margin: theme.spacing(3, 0),
     '& > div': {
       display: 'flex',
-      flexDirection: 'row',
       '& > div': {
         borderBottomColor: theme.palette.divider,
         borderBottomStyle: 'solid',
@@ -77,6 +86,7 @@ const Styles = makeStyles(theme => ({
 
 const Details = () => {
   const styles = Styles();
+  const history = useHistory();
   const { id } = useParams();
   const [item, setItem] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -92,6 +102,26 @@ const Details = () => {
     dayjs(value).format('DD-MMMM-YYYY hh:mm:ss a');
 
   const formatJSON = value => JSON.stringify(value, undefined, 2);
+
+  const handleCopy = () => {
+    const dueAt = dayjs(item.dueAt);
+
+    const source = {
+      dueAt: dayjs()
+        .add(1, 'day')
+        .hour(dueAt.hour())
+        .minute(dueAt.minute())
+        .second(dueAt.second())
+        .millisecond(dueAt.second())
+        .toDate(),
+      method: item.method,
+      url: item.url,
+      headers: item.headers,
+      body: item.body
+    };
+
+    history.push('/create', { source });
+  };
 
   const handleCancel = () => {
     (async () => {
@@ -117,7 +147,18 @@ const Details = () => {
         item ? (
           <Card>
             <CardContent>
-              <Typography variant="h6" component="h2">Details</Typography>
+              <div className={styles.header}>
+                <Typography variant="h6" component="h2">Details</Typography>
+                {
+                  item && (
+                    <Tooltip title="Clone">
+                      <IconButton onClick={handleCopy}>
+                        <CloneIcon />
+                      </IconButton>
+                    </Tooltip>
+                  )
+                }
+              </div>
               <div className={styles.details}>
                 <div>
                   <div><span>ID</span></div>

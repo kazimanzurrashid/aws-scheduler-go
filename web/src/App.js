@@ -41,9 +41,7 @@ const App = () => {
       <AppBar position="static">
         <Toolbar className={styles.toolbar}>
           <Typography variant="h6" component="h1" className={styles.title}>
-            <Link to="/">
-              AWS Scheduler
-            </Link>
+            <Link to="/">AWS Scheduler</Link>
           </Typography>
           <Link to="/create">
             <Button variant="contained" color="secondary" size="medium">
@@ -55,15 +53,9 @@ const App = () => {
       <Container maxWidth="md">
         <main className={styles.main}>
           <Switch>
-            <Route path="/create">
-              <Create/>
-            </Route>
-            <Route path="/:id">
-              <Details/>
-            </Route>
-            <Route exact path="/">
-              <List/>
-            </Route>
+            <Route path="/create"><Create/></Route>
+            <Route path="/:id"><Details/></Route>
+            <Route exact path="/"><List/></Route>
           </Switch>
         </main>
       </Container>

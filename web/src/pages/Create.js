@@ -4,7 +4,7 @@ import get from 'lodash.get';
 import DateFnsUtils from '@date-io/dayjs';
 
 import { Fragment } from 'react';
-import { Link as RouterLink, useHistory } from 'react-router-dom';
+import { Link as RouterLink, useHistory, useLocation } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
@@ -54,6 +54,7 @@ const Create = () => {
 
   const styles = Styles();
   const history = useHistory();
+  const { state } = useLocation();
 
   const {
     values,
@@ -64,7 +65,18 @@ const Create = () => {
     handleSubmit,
     handleChange
   } = useFormik({
-    initialValues: {
+    initialValues: state && state.source ? {
+      ...state.source,
+      headers: state.source.headers ?
+        Object.keys(state.source.headers).reduce((a, c) => {
+          a.push({
+            key: c,
+            value: state.source.headers[c]
+          });
+          return a;
+        }, []) :
+        [],
+    } : {
       dueAt: dayjs().add(1, 'day').toDate(),
       method: HttpMethods[0],
       url: '',
