@@ -99,7 +99,8 @@ func handler(
 		return events.APIGatewayV2HTTPResponse{
 			StatusCode: http.StatusOK,
 			Headers: map[string]string{
-				"Content-Type": "text/html;charset=utf-8",
+				"Cache-Control": "public,max-age=31536000,immutable",
+				"Content-Type":  "text/html;charset=utf-8",
 			},
 			Body: buffer.String(),
 		}, nil
