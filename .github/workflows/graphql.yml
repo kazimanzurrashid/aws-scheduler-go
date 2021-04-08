@@ -31,6 +31,7 @@ jobs:
           go test ./...
           mkdir -p dist
           CGO_ENABLED=0 GOOS=linux go build -o dist/main
+          cp pages dist/ -r
           cd dist
           zip -r -9 scheduler-graphql-v1.zip ./*
 

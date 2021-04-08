@@ -141,7 +141,7 @@ const List = () => {
 
   const errorText = name => showError(name) ? get(errors, name) : null;
 
-  const handleClearClick = () => {
+  const handleClear = () => {
     setFieldValue('status', Statuses[0], false);
     setFieldValue('from', null, false);
     setFieldValue('to', null, false);
@@ -275,7 +275,7 @@ const List = () => {
                   <Button type="submit" variant="contained" color="primary"
                           size="small" fullWidth>Go</Button>
                   <Button type="button" color="default" size="small"
-                          onClick={handleClearClick} fullWidth>Clear</Button>
+                          onClick={handleClear} fullWidth>Clear</Button>
                 </Grid>
               </Grid>
             </form>

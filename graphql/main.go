@@ -3,8 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -28,11 +32,7 @@ type request struct {
 }
 
 var schema graphql.Schema
-
-var headers = map[string]string{
-	"Access-Control-Allow-Origin": "*",
-	"Content-Type":                "application/json;charset=utf-8",
-}
+var playgroundTemplate *template.Template
 
 type (
 	marshal   func(interface{}) ([]byte, error)
@@ -63,8 +63,11 @@ func status(code int, err error) (events.APIGatewayV2HTTPResponse, error) {
 
 	res := events.APIGatewayV2HTTPResponse{
 		StatusCode: code,
-		Headers:    headers,
-		Body:       string(buff),
+		Headers: map[string]string{
+			"Access-Control-Allow-Origin": "*",
+			"Content-Type":                "application/json;charset=utf-8",
+		},
+		Body: string(buff),
 	}
 
 	return res, err
@@ -74,6 +77,35 @@ func handler(
 	ctx context.Context,
 	req events.APIGatewayV2HTTPRequest) (
 	events.APIGatewayV2HTTPResponse, error) {
+
+	if req.RawPath == "/" &&
+		strings.ToUpper(req.RequestContext.HTTP.Method) == "GET" {
+
+		var buffer strings.Builder
+
+		if err := playgroundTemplate.Execute(&buffer, struct {
+			Endpoint string
+		}{
+			Endpoint: fmt.Sprintf(
+				"https://%s/%s/graphql",
+				req.RequestContext.DomainName,
+				req.RouteKey),
+		}); err != nil {
+			return status(http.StatusInternalServerError, err)
+		}
+
+		return events.APIGatewayV2HTTPResponse{
+			StatusCode: http.StatusOK,
+			Headers: map[string]string{
+				"Content-Type": "text/html;charset=utf-8",
+			},
+			Body: buffer.String(),
+		}, nil
+	}
+
+	if req.RawPath != "/graphql" {
+		return status(http.StatusNotFound, nil)
+	}
 
 	body := strings.TrimSpace(req.Body)
 
@@ -139,14 +171,21 @@ func handler(
 
 	res := events.APIGatewayV2HTTPResponse{
 		StatusCode: http.StatusOK,
-		Headers:    headers,
-		Body:       string(buff),
+		Headers: map[string]string{
+			"Access-Control-Allow-Origin": "*",
+			"Content-Type":                "application/json;charset=utf-8",
+		},
+		Body: string(buff),
 	}
 
 	return res, nil
 }
 
 func init() {
+	basePath, _ := os.Getwd()
+	playgroundTemplate = template.Must(
+		template.ParseFiles(filepath.Join(basePath, "/pages/playground.html")))
+
 	ses := session.Must(session.NewSession())
 
 	ddbc := dynamodb.New(ses)

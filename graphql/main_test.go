@@ -38,7 +38,8 @@ var _ = Describe("handler", func() {
 			bodyBuff, _ := json.Marshal(bodyStruct)
 
 			gatewayRequest = events.APIGatewayV2HTTPRequest{
-				Body: string(bodyBuff),
+				RawPath: "/graphql",
+				Body:    string(bodyBuff),
 			}
 		})
 
@@ -118,7 +119,8 @@ var _ = Describe("handler", func() {
 			bodyBuff, _ := json.Marshal(bodyStruct)
 
 			gatewayRequest = events.APIGatewayV2HTTPRequest{
-				Body: string(bodyBuff),
+				RawPath: "/graphql",
+				Body:    string(bodyBuff),
 			}
 		})
 
@@ -184,7 +186,9 @@ var _ = Describe("handler", func() {
 			)
 
 			BeforeEach(func() {
-				gatewayRequest := events.APIGatewayV2HTTPRequest{}
+				gatewayRequest := events.APIGatewayV2HTTPRequest{
+					RawPath: "/graphql",
+				}
 				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
 			})
 
@@ -205,7 +209,8 @@ var _ = Describe("handler", func() {
 
 			BeforeEach(func() {
 				gatewayRequest := events.APIGatewayV2HTTPRequest{
-					Body: "foo-bar",
+					RawPath: "/graphql",
+					Body:    "foo-bar",
 				}
 
 				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
@@ -244,7 +249,8 @@ var _ = Describe("handler", func() {
 				bodyBuff, _ := json.Marshal(bodyStruct)
 
 				gatewayRequest := events.APIGatewayV2HTTPRequest{
-					Body: string(bodyBuff),
+					RawPath: "/graphql",
+					Body:    string(bodyBuff),
 				}
 
 				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)

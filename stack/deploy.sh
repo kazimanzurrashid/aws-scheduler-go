@@ -3,6 +3,7 @@
 cd ../graphql || exit
 mkdir -p dist
 CGO_ENABLED=0 GOOS=linux go build -o dist/main
+cp pages dist/ -r
 
 cd ../collector || exit
 mkdir -p dist
