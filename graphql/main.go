@@ -78,6 +78,8 @@ func handler(
 	req events.APIGatewayV2HTTPRequest) (
 	events.APIGatewayV2HTTPResponse, error) {
 
+	fmt.Printf("Path: %s/%s\n", req.RouteKey, req.RawPath)
+
 	httpMethod := strings.ToUpper(req.RequestContext.HTTP.Method)
 
 	if httpMethod == "GET" && req.RawPath == fmt.Sprintf("/%s", req.RouteKey) {
