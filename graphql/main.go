@@ -78,6 +78,8 @@ func handler(
 	req events.APIGatewayV2HTTPRequest) (
 	events.APIGatewayV2HTTPResponse, error) {
 
+	fmt.Printf("path: %s", req.RawPath)
+
 	if req.RawPath == "" &&
 		strings.ToUpper(req.RequestContext.HTTP.Method) == "GET" {
 
