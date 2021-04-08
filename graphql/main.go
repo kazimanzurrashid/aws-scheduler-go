@@ -78,18 +78,20 @@ func handler(
 	req events.APIGatewayV2HTTPRequest) (
 	events.APIGatewayV2HTTPResponse, error) {
 
-	fmt.Printf("Path: %s\n", req.RawPath)
-	fmt.Printf("Stage: %s\n", req.RequestContext.Stage)
-
 	httpMethod := strings.ToUpper(req.RequestContext.HTTP.Method)
 
-	if httpMethod == "GET" && req.RouteKey == "/" {
+	if httpMethod == "GET" &&
+		req.RawPath == fmt.Sprintf("/%s/", req.RequestContext.Stage) {
+
 		var buffer strings.Builder
 
 		if err := playgroundTemplate.Execute(&buffer, struct {
 			Endpoint string
 		}{
-			Endpoint: "graphql",
+			Endpoint: fmt.Sprintf(
+				"%s/%s/graphql",
+				req.RequestContext.DomainName,
+				req.RequestContext.Stage),
 		}); err != nil {
 			return status(http.StatusInternalServerError, err)
 		}
@@ -103,7 +105,8 @@ func handler(
 		}, nil
 	}
 
-	if httpMethod != "POST" || req.RouteKey != "/graphql" {
+	if httpMethod != "POST" ||
+		req.RawPath != fmt.Sprintf("/%s/graphql", req.RequestContext.Stage) {
 		return status(http.StatusNotFound, nil)
 	}
 
