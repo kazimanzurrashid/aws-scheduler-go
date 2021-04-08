@@ -83,7 +83,7 @@ func handler(
 
 	httpMethod := strings.ToUpper(req.RequestContext.HTTP.Method)
 
-	if httpMethod == "GET" && req.RawPath == fmt.Sprintf("/%s", req.RouteKey) {
+	if httpMethod == "GET" && req.RouteKey == "/" {
 		var buffer strings.Builder
 
 		if err := playgroundTemplate.Execute(&buffer, struct {
@@ -103,8 +103,7 @@ func handler(
 		}, nil
 	}
 
-	if httpMethod != "POST" ||
-		req.RawPath != fmt.Sprintf("/%s/graphql", req.RouteKey) {
+	if httpMethod != "POST" || req.RouteKey != "/graphql" {
 		return status(http.StatusNotFound, nil)
 	}
 
