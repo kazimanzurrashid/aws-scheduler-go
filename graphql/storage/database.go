@@ -241,7 +241,7 @@ func (srv *Database) List(ctx context.Context, input ListInput) (*List, error) {
 			return nil, err
 		}
 
-		if input.Status == "" && input.DueAt != nil {
+		if *params.IndexName == "ix_dummy_dueAt" {
 			startKey["dummy"] = &dynamodb.AttributeValue{
 				S: aws.String(dummyValue),
 			}

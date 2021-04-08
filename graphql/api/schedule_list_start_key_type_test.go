@@ -23,9 +23,9 @@ var _ = Describe("ScheduleListStartKey", func() {
 			Expect(t.(*graphql.NonNull).OfType).To(Equal(graphql.ID))
 		})
 
-		It("has dueAt as nullable DateTime", func() {
+		It("has dueAt as nullable Int", func() {
 			Expect(scheduleListStartKeyType.Fields()["dueAt"].Type).To(
-				Equal(graphql.DateTime))
+				Equal(graphql.Int))
 		})
 
 		It("has status as nullable ScheduleStatus", func() {

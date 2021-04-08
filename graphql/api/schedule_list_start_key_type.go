@@ -9,7 +9,7 @@ var scheduleListStartKeyType = graphql.NewInputObject(graphql.InputObjectConfig{
 			Type: graphql.NewNonNull(graphql.ID),
 		},
 		"dueAt": &graphql.InputObjectFieldConfig{
-			Type: graphql.DateTime,
+			Type: graphql.Int,
 		},
 		"status": &graphql.InputObjectFieldConfig{
 			Type: scheduleStatusType,

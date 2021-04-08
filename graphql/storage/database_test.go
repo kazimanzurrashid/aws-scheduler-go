@@ -508,7 +508,7 @@ var _ = Describe("Database", func() {
 						items[i] = item
 					}
 
-					dueAt := time.Now().Add(-time.Hour * 100)
+					dueAt := time.Now().Add(-time.Hour * 100).Unix()
 					lastKey, _ := dynamodbattribute.MarshalMap(ListKey{
 						ID:     "67890",
 						DueAt:  &dueAt,
@@ -553,7 +553,7 @@ var _ = Describe("Database", func() {
 						items[i] = item
 					}
 
-					dueAt := time.Now().Add(-time.Hour * 100)
+					dueAt := time.Now().Add(-time.Hour * 100).Unix()
 
 					lastKey, _ := dynamodbattribute.MarshalMap(ListKey{
 						ID:     "67890",
@@ -626,7 +626,7 @@ var _ = Describe("Database", func() {
 						items[i] = item
 					}
 
-					dueAt := time.Now().Add(-time.Hour * 100)
+					dueAt := time.Now().Add(-time.Hour * 100).Unix()
 					lastKey, _ := dynamodbattribute.MarshalMap(ListKey{
 						ID:     "67890",
 						DueAt:  &dueAt,
@@ -692,7 +692,7 @@ var _ = Describe("Database", func() {
 						items[i] = item
 					}
 
-					dueAt := time.Now().Add(-time.Hour * 100)
+					dueAt := time.Now().Add(-time.Hour * 100).Unix()
 					lastKey, _ := dynamodbattribute.MarshalMap(ListKey{
 						ID:     "67890",
 						DueAt:  &dueAt,
@@ -704,7 +704,7 @@ var _ = Describe("Database", func() {
 						LastEvaluatedKey: lastKey,
 					}
 
-					startKeyDueAt := time.Now().Add(-time.Hour * 5)
+					startKeyDueAt := time.Now().Add(-time.Hour * 5).Unix()
 					res, err = db.List(context.TODO(), ListInput{
 						DueAt: &DateRange{
 							From: time.Now().Add(-time.Hour * 20),
@@ -775,7 +775,7 @@ var _ = Describe("Database", func() {
 						return nil, fmt.Errorf("marshal error")
 					}
 
-					dueAt := time.Now().Add(-time.Hour * 54)
+					dueAt := time.Now().Add(-time.Hour * 54).Unix()
 
 					res, err = db.List(context.TODO(), ListInput{
 						StartKey: &ListKey{

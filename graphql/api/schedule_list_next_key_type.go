@@ -9,7 +9,7 @@ var scheduleListNextKeyType = graphql.NewObject(graphql.ObjectConfig{
 			Type: graphql.NewNonNull(graphql.ID),
 		},
 		"dueAt": &graphql.Field{
-			Type: graphql.DateTime,
+			Type: graphql.Int,
 		},
 		"status": &graphql.Field{
 			Type: scheduleStatusType,
