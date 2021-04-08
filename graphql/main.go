@@ -78,20 +78,15 @@ func handler(
 	req events.APIGatewayV2HTTPRequest) (
 	events.APIGatewayV2HTTPResponse, error) {
 
-	fmt.Printf("path: %s", req.RawPath)
+	httpMethod := strings.ToUpper(req.RequestContext.HTTP.Method)
 
-	if req.RawPath == "" &&
-		strings.ToUpper(req.RequestContext.HTTP.Method) == "GET" {
-
+	if httpMethod == "GET" && req.RawPath == fmt.Sprintf("/%s", req.RouteKey) {
 		var buffer strings.Builder
 
 		if err := playgroundTemplate.Execute(&buffer, struct {
 			Endpoint string
 		}{
-			Endpoint: fmt.Sprintf(
-				"https://%s/%s/graphql",
-				req.RequestContext.DomainName,
-				req.RouteKey),
+			Endpoint: "graphql",
 		}); err != nil {
 			return status(http.StatusInternalServerError, err)
 		}
@@ -105,7 +100,8 @@ func handler(
 		}, nil
 	}
 
-	if req.RawPath != "/graphql" {
+	if httpMethod != "POST" ||
+		req.RawPath != fmt.Sprintf("/%s/graphql", req.RouteKey) {
 		return status(http.StatusNotFound, nil)
 	}
 

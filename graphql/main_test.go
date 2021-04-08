@@ -38,8 +38,14 @@ var _ = Describe("handler", func() {
 			bodyBuff, _ := json.Marshal(bodyStruct)
 
 			gatewayRequest = events.APIGatewayV2HTTPRequest{
-				RawPath: "/graphql",
-				Body:    string(bodyBuff),
+				RouteKey: "v1",
+				RawPath:  "/v1/graphql",
+				Body:     string(bodyBuff),
+				RequestContext: events.APIGatewayV2HTTPRequestContext{
+					HTTP: events.APIGatewayV2HTTPRequestContextHTTPDescription{
+						Method: "POST",
+					},
+				},
 			}
 		})
 
@@ -119,8 +125,14 @@ var _ = Describe("handler", func() {
 			bodyBuff, _ := json.Marshal(bodyStruct)
 
 			gatewayRequest = events.APIGatewayV2HTTPRequest{
-				RawPath: "/graphql",
-				Body:    string(bodyBuff),
+				RouteKey: "v1",
+				RawPath:  "/v1/graphql",
+				Body:     string(bodyBuff),
+				RequestContext: events.APIGatewayV2HTTPRequestContext{
+					HTTP: events.APIGatewayV2HTTPRequestContextHTTPDescription{
+						Method: "POST",
+					},
+				},
 			}
 		})
 
@@ -187,7 +199,13 @@ var _ = Describe("handler", func() {
 
 			BeforeEach(func() {
 				gatewayRequest := events.APIGatewayV2HTTPRequest{
-					RawPath: "/graphql",
+					RouteKey: "v1",
+					RawPath:  "/v1/graphql",
+					RequestContext: events.APIGatewayV2HTTPRequestContext{
+						HTTP: events.APIGatewayV2HTTPRequestContextHTTPDescription{
+							Method: "POST",
+						},
+					},
 				}
 				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
 			})
@@ -209,8 +227,15 @@ var _ = Describe("handler", func() {
 
 			BeforeEach(func() {
 				gatewayRequest := events.APIGatewayV2HTTPRequest{
-					RawPath: "/graphql",
-					Body:    "foo-bar",
+					RouteKey: "v1",
+					RawPath:  "/v1/graphql",
+					Body:     "foo-bar",
+					RequestContext: events.APIGatewayV2HTTPRequestContext{
+
+						HTTP: events.APIGatewayV2HTTPRequestContextHTTPDescription{
+							Method: "POST",
+						},
+					},
 				}
 
 				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
@@ -249,8 +274,14 @@ var _ = Describe("handler", func() {
 				bodyBuff, _ := json.Marshal(bodyStruct)
 
 				gatewayRequest := events.APIGatewayV2HTTPRequest{
-					RawPath: "/graphql",
-					Body:    string(bodyBuff),
+					RouteKey: "v1",
+					RawPath:  "/v1/graphql",
+					Body:     string(bodyBuff),
+					RequestContext: events.APIGatewayV2HTTPRequestContext{
+						HTTP: events.APIGatewayV2HTTPRequestContextHTTPDescription{
+							Method: "POST",
+						},
+					},
 				}
 
 				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
