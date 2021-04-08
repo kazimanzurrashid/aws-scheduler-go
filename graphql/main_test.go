@@ -38,9 +38,10 @@ var _ = Describe("handler", func() {
 			bodyBuff, _ := json.Marshal(bodyStruct)
 
 			gatewayRequest = events.APIGatewayV2HTTPRequest{
-				RouteKey: "/graphql",
-				Body:     string(bodyBuff),
+				RawPath: "/v1/graphql",
+				Body:    string(bodyBuff),
 				RequestContext: events.APIGatewayV2HTTPRequestContext{
+					Stage: "v1",
 					HTTP: events.APIGatewayV2HTTPRequestContextHTTPDescription{
 						Method: "POST",
 					},
@@ -124,9 +125,10 @@ var _ = Describe("handler", func() {
 			bodyBuff, _ := json.Marshal(bodyStruct)
 
 			gatewayRequest = events.APIGatewayV2HTTPRequest{
-				RouteKey: "/graphql",
-				Body:     string(bodyBuff),
+				RawPath: "/v1/graphql",
+				Body:    string(bodyBuff),
 				RequestContext: events.APIGatewayV2HTTPRequestContext{
+					Stage: "v1",
 					HTTP: events.APIGatewayV2HTTPRequestContextHTTPDescription{
 						Method: "POST",
 					},
@@ -197,8 +199,9 @@ var _ = Describe("handler", func() {
 
 			BeforeEach(func() {
 				gatewayRequest := events.APIGatewayV2HTTPRequest{
-					RouteKey: "/graphql",
+					RawPath: "/v1/graphql",
 					RequestContext: events.APIGatewayV2HTTPRequestContext{
+						Stage: "v1",
 						HTTP: events.APIGatewayV2HTTPRequestContextHTTPDescription{
 							Method: "POST",
 						},
@@ -224,10 +227,10 @@ var _ = Describe("handler", func() {
 
 			BeforeEach(func() {
 				gatewayRequest := events.APIGatewayV2HTTPRequest{
-					RouteKey: "/graphql",
-					Body:     "foo-bar",
+					RawPath: "/v1/graphql",
+					Body:    "foo-bar",
 					RequestContext: events.APIGatewayV2HTTPRequestContext{
-
+						Stage: "v1",
 						HTTP: events.APIGatewayV2HTTPRequestContextHTTPDescription{
 							Method: "POST",
 						},
@@ -270,9 +273,10 @@ var _ = Describe("handler", func() {
 				bodyBuff, _ := json.Marshal(bodyStruct)
 
 				gatewayRequest := events.APIGatewayV2HTTPRequest{
-					RouteKey: "/graphql",
-					Body:     string(bodyBuff),
+					RawPath: "/v1/graphql",
+					Body:    string(bodyBuff),
 					RequestContext: events.APIGatewayV2HTTPRequestContext{
+						Stage: "v1",
 						HTTP: events.APIGatewayV2HTTPRequestContextHTTPDescription{
 							Method: "POST",
 						},
