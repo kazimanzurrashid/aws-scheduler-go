@@ -116,8 +116,8 @@ const Details = () => {
         .toDate(),
       method: item.method,
       url: item.url,
-      headers: item.headers,
-      body: item.body
+      headers: item.headers || {},
+      body: item.body || ''
     };
 
     history.push('/create', { source });

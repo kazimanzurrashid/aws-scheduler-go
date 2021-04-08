@@ -23,11 +23,9 @@ var _ = Describe("ScheduleListNextKey", func() {
 			Expect(t.(*graphql.NonNull).OfType).To(Equal(graphql.ID))
 		})
 
-		It("has dueAt as non-nullable DateTime", func() {
-			t := scheduleListNextKeyType.Fields()["dueAt"].Type
-
-			Expect(t).To(BeAssignableToTypeOf(&graphql.NonNull{}))
-			Expect(t.(*graphql.NonNull).OfType).To(Equal(graphql.DateTime))
+		It("has dueAt as nullable DateTime", func() {
+			Expect(scheduleListNextKeyType.Fields()["dueAt"].Type).To(
+				Equal(graphql.DateTime))
 		})
 
 		It("has status as nullable ScheduleStatus", func() {

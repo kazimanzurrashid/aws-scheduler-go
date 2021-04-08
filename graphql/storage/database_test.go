@@ -508,10 +508,11 @@ var _ = Describe("Database", func() {
 						items[i] = item
 					}
 
+					dueAt := time.Now().Add(-time.Hour * 100)
 					lastKey, _ := dynamodbattribute.MarshalMap(ListKey{
 						ID:     "67890",
-						DueAt:  time.Now().Add(-time.Hour * 100),
-						Status: ScheduleStatusIdle,
+						DueAt:  &dueAt,
+						Status: aws.String(ScheduleStatusIdle),
 					})
 
 					dynamo.QueryOutput = &dynamodb.QueryOutput{
@@ -552,10 +553,12 @@ var _ = Describe("Database", func() {
 						items[i] = item
 					}
 
+					dueAt := time.Now().Add(-time.Hour * 100)
+
 					lastKey, _ := dynamodbattribute.MarshalMap(ListKey{
 						ID:     "67890",
-						DueAt:  time.Now().Add(-time.Hour * 100),
-						Status: ScheduleStatusIdle,
+						DueAt:  &dueAt,
+						Status: aws.String(ScheduleStatusIdle),
 					})
 
 					dynamo.QueryOutput = &dynamodb.QueryOutput{
@@ -623,10 +626,11 @@ var _ = Describe("Database", func() {
 						items[i] = item
 					}
 
+					dueAt := time.Now().Add(-time.Hour * 100)
 					lastKey, _ := dynamodbattribute.MarshalMap(ListKey{
 						ID:     "67890",
-						DueAt:  time.Now().Add(-time.Hour * 100),
-						Status: ScheduleStatusIdle,
+						DueAt:  &dueAt,
+						Status: aws.String(ScheduleStatusIdle),
 					})
 
 					dynamo.QueryOutput = &dynamodb.QueryOutput{
@@ -688,10 +692,11 @@ var _ = Describe("Database", func() {
 						items[i] = item
 					}
 
+					dueAt := time.Now().Add(-time.Hour * 100)
 					lastKey, _ := dynamodbattribute.MarshalMap(ListKey{
 						ID:     "67890",
-						DueAt:  time.Now().Add(-time.Hour * 100),
-						Status: ScheduleStatusIdle,
+						DueAt:  &dueAt,
+						Status: aws.String(ScheduleStatusIdle),
 					})
 
 					dynamo.QueryOutput = &dynamodb.QueryOutput{
@@ -699,6 +704,7 @@ var _ = Describe("Database", func() {
 						LastEvaluatedKey: lastKey,
 					}
 
+					startKeyDueAt := time.Now().Add(-time.Hour * 5)
 					res, err = db.List(context.TODO(), ListInput{
 						DueAt: &DateRange{
 							From: time.Now().Add(-time.Hour * 20),
@@ -706,7 +712,7 @@ var _ = Describe("Database", func() {
 						},
 						StartKey: &ListKey{
 							ID:    "6568",
-							DueAt: time.Now().Add(-time.Hour * 5),
+							DueAt: &startKeyDueAt,
 						},
 					})
 				})
@@ -769,10 +775,12 @@ var _ = Describe("Database", func() {
 						return nil, fmt.Errorf("marshal error")
 					}
 
+					dueAt := time.Now().Add(-time.Hour * 54)
+
 					res, err = db.List(context.TODO(), ListInput{
 						StartKey: &ListKey{
 							ID:    "6568",
-							DueAt: time.Now().Add(-time.Hour * 54),
+							DueAt: &dueAt,
 						},
 					})
 				})

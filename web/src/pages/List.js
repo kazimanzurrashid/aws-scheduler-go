@@ -26,6 +26,7 @@ import Spinner from '../components/Spinner';
 import Grid from '@material-ui/core/Grid';
 
 import { useFormik } from 'formik';
+import debounce from 'lodash.debounce';
 import get from 'lodash.get';
 import * as yup from 'yup';
 import Button from '@material-ui/core/Button';
@@ -170,6 +171,40 @@ const List = () => {
     history.push(`/${item.id}`);
   };
 
+  const handleScroll = debounce((e) => {
+    const target = e.target;
+    console.log(target.scrollTop, target.offsetHeight);
+
+    if (!startKey) {
+      return;
+    }
+
+    (async () => {
+      const model = {
+        startKey
+      };
+
+      if (values.status !== Statuses[0]) {
+        model.status = values.status;
+      }
+
+      if (values.from && values.to) {
+        model.dueAt = {
+          from: dayjs(values.from)
+            .startOf('day')
+            .toISOString(),
+          to: dayjs(values.to)
+            .endOf('day')
+            .toISOString()
+        };
+      }
+
+      const { schedules, nextKey } = await Api.list(model);
+      sort(schedules, { column: orderBy, direction });
+      setStartKey(nextKey);
+    })();
+  }, 300);
+
   return (
     <>
       <Breadcrumbs className={styles.breadcrumbs}>
@@ -230,15 +265,11 @@ const List = () => {
                     fullWidth
                   />
                 </Grid>
-                <Grid item container direction="column" spacing={1} md={1}
-                      xs={12}>
-                  <Button type="submit" variant="contained" color="primary">
-                    Go
-                  </Button>
-                  <Button type="button" color="default"
-                          onClick={handleClearClick}>
-                    Clear
-                  </Button>
+                <Grid item md={1} xs={12}>
+                  <Button type="submit" variant="contained" color="primary"
+                          size="small" fullWidth>Go</Button>
+                  <Button type="button" color="default" size="small"
+                          onClick={handleClearClick} fullWidth>Clear</Button>
                 </Grid>
               </Grid>
             </form>
@@ -247,7 +278,8 @@ const List = () => {
       </Card>
       {
         list ? (
-          <TableContainer component={Paper} className={styles.records}>
+          <TableContainer component={Paper} className={styles.records}
+                          onScroll={handleScroll}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
