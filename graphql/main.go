@@ -187,7 +187,7 @@ func handler(
 func init() {
 	basePath, _ := os.Getwd()
 	playgroundTemplate = template.Must(
-		template.ParseFiles(filepath.Join(basePath, "/pages/playground.html")))
+		template.ParseFiles(filepath.Join(basePath, "/pages/playground.gohtml")))
 
 	ses := session.Must(session.NewSession())
 
