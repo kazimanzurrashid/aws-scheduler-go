@@ -89,7 +89,7 @@ func handler(
 			Endpoint string
 		}{
 			Endpoint: fmt.Sprintf(
-				"%s/%s/graphql",
+				"https://%s/%s/graphql",
 				req.RequestContext.DomainName,
 				req.RequestContext.Stage),
 		}); err != nil {
