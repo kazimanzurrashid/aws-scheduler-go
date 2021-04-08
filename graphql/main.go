@@ -78,7 +78,7 @@ func handler(
 	req events.APIGatewayV2HTTPRequest) (
 	events.APIGatewayV2HTTPResponse, error) {
 
-	if req.RawPath == "/" &&
+	if req.RawPath == "" &&
 		strings.ToUpper(req.RequestContext.HTTP.Method) == "GET" {
 
 		var buffer strings.Builder
