@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import DateFnsUtils from '@date-io/dayjs';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -19,7 +19,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import TableBody from '@material-ui/core/TableBody';
-import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
+import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 import Api from '../api';
 import Spinner from '../components/Spinner';
@@ -66,6 +66,7 @@ const List = () => {
   const [direction, setDirection] = useState('asc');
   const [list, setList] = useState(null);
   const [startKey, setStartKey] = useState(null);
+  const table = useRef();
 
   const sort = (target, { column, direction}) => {
     const sorted = target.sort((x, y) => {
@@ -172,10 +173,14 @@ const List = () => {
   };
 
   const handleScroll = debounce((e) => {
-    const target = e.target;
-    console.log(target.scrollTop, target.offsetHeight);
-
     if (!startKey) {
+      return;
+    }
+
+    const target = e.target;
+
+    // noinspection JSUnresolvedVariable
+    if (target.scrollTop + target.offsetHeight + 150 <= table.current.offsetHeight) {
       return;
     }
 
@@ -200,7 +205,8 @@ const List = () => {
       }
 
       const { schedules, nextKey } = await Api.list(model);
-      sort(schedules, { column: orderBy, direction });
+      const updatedList = [...list, ...schedules];
+      sort(updatedList, { column: orderBy, direction });
       setStartKey(nextKey);
     })();
   }, 300);
@@ -280,7 +286,7 @@ const List = () => {
         list ? (
           <TableContainer component={Paper} className={styles.records}
                           onScroll={handleScroll}>
-            <Table stickyHeader>
+            <Table ref={table} stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell>
