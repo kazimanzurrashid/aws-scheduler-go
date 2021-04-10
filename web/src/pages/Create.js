@@ -19,7 +19,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import { MuiPickersUtilsProvider, DateTimePicker } from '@material-ui/pickers';
+import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 import { useFormik } from 'formik';
 
@@ -75,7 +75,7 @@ const Create = () => {
           });
           return a;
         }, []) :
-        [],
+        []
     } : {
       dueAt: dayjs().add(1, 'day').toDate(),
       method: HttpMethods[0],
@@ -105,7 +105,7 @@ const Create = () => {
 
         history.push(`/${id}`);
       })();
-    },
+    }
   });
 
   const handleDueAtChange = value =>
@@ -134,7 +134,7 @@ const Create = () => {
     setFieldValue('headers', headers);
   };
 
-  return(
+  return (
     <>
       <Breadcrumbs className={styles.breadcrumbs}>
         <RouterLink to="/">
@@ -237,10 +237,10 @@ const Create = () => {
                             required
                           />
                         </Grid>
-                        <Grid item >
+                        <Grid item>
                           <IconButton type="button"
                                       onClick={handleRemoveClick(index)}>
-                            <DeleteIcon />
+                            <DeleteIcon/>
                           </IconButton>
                         </Grid>
                       </Grid>
@@ -252,7 +252,7 @@ const Create = () => {
                     type="button"
                     variant="outlined"
                     color="primary"
-                    startIcon={<AddCircleOutlineIcon />}
+                    startIcon={<AddCircleOutlineIcon/>}
                     size="medium"
                     fullWidth
                     onClick={handleAddClick}

@@ -9,8 +9,8 @@ const Style = makeStyles(() => {
       textAlign: 'center',
       top: '50%',
       transform: 'translate(-50%, -50%)',
-      verticalAlign: 'middle',
-    },
+      verticalAlign: 'middle'
+    }
   };
 });
 

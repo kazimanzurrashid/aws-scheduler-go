@@ -68,7 +68,7 @@ const List = () => {
   const [startKey, setStartKey] = useState(null);
   const table = useRef();
 
-  const sort = (target, { column, direction}) => {
+  const sort = (target, { column, direction }) => {
     const sorted = target.sort((x, y) => {
       if (x[column] === y[column]) {
         return 0;
@@ -130,7 +130,7 @@ const List = () => {
         sort(schedules, { column: orderBy, direction });
         setStartKey(nextKey);
       })();
-    },
+    }
   });
 
   const handleDateChange = name => value =>
@@ -165,7 +165,7 @@ const List = () => {
 
     setOrderBy(localColumn);
     setDirection(localDirection);
-    sort(list,{ column: localColumn, direction: localDirection });
+    sort(list, { column: localColumn, direction: localDirection });
   };
 
   const handleRowClick = item => {

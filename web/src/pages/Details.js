@@ -153,7 +153,7 @@ const Details = () => {
                   item && (
                     <Tooltip title="Clone">
                       <IconButton onClick={handleCopy}>
-                        <CloneIcon />
+                        <CloneIcon/>
                       </IconButton>
                     </Tooltip>
                   )

@@ -1,9 +1,4 @@
-import {
-  BrowserRouter,
-  Link,
-  Switch,
-  Route
-} from 'react-router-dom';
+import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -17,7 +12,7 @@ import Create from './pages/Create';
 import Details from './pages/Details';
 import List from './pages/List';
 
-const Styles = makeStyles((theme) =>({
+const Styles = makeStyles((theme) => ({
   toolbar: {
     '& a': {
       color: theme.palette.common.white,
