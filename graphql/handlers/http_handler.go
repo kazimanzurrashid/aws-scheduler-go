@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -30,18 +29,11 @@ func handlePlayground(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//goland:noinspection HttpUrlsUsage
-	if err := playgroundTemplate.Execute(w, struct {
+	_ = playgroundTemplate.Execute(w, struct {
 		Endpoint string
 	}{
-		Endpoint: fmt.Sprintf("http://%s/graphql", r.Host),
-	}); err != nil {
-		httpStatus(http.StatusInternalServerError, w)
-		return
-	}
-
-	w.Header().Set("Cache-Control", "private,max-age=31536000,immutable")
-	w.Header().Set("Content-Type", "text/html;charset=utf-8")
+		Endpoint: "/graphql",
+	})
 }
 
 func handleGraphQL(w http.ResponseWriter, r *http.Request) {

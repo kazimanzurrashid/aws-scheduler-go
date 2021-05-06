@@ -46,10 +46,7 @@ func Lambda(
 		if err := playgroundTemplate.Execute(&buffer, struct {
 			Endpoint string
 		}{
-			Endpoint: fmt.Sprintf(
-				"https://%s/%s/graphql",
-				req.RequestContext.DomainName,
-				req.RequestContext.Stage),
+			Endpoint: fmt.Sprintf("/%s/graphql", req.RequestContext.Stage),
 		}); err != nil {
 			return lambdaStatus(http.StatusInternalServerError, err)
 		}
@@ -57,8 +54,7 @@ func Lambda(
 		return events.APIGatewayV2HTTPResponse{
 			StatusCode: http.StatusOK,
 			Headers: map[string]string{
-				"Cache-Control": "private,max-age=31536000,immutable",
-				"Content-Type":  "text/html;charset=utf-8",
+				"Content-Type": "text/html;charset=utf-8",
 			},
 			Body: buffer.String(),
 		}, nil
