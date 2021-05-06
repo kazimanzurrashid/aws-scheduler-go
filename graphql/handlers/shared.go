@@ -7,7 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -108,10 +110,10 @@ func executeGraphQL(ctx context.Context, statement string) (interface{}, int) {
 }
 
 func init() {
-	basePath, _ := os.Getwd()
-	playgroundTemplate = template.Must(
-		template.ParseFiles(
-			filepath.Join(basePath, "./pages/playground.html")))
+	_, currentFile, _, _ := runtime.Caller(0)
+	templatePath := filepath.Join(
+		path.Dir(currentFile), "./../pages/playground.html")
+	playgroundTemplate = template.Must(template.ParseFiles(templatePath))
 
 	ses := session.Must(session.NewSession())
 
