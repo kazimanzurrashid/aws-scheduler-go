@@ -1,8 +1,13 @@
+const Endpoint = process.env.NODE_ENV === 'production' ?
+  'https://nokxy6r6uf.execute-api.ap-south-1.amazonaws.com/v1/graphql' :
+  'http://localhost:8080/graphql';
+
 const request = async (operation, body) => {
-  const response = await fetch('https://nokxy6r6uf.execute-api.ap-south-1.amazonaws.com/v1/graphql', {
+  const response = await fetch(Endpoint, {
     method: 'POST',
     mode: 'cors',
     headers: {
+      Accept: 'application/json',
       'Content-Type': 'application/json;charset=utf-8'
     },
     body: JSON.stringify(body)

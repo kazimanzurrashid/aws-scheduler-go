@@ -111,7 +111,7 @@ func init() {
 	basePath, _ := os.Getwd()
 	playgroundTemplate = template.Must(
 		template.ParseFiles(
-			filepath.Join(basePath, "./../pages/playground.html")))
+			filepath.Join(basePath, "./pages/playground.html")))
 
 	ses := session.Must(session.NewSession())
 
