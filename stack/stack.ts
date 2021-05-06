@@ -105,7 +105,7 @@ class SchedulerStack extends Stack {
           CorsHttpMethod.POST,
           CorsHttpMethod.OPTIONS
         ],
-        allowHeaders: ['Content-Type'],
+        allowHeaders: ['Authorization,Content-Type'],
         maxAge: Duration.days(365)
       },
       createDefaultStage: false

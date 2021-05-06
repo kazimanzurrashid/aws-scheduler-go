@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"testing"
@@ -9,5 +9,5 @@ import (
 
 func TestGraphql(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Main Suite")
+	RunSpecs(t, "Handlers Suite")
 }

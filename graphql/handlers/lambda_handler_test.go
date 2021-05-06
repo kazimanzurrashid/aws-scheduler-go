@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -17,7 +17,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("handler", func() {
+var _ = Describe("Lambda", func() {
 	BeforeEach(func() {
 		f := api.NewFactory(&fakeStorage{})
 		s, _ := f.Schema()
@@ -50,32 +50,24 @@ var _ = Describe("handler", func() {
 		})
 
 		Context("valid", func() {
-			var (
-				gatewayResponse events.APIGatewayV2HTTPResponse
-				gatewayError    error
-			)
+			var gatewayResponse events.APIGatewayV2HTTPResponse
 
 			BeforeEach(func() {
-				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+				gatewayResponse, _ = Lambda(context.TODO(), gatewayRequest)
 			})
 
-			It("returns http status code OK", func() {
+			It("returns status code OK", func() {
 				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusOK))
 			})
 
 			It("returns graphql response", func() {
 				Expect(gatewayResponse.Body).NotTo(Equal(""))
 			})
-
-			It("does not return any error", func() {
-				Expect(gatewayError).To(BeNil())
-			})
 		})
 
 		Context("invalid", func() {
 			var (
 				gatewayResponse events.APIGatewayV2HTTPResponse
-				gatewayError    error
 				realUnmarshal   unmarshal
 			)
 
@@ -86,15 +78,12 @@ var _ = Describe("handler", func() {
 					return fmt.Errorf("unmarshal error")
 				}
 
-				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+				gatewayResponse, _ = Lambda(context.TODO(), gatewayRequest)
 			})
 
-			It("returns http status code Internal Server Error", func() {
-				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusInternalServerError))
-			})
-
-			It("returns error", func() {
-				Expect(gatewayError).NotTo(BeNil())
+			It("returns status code Bad Request", func() {
+				Expect(gatewayResponse.StatusCode).To(
+					Equal(http.StatusBadRequest))
 			})
 
 			AfterEach(func() {
@@ -137,32 +126,24 @@ var _ = Describe("handler", func() {
 		})
 
 		Context("valid", func() {
-			var (
-				gatewayResponse events.APIGatewayV2HTTPResponse
-				gatewayError    error
-			)
+			var gatewayResponse events.APIGatewayV2HTTPResponse
 
 			BeforeEach(func() {
-				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+				gatewayResponse, _ = Lambda(context.TODO(), gatewayRequest)
 			})
 
-			It("returns http status code OK", func() {
+			It("returns status code OK", func() {
 				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusOK))
 			})
 
 			It("returns graphql response", func() {
 				Expect(gatewayResponse.Body).NotTo(Equal(""))
 			})
-
-			It("does not return any error", func() {
-				Expect(gatewayError).To(BeNil())
-			})
 		})
 
 		Context("invalid", func() {
 			var (
 				gatewayResponse events.APIGatewayV2HTTPResponse
-				gatewayError    error
 				realUnmarshal   unmarshal
 			)
 
@@ -173,15 +154,12 @@ var _ = Describe("handler", func() {
 					return fmt.Errorf("unmarshal error")
 				}
 
-				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+				gatewayResponse, _ = Lambda(context.TODO(), gatewayRequest)
 			})
 
-			It("returns http status code Internal Server Error", func() {
-				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusInternalServerError))
-			})
-
-			It("returns error", func() {
-				Expect(gatewayError).NotTo(BeNil())
+			It("returns status code Bad Request", func() {
+				Expect(gatewayResponse.StatusCode).To(
+					Equal(http.StatusBadRequest))
 			})
 
 			AfterEach(func() {
@@ -192,10 +170,7 @@ var _ = Describe("handler", func() {
 
 	Context("any request", func() {
 		Context("empty body", func() {
-			var (
-				gatewayResponse events.APIGatewayV2HTTPResponse
-				gatewayError    error
-			)
+			var gatewayResponse events.APIGatewayV2HTTPResponse
 
 			BeforeEach(func() {
 				gatewayRequest := events.APIGatewayV2HTTPRequest{
@@ -207,23 +182,17 @@ var _ = Describe("handler", func() {
 						},
 					},
 				}
-				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+				gatewayResponse, _ = Lambda(context.TODO(), gatewayRequest)
 			})
 
-			It("returns http status code Bad Request", func() {
-				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusBadRequest))
-			})
-
-			It("does not return any error", func() {
-				Expect(gatewayError).To(BeNil())
+			It("returns status code Bad Request", func() {
+				Expect(gatewayResponse.StatusCode).To(
+					Equal(http.StatusBadRequest))
 			})
 		})
 
 		Context("unrecognized body", func() {
-			var (
-				gatewayResponse events.APIGatewayV2HTTPResponse
-				gatewayError    error
-			)
+			var gatewayResponse events.APIGatewayV2HTTPResponse
 
 			BeforeEach(func() {
 				gatewayRequest := events.APIGatewayV2HTTPRequest{
@@ -237,15 +206,12 @@ var _ = Describe("handler", func() {
 					},
 				}
 
-				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+				gatewayResponse, _ = Lambda(context.TODO(), gatewayRequest)
 			})
 
-			It("returns http status code Bad Request", func() {
-				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusBadRequest))
-			})
-
-			It("does not return any error", func() {
-				Expect(gatewayError).To(BeNil())
+			It("returns status code Bad Request", func() {
+				Expect(gatewayResponse.StatusCode).To(Equal(
+					http.StatusBadRequest))
 			})
 		})
 
@@ -283,11 +249,14 @@ var _ = Describe("handler", func() {
 					},
 				}
 
-				gatewayResponse, gatewayError = handler(context.TODO(), gatewayRequest)
+				gatewayResponse, gatewayError = Lambda(
+					context.TODO(),
+					gatewayRequest)
 			})
 
-			It("returns http status code Internal Server Error", func() {
-				Expect(gatewayResponse.StatusCode).To(Equal(http.StatusInternalServerError))
+			It("returns status code Internal Server Error", func() {
+				Expect(gatewayResponse.StatusCode).To(
+					Equal(http.StatusInternalServerError))
 			})
 
 			It("returns error", func() {
