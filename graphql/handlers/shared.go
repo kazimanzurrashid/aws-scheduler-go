@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"github.com/joho/godotenv"
 	"html/template"
 	"log"
 	"net/http"
@@ -18,7 +19,6 @@ import (
 	"github.com/aws/aws-xray-sdk-go/xray"
 
 	"github.com/graphql-go/graphql"
-
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/api"
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/storage"
 )
@@ -119,8 +119,18 @@ func init() {
 				filepath.Join(basePath, "/pages/playground.html")))
 	} else {
 		_, currentFile, _, _ := runtime.Caller(0)
-		templatePath := filepath.Join(
-			path.Dir(currentFile), "./../pages/playground.html")
+		currentDir := path.Dir(currentFile)
+
+		envFile := filepath.Join(currentDir, "./../.env")
+
+		if _, err := os.Stat(envFile); err == nil {
+			if err := godotenv.Load(envFile); err != nil {
+				log.Fatalf("env file error: %v", err)
+				return
+			}
+		}
+
+		templatePath := filepath.Join(currentDir, "./../pages/playground.html")
 		playgroundTemplate = template.Must(template.ParseFiles(templatePath))
 	}
 

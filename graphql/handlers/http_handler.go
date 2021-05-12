@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -83,5 +85,5 @@ func Http() {
 	http.HandleFunc("/graphql", handleGraphQL)
 	http.HandleFunc("/", handlePlayground)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil))
 }
