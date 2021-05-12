@@ -6,6 +6,8 @@ import DateFnsUtils from '@date-io/dayjs';
 import { Fragment } from 'react';
 import { Link as RouterLink, useHistory, useLocation } from 'react-router-dom';
 
+import { useFormik } from 'formik';
+
 import { makeStyles } from '@material-ui/core/styles';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import MuiLink from '@material-ui/core/Link';
@@ -20,8 +22,6 @@ import Button from '@material-ui/core/Button';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-
-import { useFormik } from 'formik';
 
 import Api from '../api';
 
@@ -40,30 +40,18 @@ const Styles = makeStyles(theme => ({
 }));
 
 const Create = () => {
-  const formSchema = yup.object({
-    dueAt: yup.date().label('Due At').required().min(dayjs()
-      .add(1, 'minute').toDate(), 'Due At must be in future.'),
-    url: yup.string().label('URL').required().url(),
-    method: yup.string().label('Method').required().oneOf(HttpMethods),
-    headers: yup.array().of(yup.object({
-      key: yup.string().label('Key').required(),
-      value: yup.string().label('Value').required()
-    })),
-    body: yup.string().label('Body').optional()
-  });
-
   const styles = Styles();
   const history = useHistory();
   const { state } = useLocation();
 
   const {
-    values,
-    setFieldValue,
     errors,
-    touched,
-    isSubmitting,
+    handleChange,
     handleSubmit,
-    handleChange
+    isSubmitting,
+    setFieldValue,
+    values,
+    touched
   } = useFormik({
     initialValues: state && state.source ? {
       ...state.source,
@@ -83,7 +71,17 @@ const Create = () => {
       headers: [],
       body: ''
     },
-    validationSchema: formSchema,
+    validationSchema: yup.object({
+      dueAt: yup.date().label('Due At').required().min(dayjs()
+        .add(1, 'minute').toDate(), 'Due At must be in future.'),
+      url: yup.string().label('URL').required().url(),
+      method: yup.string().label('Method').required().oneOf(HttpMethods),
+      headers: yup.array().of(yup.object({
+        key: yup.string().label('Key').required(),
+        value: yup.string().label('Value').required()
+      })),
+      body: yup.string().label('Body').optional()
+    }),
     onSubmit: fields => {
       (async () => {
         const model = {

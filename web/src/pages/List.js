@@ -1,9 +1,8 @@
 import debounce from 'lodash.debounce';
 import get from 'lodash.get';
-import * as yup from 'yup';
-
 import dayjs from 'dayjs';
 import DateFnsUtils from '@date-io/dayjs';
+import * as yup from 'yup';
 
 import { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -33,12 +32,6 @@ import Api from '../api';
 import Spinner from '../components/Spinner';
 
 const Statuses = ['-', 'IDLE', 'QUEUED', 'SUCCEEDED', 'CANCELED', 'FAILED'];
-
-const formSchema = yup.object({
-  status: yup.string().label('Method').optional().oneOf(Statuses),
-  from: yup.date().label('From date').nullable().optional(),
-  to: yup.date().label('To date').nullable().optional()
-});
 
 const Styles = makeStyles(theme => ({
   breadcrumbs: {
@@ -107,7 +100,11 @@ const List = () => {
       from: null,
       to: null
     },
-    validationSchema: formSchema,
+    validationSchema: yup.object({
+      status: yup.string().label('Method').optional().oneOf(Statuses),
+      from: yup.date().label('From date').nullable().optional(),
+      to: yup.date().label('To date').nullable().optional()
+    }),
     onSubmit: fields => {
       (async () => {
         const model = {};
@@ -155,7 +152,6 @@ const List = () => {
   };
 
   const handleSort = column => () => {
-    const localColumn = column;
     let localDirection;
 
     if (column === orderBy) {
@@ -164,14 +160,12 @@ const List = () => {
       localDirection = 'asc';
     }
 
-    setOrderBy(localColumn);
+    setOrderBy(column);
     setDirection(localDirection);
-    sort(list, { column: localColumn, direction: localDirection });
+    sort(list, { column, direction: localDirection });
   };
 
-  const handleRowClick = item => {
-    history.push(`/${item.id}`);
-  };
+  const handleRowClick = item => history.push(`/${item.id}`);
 
   const handleScroll = debounce((e) => {
     if (!startKey) {
@@ -210,7 +204,7 @@ const List = () => {
       sort(updatedList, { column: orderBy, direction });
       setStartKey(nextKey);
     })();
-  }, 300);
+  }, 400);
 
   return (
     <>

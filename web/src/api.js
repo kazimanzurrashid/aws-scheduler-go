@@ -1,5 +1,5 @@
 const Endpoint = process.env.NODE_ENV === 'production' ?
-  'https://nokxy6r6uf.execute-api.ap-south-1.amazonaws.com/v1/graphql' :
+  'https://xxxxxxxxxx.execute-api.ap-south-1.amazonaws.com/v1/graphql' :
   'http://localhost:8080/graphql';
 
 const request = async (operation, body) => {
