@@ -110,16 +110,25 @@ func executeGraphQL(ctx context.Context, statement string) (interface{}, int) {
 }
 
 func init() {
-	_, currentFile, _, _ := runtime.Caller(0)
-	templatePath := filepath.Join(
-		path.Dir(currentFile), "./../pages/playground.html")
-	playgroundTemplate = template.Must(template.ParseFiles(templatePath))
+	isRunningInLambda := os.Getenv("LAMBDA_TASK_ROOT") != ""
+
+	if isRunningInLambda {
+		basePath, _ := os.Getwd()
+		playgroundTemplate = template.Must(
+			template.ParseFiles(
+				filepath.Join(basePath, "/pages/playground.html")))
+	} else {
+		_, currentFile, _, _ := runtime.Caller(0)
+		templatePath := filepath.Join(
+			path.Dir(currentFile), "./../pages/playground.html")
+		playgroundTemplate = template.Must(template.ParseFiles(templatePath))
+	}
 
 	ses := session.Must(session.NewSession())
 
 	ddbc := dynamodb.New(ses)
 
-	if os.Getenv("LAMBDA_TASK_ROOT") != "" {
+	if isRunningInLambda {
 		xray.AWS(ddbc.Client)
 	}
 

@@ -43,7 +43,7 @@ class SchedulerStack extends Stack {
 
     const schedulerTable = new Table(this, 'Table', {
       tableName: `${props.name}-${props.version}`,
-      removalPolicy: RemovalPolicy.DESTROY,
+      removalPolicy: RemovalPolicy.RETAIN,
       billingMode: BillingMode.PAY_PER_REQUEST,
       pointInTimeRecovery: false,
       partitionKey: {
