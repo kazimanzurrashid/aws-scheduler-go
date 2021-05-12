@@ -101,11 +101,11 @@ class SchedulerStack extends Stack {
       corsPreflight: {
         allowOrigins: ['*'],
         allowMethods: [
-          CorsHttpMethod.GET,
-          CorsHttpMethod.POST,
-          CorsHttpMethod.OPTIONS
+          CorsHttpMethod.POST
         ],
-        allowHeaders: ['Authorization,Content-Type'],
+        allowHeaders: [
+          'Content-Type'
+        ],
         maxAge: Duration.days(365)
       },
       createDefaultStage: false
@@ -178,7 +178,7 @@ const app = new App();
 new SchedulerStack(app, 'scheduler-v1', {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
-    region: process.env.CDK_DEFAULT_REGION
+    region: 'ap-south-1'//process.env.CDK_DEFAULT_REGION
   },
   name: 'scheduler',
   version: 'v1'
