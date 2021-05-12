@@ -2,8 +2,10 @@
 
 [![GitHub](https://img.shields.io/github/license/kazimanzurrashid/aws-scheduler-go)](https://opensource.org/licenses/MIT)
 
-AWS Scheduler is low a cost scheduling system that runs on AWS Serverless
+AWS Scheduler is a low cost scheduling system that runs on AWS Serverless
 services.
+
+*WIP*
 
 ![Architecture](media/architecture.png)
 
