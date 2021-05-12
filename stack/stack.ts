@@ -178,7 +178,7 @@ const app = new App();
 new SchedulerStack(app, 'scheduler-v1', {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
-    region: 'ap-south-1'//process.env.CDK_DEFAULT_REGION
+    region: process.env.CDK_DEFAULT_REGION
   },
   name: 'scheduler',
   version: 'v1'
