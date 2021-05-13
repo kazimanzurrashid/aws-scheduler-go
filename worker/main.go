@@ -23,8 +23,7 @@ var (
 )
 
 func handler(ctx context.Context, e events.DynamoDBEvent) error {
-	var uis []*services.UpdateInput
-	var wg sync.WaitGroup
+	var queuedRecords []events.DynamoDBEventRecord
 
 	for _, record := range e.Records {
 		if record.EventName != "MODIFY" {
@@ -35,8 +34,20 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			continue
 		}
 
+		queuedRecords = append(queuedRecords, record)
+	}
+
+	if len(queuedRecords) == 0 {
+		return nil
+	}
+
+	var wg sync.WaitGroup
+	uis := make([]*services.UpdateInput, len(queuedRecords))
+
+	for i, record := range queuedRecords {
 		wg.Add(1)
-		go func(attrs map[string]events.DynamoDBAttributeValue) {
+
+		go func(attrs map[string]events.DynamoDBAttributeValue, index int) {
 			defer wg.Done()
 
 			ri := services.CreateRequestInput(attrs)
@@ -50,15 +61,11 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			ui.Result = aws.String(ro.Result)
 			ui.CompletedAt = aws.Int64(time.Now().Unix())
 
-			uis = append(uis, ui)
-		}(record.Change.NewImage)
+			uis[index] = ui
+		}(record.Change.NewImage, i)
 	}
 
 	wg.Wait()
-
-	if len(uis) == 0 {
-		return nil
-	}
 
 	return database.Update(ctx, uis)
 }

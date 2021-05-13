@@ -189,7 +189,7 @@ func (srv *Database) List(ctx context.Context, input ListInput) (*List, error) {
 		ReturnConsumedCapacity:    aws.String(dynamodb.ReturnConsumedCapacityNone),
 		ExpressionAttributeNames:  map[string]*string{},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{},
-		ScanIndexForward:          aws.Bool(true),
+		ScanIndexForward:          aws.Bool(false),
 	}
 
 	if input.Status != "" {

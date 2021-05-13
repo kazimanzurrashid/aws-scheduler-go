@@ -57,7 +57,7 @@ const List = () => {
   const history = useHistory();
 
   const [orderBy, setOrderBy] = useState('dueAt');
-  const [direction, setDirection] = useState('asc');
+  const [direction, setDirection] = useState('desc');
   const [list, setList] = useState(null);
   const [startKey, setStartKey] = useState(null);
   const table = useRef();
