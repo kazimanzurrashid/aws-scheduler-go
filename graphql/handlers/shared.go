@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"github.com/joho/godotenv"
 	"html/template"
 	"log"
 	"net/http"
@@ -19,6 +18,8 @@ import (
 	"github.com/aws/aws-xray-sdk-go/xray"
 
 	"github.com/graphql-go/graphql"
+	"github.com/joho/godotenv"
+
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/api"
 	"github.com/kazimanzurrashid/aws-scheduler-go/graphql/storage"
 )
@@ -110,13 +111,13 @@ func executeGraphQL(ctx context.Context, statement string) (interface{}, int) {
 }
 
 func init() {
-	isRunningInLambda := os.Getenv("LAMBDA_TASK_ROOT") != ""
+	inLambda := os.Getenv("LAMBDA_TASK_ROOT") != ""
 
-	if isRunningInLambda {
-		basePath, _ := os.Getwd()
+	if inLambda {
+		currentDir, _ := os.Getwd()
 		playgroundTemplate = template.Must(
 			template.ParseFiles(
-				filepath.Join(basePath, "/pages/playground.html")))
+				filepath.Join(currentDir, "/pages/playground.html")))
 	} else {
 		_, currentFile, _, _ := runtime.Caller(0)
 		currentDir := path.Dir(currentFile)
@@ -138,7 +139,7 @@ func init() {
 
 	ddbc := dynamodb.New(ses)
 
-	if isRunningInLambda {
+	if inLambda {
 		xray.AWS(ddbc.Client)
 	}
 

@@ -41,7 +41,7 @@ const Styles = makeStyles(theme => ({
     marginBottom: theme.spacing(2)
   },
   records: {
-    maxHeight: 650,
+    maxHeight: 750,
     '& tbody tr': {
       cursor: 'pointer'
     }

@@ -5,7 +5,10 @@
 AWS Scheduler is a low cost scheduling system that runs on AWS Serverless
 services.
 
-*WIP*
+## Background
+_WIP_
+
+## Architecture
 
 ![Architecture](media/architecture.png)
 
