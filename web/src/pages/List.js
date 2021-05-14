@@ -175,7 +175,7 @@ const List = () => {
     const target = e.target;
 
     // noinspection JSUnresolvedVariable
-    if (target.scrollTop + target.offsetHeight + 150 <= table.current.offsetHeight) {
+    if (target.scrollTop + target.offsetHeight + 218 <= table.current.offsetHeight) {
       return;
     }
 

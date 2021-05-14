@@ -24,7 +24,7 @@ func CreateRequestInput(
 		}
 	} else {
 		for k, v := range map[string]string{
-			"accept":       "application/json;charset=utf-8",
+			"accept":       "application/json",
 			"content-type": "application/json;charset=utf-8",
 		} {
 			input.Headers[k] = v
