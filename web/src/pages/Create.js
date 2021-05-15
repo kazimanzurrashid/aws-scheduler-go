@@ -71,12 +71,12 @@ const Create = () => {
       headers: [],
       body: ''
     },
-    validationSchema: yup.object({
-      dueAt: yup.date().label('Due At').required().min(dayjs()
-        .add(1, 'minute').toDate(), 'Due At must be in future.'),
+    validationSchema: yup.object().shape({
+      dueAt: yup.date().label('Due At').required()
+        .min(dayjs().toDate(), 'Due At must be in future.'),
       url: yup.string().label('URL').required().url(),
       method: yup.string().label('Method').required().oneOf(HttpMethods),
-      headers: yup.array().of(yup.object({
+      headers: yup.array().of(yup.object().shape({
         key: yup.string().label('Key').required(),
         value: yup.string().label('Value').required()
       })),

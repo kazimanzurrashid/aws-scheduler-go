@@ -56,13 +56,14 @@ const List = () => {
   const styles = Styles();
   const history = useHistory();
 
-  const [orderBy, setOrderBy] = useState('dueAt');
-  const [direction, setDirection] = useState('desc');
+  const [toMinDate, setToMinDate] = useState(dayjs().toDate());
+  const [sortColumn, setSortColumn] = useState('dueAt');
+  const [sortDirection, setSortDirection] = useState('desc');
   const [list, setList] = useState(null);
   const [startKey, setStartKey] = useState(null);
   const table = useRef();
 
-  const sort = (target, { column, direction }) => {
+  const sort = (target, column, direction) => {
     const sorted = target.sort((x, y) => {
       if (x[column] === y[column]) {
         return 0;
@@ -87,23 +88,24 @@ const List = () => {
   }, []);
 
   const {
-    values,
-    setFieldValue,
     errors,
-    touched,
-    isSubmitting,
+    handleChange,
     handleSubmit,
-    handleChange
+    isSubmitting,
+    setFieldValue,
+    values,
+    touched
   } = useFormik({
     initialValues: {
       status: Statuses[0],
       from: null,
       to: null
     },
-    validationSchema: yup.object({
+    validationSchema: yup.object().shape({
       status: yup.string().label('Method').optional().oneOf(Statuses),
       from: yup.date().label('From date').nullable().optional(),
       to: yup.date().label('To date').nullable().optional()
+        .min(yup.ref('from'), 'To must be same or after from date')
     }),
     onSubmit: fields => {
       (async () => {
@@ -125,14 +127,18 @@ const List = () => {
         }
 
         const { schedules, nextKey } = await Api.list(model);
-        sort(schedules, { column: orderBy, direction });
+        sort(schedules, { column: sortColumn, direction: sortDirection });
         setStartKey(nextKey);
       })();
     }
   });
 
-  const handleDateChange = name => value =>
-    setFieldValue(name, value, true);
+  const handleDateChange = name => value => {
+    if (name === 'from' && value) {
+      setToMinDate(value.toDate());
+    }
+    return setFieldValue(name, value, true);
+  };
 
   const showError = name =>
     !!get(errors, name) && (!!get(touched, name) || isSubmitting);
@@ -146,7 +152,7 @@ const List = () => {
 
     (async () => {
       const { schedules, nextKey } = await Api.list();
-      sort(schedules, { column: orderBy, direction });
+      sort(schedules, { column: sortColumn, direction: sortDirection });
       setStartKey(nextKey);
     })();
   };
@@ -154,15 +160,15 @@ const List = () => {
   const handleSort = column => () => {
     let localDirection;
 
-    if (column === orderBy) {
-      localDirection = direction === 'desc' ? 'asc' : 'desc';
+    if (column === sortColumn) {
+      localDirection = sortDirection === 'desc' ? 'asc' : 'desc';
     } else {
       localDirection = 'asc';
     }
 
-    setOrderBy(column);
-    setDirection(localDirection);
-    sort(list, { column, direction: localDirection });
+    setSortColumn(column);
+    setSortDirection(localDirection);
+    sort(list, column, localDirection);
   };
 
   const handleRowClick = item => history.push(`/${item.id}`);
@@ -175,7 +181,7 @@ const List = () => {
     const target = e.target;
 
     // noinspection JSUnresolvedVariable
-    if (target.scrollTop + target.offsetHeight + 218 <= table.current.offsetHeight) {
+    if (target.scrollTop + target.offsetHeight + (72 * 3) <= table.current.offsetHeight) {
       return;
     }
 
@@ -201,7 +207,7 @@ const List = () => {
 
       const { schedules, nextKey } = await Api.list(model);
       const updatedList = [...list, ...schedules];
-      sort(updatedList, { column: orderBy, direction });
+      sort(updatedList, sortColumn, sortDirection);
       setStartKey(nextKey);
     })();
   }, 400);
@@ -238,11 +244,12 @@ const List = () => {
                 </Grid>
                 <Grid item md={4} xs={12}>
                   <DatePicker
-                    id="fromDate"
-                    name="fromDate"
+                    id="from"
+                    name="from"
                     label="From"
                     inputVariant="outlined"
                     variant="inline"
+                    format="Do MMMM, YYYY"
                     value={values.from}
                     onChange={handleDateChange('from')}
                     error={showError('from')}
@@ -253,11 +260,13 @@ const List = () => {
                 </Grid>
                 <Grid item md={4} xs={12}>
                   <DatePicker
-                    id="toDate"
-                    name="toDate"
+                    id="to"
+                    name="to"
                     label="To"
                     inputVariant="outlined"
                     variant="inline"
+                    format="Do MMMM, YYYY"
+                    minDate={toMinDate}
                     value={values.to}
                     onChange={handleDateChange('to')}
                     error={showError('to')}
@@ -286,40 +295,40 @@ const List = () => {
                 <TableRow>
                   <TableCell>
                     <TableSortLabel
-                      active={orderBy === 'id'}
-                      direction={direction}
+                      active={sortColumn === 'id'}
+                      direction={sortDirection}
                       onClick={handleSort('id')}>
                       ID
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
                     <TableSortLabel
-                      active={orderBy === 'dueAt'}
-                      direction={direction}
+                      active={sortColumn === 'dueAt'}
+                      direction={sortDirection}
                       onClick={handleSort('dueAt')}>
                       Due At
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
                     <TableSortLabel
-                      active={orderBy === 'method'}
-                      direction={direction}
+                      active={sortColumn === 'method'}
+                      direction={sortDirection}
                       onClick={handleSort('method')}>
                       Method
                     </TableSortLabel>
                   </TableCell>
                   <TableCell className={styles.urlColumn}>
                     <TableSortLabel
-                      active={orderBy === 'url'}
-                      direction={direction}
+                      active={sortColumn === 'url'}
+                      direction={sortDirection}
                       onClick={handleSort('url')}>
                       URL
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
                     <TableSortLabel
-                      active={orderBy === 'status'}
-                      direction={direction}
+                      active={sortColumn === 'status'}
+                      direction={sortDirection}
                       onClick={handleSort('status')}>
                       Status
                     </TableSortLabel>
