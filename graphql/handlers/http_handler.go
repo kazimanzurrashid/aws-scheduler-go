@@ -42,9 +42,7 @@ func handleGraphQL(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST")
-		w.Header().Set(
-			"Access-Control-Allow-Headers",
-			"Authorization,Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		w.Header().Set("Access-Control-Max-Age", "31536000")
 		return
 	}

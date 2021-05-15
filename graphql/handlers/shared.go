@@ -84,6 +84,7 @@ func executeGraphQL(ctx context.Context, statement string) (interface{}, int) {
 		var wg sync.WaitGroup
 
 		for i, p := range payloads {
+			wg.Add(1)
 			go func(payload request, index int) {
 				defer wg.Done()
 
@@ -97,7 +98,6 @@ func executeGraphQL(ctx context.Context, statement string) (interface{}, int) {
 
 				rets[index] = out
 			}(p, i)
-			wg.Add(1)
 		}
 
 		wg.Wait()
@@ -126,7 +126,7 @@ func init() {
 
 		if _, err := os.Stat(envFile); err == nil {
 			if err := godotenv.Load(envFile); err != nil {
-				log.Fatalf("env file error: %v", err)
+				log.Fatalf("env file load error: %v", err)
 				return
 			}
 		}
