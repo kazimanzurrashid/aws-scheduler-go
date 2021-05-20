@@ -137,7 +137,7 @@ const List = () => {
     if (name === 'from' && value) {
       setToMinDate(value.toDate());
     }
-    return setFieldValue(name, value, true);
+    return setFieldValue(name, value);
   };
 
   const showError = name =>
