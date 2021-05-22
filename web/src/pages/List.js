@@ -107,29 +107,27 @@ const List = () => {
       to: yup.date().label('To date').nullable().optional()
         .min(yup.ref('from'), 'To must be same or after from date')
     }),
-    onSubmit: fields => {
-      (async () => {
-        const model = {};
+    onSubmit: async fields => {
+      const model = {};
 
-        if (fields.status !== Statuses[0]) {
-          model.status = fields.status;
-        }
+      if (fields.status !== Statuses[0]) {
+        model.status = fields.status;
+      }
 
-        if (fields.from && fields.to) {
-          model.dueAt = {
-            from: dayjs(fields.from)
-              .startOf('day')
-              .toISOString(),
-            to: dayjs(fields.to)
-              .endOf('day')
-              .toISOString()
-          };
-        }
+      if (fields.from && fields.to) {
+        model.dueAt = {
+          from: dayjs(fields.from)
+            .startOf('day')
+            .toISOString(),
+          to: dayjs(fields.to)
+            .endOf('day')
+            .toISOString()
+        };
+      }
 
-        const { schedules, nextKey } = await Api.list(model);
-        sort(schedules, { column: sortColumn, direction: sortDirection });
-        setStartKey(nextKey);
-      })();
+      const { schedules, nextKey } = await Api.list(model);
+      sort(schedules, { column: sortColumn, direction: sortDirection });
+      setStartKey(nextKey);
     }
   });
 
@@ -145,16 +143,14 @@ const List = () => {
 
   const errorText = name => showError(name) ? get(errors, name) : null;
 
-  const handleClear = () => {
-    setFieldValue('status', Statuses[0], false);
-    setFieldValue('from', null, false);
-    setFieldValue('to', null, false);
+  const handleClear = async () => {
+    await setFieldValue('status', Statuses[0], false);
+    await setFieldValue('from', null, false);
+    await setFieldValue('to', null, false);
 
-    (async () => {
-      const { schedules, nextKey } = await Api.list();
-      sort(schedules, { column: sortColumn, direction: sortDirection });
-      setStartKey(nextKey);
-    })();
+    const { schedules, nextKey } = await Api.list();
+    sort(schedules, { column: sortColumn, direction: sortDirection });
+    setStartKey(nextKey);
   };
 
   const handleSort = column => () => {

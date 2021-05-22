@@ -106,8 +106,7 @@ const Create = () => {
     }
   });
 
-  const handleDueAtChange = value =>
-    setFieldValue('dueAt', value, true);
+  const handleDueAtChange = value => setFieldValue('dueAt', value);
 
   const canShowBody = () =>
     ![
