@@ -45,7 +45,7 @@ class SchedulerStack extends Stack {
       tableName: `${props.name}-${props.version}`,
       removalPolicy: RemovalPolicy.RETAIN,
       billingMode: BillingMode.PAY_PER_REQUEST,
-      pointInTimeRecovery: false,
+      pointInTimeRecovery: true,
       partitionKey: {
         name: 'id',
         type: AttributeType.STRING
