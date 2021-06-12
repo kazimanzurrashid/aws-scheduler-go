@@ -115,7 +115,7 @@ const Create = () => {
     ].includes(values.method);
 
   const showError = name =>
-    !!get(errors, name) && (!!get(touched, name) || isSubmitting);
+    Boolean(get(errors, name)) && (Boolean(get(touched, name)) || isSubmitting);
 
   const errorText = name => showError(name) ? get(errors, name) : null;
 
