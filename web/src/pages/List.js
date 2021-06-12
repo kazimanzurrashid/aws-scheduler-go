@@ -174,7 +174,7 @@ const List = () => {
       return;
     }
 
-    const target = e.target;
+    const { target } = e;
 
     // noinspection JSUnresolvedVariable
     if (target.scrollTop + target.offsetHeight + (72 * 3) <= table.current.offsetHeight) {
@@ -333,7 +333,7 @@ const List = () => {
               </TableHead>
               <TableBody>
                 {list.map(item => (
-                  <TableRow key={item.id} hover={true}
+                  <TableRow key={item.id} hover
                             onClick={() => handleRowClick(item)}>
                     <TableCell>{item.id}</TableCell>
                     <TableCell>

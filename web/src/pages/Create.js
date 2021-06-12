@@ -120,13 +120,13 @@ const Create = () => {
   const errorText = name => showError(name) ? get(errors, name) : null;
 
   const handleRemoveClick = index => () => {
-    const headers = values.headers;
+    const { headers } = values;
     headers.splice(index, 1);
     setFieldValue('headers', headers);
   };
 
   const handleAddClick = () => {
-    const headers = values.headers;
+    const { headers } = values;
     headers.push({ key: '', value: '' });
     setFieldValue('headers', headers);
   };
@@ -151,7 +151,7 @@ const Create = () => {
                     name="dueAt"
                     label="Due At"
                     inputVariant="outlined"
-                    disablePast={true}
+                    disablePast
                     minDate={dayjs().toDate()}
                     value={values.dueAt}
                     onChange={handleDueAtChange}

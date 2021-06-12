@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -39,5 +40,9 @@ const CopyToClipboardButton = ({ value }) => {
     </Tooltip>
   );
 };
+
+CopyToClipboardButton.propTypes = {
+  name: PropTypes.string.isRequired
+}
 
 export default CopyToClipboardButton;
