@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-xray-sdk-go v1.5.0
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.0
-	github.com/klauspost/compress v1.13.0 // indirect
+	github.com/klauspost/compress v1.13.1 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.13.0
 	github.com/valyala/fasthttp v1.26.0 // indirect
