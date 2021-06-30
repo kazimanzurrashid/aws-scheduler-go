@@ -35,11 +35,11 @@ const App = () => {
       <CssBaseline/>
       <AppBar position="static">
         <Toolbar className={styles.toolbar}>
-          <Typography variant="h6" component="h1" className={styles.title}>
+          <Typography className={styles.title} component="h1" variant="h6">
             <Link to="/">AWS Scheduler</Link>
           </Typography>
           <Link to="/create">
-            <Button variant="contained" color="secondary" size="medium">
+            <Button color="secondary" size="medium" variant="contained">
               Create
             </Button>
           </Link>
