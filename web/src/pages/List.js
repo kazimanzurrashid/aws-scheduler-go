@@ -162,6 +162,8 @@ const List = () => {
   const handleRowClick = item => history.push(`/${item.id}`);
 
   const handleScroll = debounce((e) => {
+    const [rowHeight, noOfRows] = [72, 3];
+
     if (!startKey) {
       return;
     }
@@ -169,7 +171,7 @@ const List = () => {
     const { target } = e;
 
     // noinspection JSUnresolvedVariable
-    if (target.scrollTop + target.offsetHeight + (72 * 3) <= table.current.offsetHeight) {
+    if (target.scrollTop + target.offsetHeight + (rowHeight * noOfRows) <= table.current.offsetHeight) {
       return;
     }
 
