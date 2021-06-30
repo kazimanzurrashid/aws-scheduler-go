@@ -150,13 +150,9 @@ const List = () => {
   };
 
   const handleSort = column => () => {
-    let localDirection;
-
-    if (column === sortColumn) {
-      localDirection = sortDirection === 'desc' ? 'asc' : 'desc';
-    } else {
-      localDirection = 'asc';
-    }
+    const localDirection = column === sortColumn && sortDirection === 'asc' ?
+      'desc' :
+      'asc';
 
     setSortColumn(column);
     setSortDirection(localDirection);
