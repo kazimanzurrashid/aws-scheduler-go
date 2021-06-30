@@ -107,13 +107,13 @@ const Details = () => {
     const dueAt = dayjs(item.dueAt);
 
     const source = {
-      dueAt: dayjs()
-        .add(1, 'day')
-        .hour(dueAt.hour())
-        .minute(dueAt.minute())
-        .second(dueAt.second())
-        .millisecond(dueAt.second())
-        .toDate(),
+      dueAt: dayjs().
+        add(1, 'day').
+        hour(dueAt.hour()).
+        minute(dueAt.minute()).
+        second(dueAt.second()).
+        millisecond(dueAt.second()).
+        toDate(),
       method: item.method,
       url: item.url,
       headers: item.headers || {},

@@ -104,8 +104,8 @@ const List = () => {
     validationSchema: yup.object().shape({
       status: yup.string().label('Method').optional().oneOf(Statuses),
       from: yup.date().label('From date').nullable().optional(),
-      to: yup.date().label('To date').nullable().optional()
-        .min(yup.ref('from'), 'To must be same or after from date')
+      to: yup.date().label('To date').nullable().optional().
+        min(yup.ref('from'), 'To must be same or after from date')
     }),
     onSubmit: async fields => {
       const model = {};
@@ -116,12 +116,8 @@ const List = () => {
 
       if (fields.from && fields.to) {
         model.dueAt = {
-          from: dayjs(fields.from)
-            .startOf('day')
-            .toISOString(),
-          to: dayjs(fields.to)
-            .endOf('day')
-            .toISOString()
+          from: dayjs(fields.from).startOf('day').toISOString(),
+          to: dayjs(fields.to).endOf('day').toISOString()
         };
       }
 
@@ -192,12 +188,8 @@ const List = () => {
 
       if (values.from && values.to) {
         model.dueAt = {
-          from: dayjs(values.from)
-            .startOf('day')
-            .toISOString(),
-          to: dayjs(values.to)
-            .endOf('day')
-            .toISOString()
+          from: dayjs(values.from).startOf('day').toISOString(),
+          to: dayjs(values.to).endOf('day').toISOString()
         };
       }
 
