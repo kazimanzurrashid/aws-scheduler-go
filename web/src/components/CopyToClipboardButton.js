@@ -42,7 +42,7 @@ const CopyToClipboardButton = ({ value }) => {
 };
 
 CopyToClipboardButton.propTypes = {
-  name: PropTypes.string.isRequired
+  value: PropTypes.string.isRequired
 }
 
 export default CopyToClipboardButton;
