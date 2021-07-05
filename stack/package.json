@@ -10,7 +10,7 @@
     "@aws-cdk/aws-events": "^1.110.1",
     "@aws-cdk/aws-events-targets": "^1.110.1",
     "@aws-cdk/aws-lambda": "^1.110.1",
-    "@aws-cdk/aws-lambda-event-sources": "^1.110.1",
+    "@aws-cdk/aws-lambda-event-sources": "^1.111.0",
     "@aws-cdk/core": "^1.111.0",
     "source-map-support": "^0.5.19"
   },
