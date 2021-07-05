@@ -59,7 +59,7 @@ const Api = {
       variables
     };
 
-    return request('list', body);
+    return await request('list', body);
   },
 
   get: async (id) => {
@@ -85,7 +85,7 @@ const Api = {
       variables: { id }
     };
 
-    return request('get', body);
+    return await request('get', body);
   },
 
   create: async (model) => {
@@ -98,7 +98,7 @@ const Api = {
       variables: model
     };
 
-    return request('create', body);
+    return await request('create', body);
   },
 
   cancel: async (id) => {
@@ -111,7 +111,7 @@ const Api = {
       variables: { id }
     };
 
-    return request('cancel', body);
+    return await request('cancel', body);
   }
 };
 
