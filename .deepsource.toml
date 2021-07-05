@@ -10,6 +10,8 @@ enabled = true
 
   [analyzers.meta]
   plugins = ["react"]
+  environment = ["nodejs","browser"]
+  module_system = "es-modules"
 
 [[analyzers]]
 name = "go"
