@@ -12,6 +12,7 @@ enabled = true
   plugins = ["react"]
   environment = ["nodejs","browser"]
   module_system = "es-modules"
+  dependency_file_paths = ["web/package.json"]
 
 [[analyzers]]
 name = "go"
