@@ -1,4 +1,3 @@
-/*global process */
 const Endpoint = process.env.NODE_ENV === 'production' ?
   'https://xxxxxxxxxx.execute-api.ap-south-1.amazonaws.com/v1/graphql' :
   'http://localhost:8080/graphql';
