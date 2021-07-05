@@ -20,6 +20,7 @@ const Spinner = props => {
 
   return (
     <div className={style.root}>
+      {/*eslint-disable-next-line react/jsx-props-no-spreading*/}
       <CircularProgress {...props} />
     </div>
   );
