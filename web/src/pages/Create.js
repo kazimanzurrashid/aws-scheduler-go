@@ -93,6 +93,7 @@ const Create = () => {
         };
 
         if ([HttpMethods[0], HttpMethods[HttpMethods.length - 1]].includes(values.method)) {
+          /*eslint-disable-next-line dot-notation*/
           delete model['body'];
         }
 
