@@ -134,10 +134,10 @@ const List = () => {
     return setFieldValue(name, value);
   };
 
-  const showError = name =>
-    Boolean(get(errors, name)) && (Boolean(get(touched, name)) || isSubmitting);
+  const showError = (name) =>
+    (Boolean(get(errors, name)) && (Boolean(get(touched, name)) || isSubmitting));
 
-  const errorText = name => showError(name) ? get(errors, name) : null;
+  const errorText = (name) => (showError(name) ? get(errors, name) : null);
 
   const handleClear = async () => {
     await setFieldValue('status', Statuses[0], false);
