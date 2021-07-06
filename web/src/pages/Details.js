@@ -101,7 +101,7 @@ const Details = () => {
   const formatDateTime = value =>
     dayjs(value).format('DD-MMMM-YYYY hh:mm:ss a');
 
-  const formatJSON = value => JSON.stringify(value, void 0, 2);
+  const formatJSON = value => JSON.stringify(value, null, 2);
 
   const handleCopy = () => {
     const dueAt = dayjs(item.dueAt);
