@@ -3,7 +3,7 @@ import get from 'lodash.get';
 import dayjs from 'dayjs';
 import DateFnsUtils from '@date-io/dayjs';
 
-import { Fragment } from 'react';
+import React, { Fragment } from 'react';
 import { Link as RouterLink, useHistory, useLocation } from 'react-router-dom';
 
 import { useFormik } from 'formik';
