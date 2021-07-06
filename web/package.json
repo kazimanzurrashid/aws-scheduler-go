@@ -32,7 +32,7 @@
     ],
     "overrides": [
       {
-        "files": ["**/*.js?(x)"],
+        "files": ["**/*.js"],
         "rules": {
           "react/forbid-component-props": "off",
           "react/jsx-max-depth": "off",
