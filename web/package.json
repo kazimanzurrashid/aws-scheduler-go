@@ -31,7 +31,8 @@
       "react-app/jest"
     ],
     "rules": {
-      "react/jsx-max-depth": 0
+      "react/forbid-component-props": "off",
+      "react/jsx-max-depth": "off"
     }
   },
   "browserslist": {
