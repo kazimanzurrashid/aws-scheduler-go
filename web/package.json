@@ -29,10 +29,7 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ],
-    "rules": {
-      "no-use-before-define": ["error", { "variables": false }]
-    }
+    ]
   },
   "browserslist": {
     "production": [
