@@ -29,6 +29,14 @@
     "extends": [
       "react-app",
       "react-app/jest"
+    ],
+    "overrides": [
+      {
+        "files": ["**/*.js?(x)"],
+        "rules": {
+          "react/jsx-max-depth": "off"
+        }
+      }
     ]
   },
   "browserslist": {
