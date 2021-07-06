@@ -32,7 +32,8 @@
     ],
     "rules": {
       "react/forbid-component-props": "off",
-      "react/jsx-max-depth": "off"
+      "react/jsx-max-depth": "off",
+      "react/jsx-no-literals": "off"
     }
   },
   "browserslist": {
