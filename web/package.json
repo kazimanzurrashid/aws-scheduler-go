@@ -34,7 +34,7 @@
       {
         "files": ["**/*.js?(x)"],
         "rules": {
-          "react/jsx-max-depth": "off"
+          "react/jsx-max-depth": [false]
         }
       }
     ]
