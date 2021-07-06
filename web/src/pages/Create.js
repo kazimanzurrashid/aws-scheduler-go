@@ -114,9 +114,9 @@ const Create = () => {
     ].includes(values.method);
 
   const showError = name =>
-    Boolean(get(errors, name)) && (Boolean(get(touched, name)) || isSubmitting);
+    (Boolean(get(errors, name)) && (Boolean(get(touched, name)) || isSubmitting));
 
-  const errorText = name => showError(name) ? get(errors, name) : null;
+  const errorText = name => (showError(name) ? get(errors, name) : null);
 
   const handleRemoveClick = index => () => {
     const { headers } = values;
