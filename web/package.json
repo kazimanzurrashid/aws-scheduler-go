@@ -30,11 +30,16 @@
       "react-app",
       "react-app/jest"
     ],
-    "rules": {
-      "react/forbid-component-props": "off",
-      "react/jsx-max-depth": "off",
-      "react/jsx-no-literals": "off"
-    }
+    "overrides": [
+      {
+        "files": ["**/*.js?(x)"],
+        "rules": {
+          "react/forbid-component-props": "off",
+          "react/jsx-max-depth": "off",
+          "react/jsx-no-literals": "off"
+        }
+      }
+    ]
   },
   "browserslist": {
     "production": [
