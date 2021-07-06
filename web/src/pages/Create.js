@@ -93,7 +93,7 @@ const Create = () => {
         };
 
         if ([HttpMethods[0], HttpMethods[HttpMethods.length - 1]].includes(values.method)) {
-          model.body = undefined;
+          delete model['body'];
         }
 
         model.dueAt = dayjs(model.dueAt).startOf('minute').toISOString();
