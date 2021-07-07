@@ -112,7 +112,7 @@ const Details = () => {
         .hour(dueAt.hour())
         .minute(dueAt.minute())
         .second(dueAt.second())
-        .millisecond(dueAt.milliseconds())
+        .millisecond(dueAt.millisecond())
         .toDate(),
       method: item.method,
       url: item.url,
