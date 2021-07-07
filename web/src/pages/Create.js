@@ -75,11 +75,7 @@ const Create = () => {
             body: ''
           },
     validationSchema: yup.object().shape({
-      dueAt: yup
-        .date()
-        .label('Due At')
-        .required()
-        .min(dayjs().toDate(), 'Due At must be in future.'),
+      dueAt: yup.date().label('Due At').required().min(dayjs().toDate(), 'Due At must be in future.'),
       url: yup.string().label('URL').required().url(),
       method: yup.string().label('Method').required().oneOf(HttpMethods),
       headers: yup.array().of(
