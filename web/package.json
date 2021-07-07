@@ -35,7 +35,10 @@
       "plugin:prettier/recommended"
     ],
     "rules": {
-      "no-use-before-define": "off"
+      "no-use-before-define": "off",
+      "react/forbid-component-props": "off",
+      "react/jsx-max-depth": "off",
+      "react/jsx-no-literals": "off"
     },
     "overrides": [
       {
