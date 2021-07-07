@@ -104,7 +104,12 @@ const List = () => {
     validationSchema: yup.object().shape({
       status: yup.string().label('Method').optional().oneOf(Statuses),
       from: yup.date().label('From date').nullable().optional(),
-      to: yup.date().label('To date').nullable().optional().min(yup.ref('from'), 'To must be same or after from date')
+      to: yup
+        .date()
+        .label('To date')
+        .nullable()
+        .optional()
+        .min(yup.ref('from'), 'To must be same or after from date')
     }),
     onSubmit: async (fields) => {
       const model = {};
