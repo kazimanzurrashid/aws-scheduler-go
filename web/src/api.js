@@ -1,6 +1,7 @@
-const Endpoint = process.env.NODE_ENV === 'production' ?
-  'https://xxxxxxxxxx.execute-api.ap-south-1.amazonaws.com/v1/graphql' :
-  'http://localhost:8080/graphql';
+const Endpoint =
+  process.env.NODE_ENV === 'production'
+    ? 'https://xxxxxxxxxx.execute-api.ap-south-1.amazonaws.com/v1/graphql'
+    : 'http://localhost:8080/graphql';
 
 const request = async (operation, body) => {
   const response = await fetch(Endpoint, {
@@ -13,7 +14,9 @@ const request = async (operation, body) => {
     body: JSON.stringify(body)
   });
 
-  const { data: { [operation]: result } } = await response.json();
+  const {
+    data: { [operation]: result }
+  } = await response.json();
 
   return result;
 };

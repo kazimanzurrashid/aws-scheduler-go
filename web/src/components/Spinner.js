@@ -15,7 +15,7 @@ const Style = makeStyles(() => {
   };
 });
 
-const Spinner = props => {
+const Spinner = (props) => {
   const style = Style();
 
   return (

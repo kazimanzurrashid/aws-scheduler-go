@@ -33,7 +33,7 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <CssBaseline/>
+      <CssBaseline />
       <AppBar position="static">
         <Toolbar className={styles.toolbar}>
           <Typography className={styles.title} component="h1" variant="h6">
@@ -49,9 +49,15 @@ const App = () => {
       <Container maxWidth="md">
         <main className={styles.main}>
           <Switch>
-            <Route path="/create"><Create/></Route>
-            <Route path="/:id"><Details/></Route>
-            <Route exact path="/"><List/></Route>
+            <Route path="/create">
+              <Create />
+            </Route>
+            <Route path="/:id">
+              <Details />
+            </Route>
+            <Route exact path="/">
+              <List />
+            </Route>
           </Switch>
         </main>
       </Container>

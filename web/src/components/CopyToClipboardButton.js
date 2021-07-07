@@ -35,7 +35,7 @@ const CopyToClipboardButton = ({ value }) => {
       title="Copied"
     >
       <IconButton onClick={handleClick} onMouseOut={handleClose}>
-        <CopyIcon fontSize="small"/>
+        <CopyIcon fontSize="small" />
       </IconButton>
     </Tooltip>
   );
@@ -43,6 +43,6 @@ const CopyToClipboardButton = ({ value }) => {
 
 CopyToClipboardButton.propTypes = {
   value: PropTypes.string.isRequired
-}
+};
 
 export default CopyToClipboardButton;

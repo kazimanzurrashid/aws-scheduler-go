@@ -23,7 +23,7 @@ import Api from '../api';
 import CopyToClipboardButton from '../components/CopyToClipboardButton';
 import Spinner from '../components/Spinner';
 
-const Styles = makeStyles(theme => ({
+const Styles = makeStyles((theme) => ({
   breadcrumbs: {
     marginBottom: theme.spacing(2)
   },
@@ -98,10 +98,10 @@ const Details = () => {
     })();
   }, [id]);
 
-  const formatDateTime = value =>
+  const formatDateTime = (value) =>
     dayjs(value).format('DD-MMMM-YYYY hh:mm:ss a');
 
-  const formatJSON = value => JSON.stringify(value, null, 2);
+  const formatJSON = (value) => JSON.stringify(value, null, 2);
 
   const handleCopy = () => {
     const dueAt = dayjs(item.dueAt);
@@ -139,157 +139,174 @@ const Details = () => {
     <>
       <Breadcrumbs className={styles.breadcrumbs}>
         <RouterLink to="/">
-          <MuiLink component="button" color="textSecondary">Home</MuiLink>
+          <MuiLink component="button" color="textSecondary">
+            Home
+          </MuiLink>
         </RouterLink>
         <Typography color="textPrimary">Details</Typography>
       </Breadcrumbs>
-      {
-        item ? (
-          <Card>
-            <CardContent>
-              <div className={styles.header}>
-                <Typography variant="h6" component="h2">Details</Typography>
-                {
-                  item && (
-                    <Tooltip title="Clone">
-                      <IconButton onClick={handleCopy}>
-                        <CloneIcon/>
-                      </IconButton>
-                    </Tooltip>
-                  )
-                }
-              </div>
-              <div className={styles.details}>
+      {item ? (
+        <Card>
+          <CardContent>
+            <div className={styles.header}>
+              <Typography variant="h6" component="h2">
+                Details
+              </Typography>
+              {item && (
+                <Tooltip title="Clone">
+                  <IconButton onClick={handleCopy}>
+                    <CloneIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </div>
+            <div className={styles.details}>
+              <div>
                 <div>
-                  <div><span>ID</span></div>
-                  <div>
-                    <pre>{item.id}</pre>
-                    <CopyToClipboardButton value={item.id}/>
-                  </div>
+                  <span>ID</span>
                 </div>
                 <div>
-                  <div><span>Due At</span></div>
-                  <div>{formatDateTime(item.dueAt)}</div>
-                </div>
-                {
-                  item.startedAt && (
-                    <div>
-                      <div><span>Started At</span></div>
-                      <div>{formatDateTime(item.startedAt)}</div>
-                    </div>
-                  )
-                }
-                {
-                  item.completedAt && (
-                    <div>
-                      <div><span>Completed At</span></div>
-                      <div>{formatDateTime(item.completedAt)}</div>
-                    </div>
-                  )
-                }
-                {
-                  item.canceledAt && (
-                    <div>
-                      <div><span>Canceled At</span></div>
-                      <div>{formatDateTime(item.canceledAt)}</div>
-                    </div>
-                  )
-                }
-                <div>
-                  <div><span>Method</span></div>
-                  <div>
-                    <pre>{item.method}</pre>
-                    <CopyToClipboardButton value={item.method}/>
-                  </div>
-                </div>
-                <div>
-                  <div><span>URL</span></div>
-                  <div>
-                    <pre>{item.url}</pre>
-                    <CopyToClipboardButton value={item.url}/>
-                  </div>
-                </div>
-                {
-                  item.headers && (
-                    <div>
-                      <div><span>Headers</span></div>
-                      <div>
-                        <pre>{formatJSON(item.headers)}</pre>
-                        <CopyToClipboardButton
-                          value={formatJSON(item.headers)}/>
-                      </div>
-                    </div>
-                  )
-                }
-                {
-                  item.body && (
-                    <div>
-                      <div><span>Body</span></div>
-                      <div>
-                        <pre>{item.body}</pre>
-                        <CopyToClipboardButton value={item.body}/>
-                      </div>
-                    </div>
-                  )
-                }
-                {
-                  item.result && (
-                    <div>
-                      <div><span>Result</span></div>
-                      <div>
-                        <pre>{formatJSON(JSON.parse(item.result))}</pre>
-                        <CopyToClipboardButton
-                          value={formatJSON(JSON.parse(item.result))}/>
-                      </div>
-                    </div>
-                  )
-                }
-                <div>
-                  <div><span>Status</span></div>
-                  <div>{item.status}</div>
-                </div>
-                <div>
-                  <div><span>Created At</span></div>
-                  <div>{formatDateTime(item.createdAt)}</div>
+                  <pre>{item.id}</pre>
+                  <CopyToClipboardButton value={item.id} />
                 </div>
               </div>
-              {
-                item.status === 'IDLE' && (
-                  <>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      size="large"
-                      onClick={() => setShowConfirmation(true)}
-                      fullWidth>
-                      Cancel
+              <div>
+                <div>
+                  <span>Due At</span>
+                </div>
+                <div>{formatDateTime(item.dueAt)}</div>
+              </div>
+              {item.startedAt && (
+                <div>
+                  <div>
+                    <span>Started At</span>
+                  </div>
+                  <div>{formatDateTime(item.startedAt)}</div>
+                </div>
+              )}
+              {item.completedAt && (
+                <div>
+                  <div>
+                    <span>Completed At</span>
+                  </div>
+                  <div>{formatDateTime(item.completedAt)}</div>
+                </div>
+              )}
+              {item.canceledAt && (
+                <div>
+                  <div>
+                    <span>Canceled At</span>
+                  </div>
+                  <div>{formatDateTime(item.canceledAt)}</div>
+                </div>
+              )}
+              <div>
+                <div>
+                  <span>Method</span>
+                </div>
+                <div>
+                  <pre>{item.method}</pre>
+                  <CopyToClipboardButton value={item.method} />
+                </div>
+              </div>
+              <div>
+                <div>
+                  <span>URL</span>
+                </div>
+                <div>
+                  <pre>{item.url}</pre>
+                  <CopyToClipboardButton value={item.url} />
+                </div>
+              </div>
+              {item.headers && (
+                <div>
+                  <div>
+                    <span>Headers</span>
+                  </div>
+                  <div>
+                    <pre>{formatJSON(item.headers)}</pre>
+                    <CopyToClipboardButton value={formatJSON(item.headers)} />
+                  </div>
+                </div>
+              )}
+              {item.body && (
+                <div>
+                  <div>
+                    <span>Body</span>
+                  </div>
+                  <div>
+                    <pre>{item.body}</pre>
+                    <CopyToClipboardButton value={item.body} />
+                  </div>
+                </div>
+              )}
+              {item.result && (
+                <div>
+                  <div>
+                    <span>Result</span>
+                  </div>
+                  <div>
+                    <pre>{formatJSON(JSON.parse(item.result))}</pre>
+                    <CopyToClipboardButton
+                      value={formatJSON(JSON.parse(item.result))}
+                    />
+                  </div>
+                </div>
+              )}
+              <div>
+                <div>
+                  <span>Status</span>
+                </div>
+                <div>{item.status}</div>
+              </div>
+              <div>
+                <div>
+                  <span>Created At</span>
+                </div>
+                <div>{formatDateTime(item.createdAt)}</div>
+              </div>
+            </div>
+            {item.status === 'IDLE' && (
+              <>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  size="large"
+                  onClick={() => setShowConfirmation(true)}
+                  fullWidth
+                >
+                  Cancel
+                </Button>
+                <Dialog
+                  open={showConfirmation}
+                  onClose={() => setShowConfirmation(false)}
+                >
+                  <DialogTitle>Confirm?</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText>
+                      Are you sure you want to Cancel?
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button color="secondary" onClick={handleCancel}>
+                      Yes
                     </Button>
-                    <Dialog open={showConfirmation}
-                            onClose={() => setShowConfirmation(false)}>
-                      <DialogTitle>Confirm?</DialogTitle>
-                      <DialogContent>
-                        <DialogContentText>
-                          Are you sure you want to Cancel?
-                        </DialogContentText>
-                      </DialogContent>
-                      <DialogActions>
-                        <Button color="secondary"
-                                onClick={handleCancel}>Yes</Button>
-                        <Button color="primary" autoFocus
-                                onClick={() => setShowConfirmation(false)}>
-                          No
-                        </Button>
-                      </DialogActions>
-                    </Dialog>
-                  </>
-                )
-              }
-            </CardContent>
-          </Card>
-        ) : (
-          <Spinner/>
-        )
-      }
+                    <Button
+                      color="primary"
+                      autoFocus
+                      onClick={() => setShowConfirmation(false)}
+                    >
+                      No
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <Spinner />
+      )}
     </>
   );
 };

@@ -33,7 +33,7 @@ import Spinner from '../components/Spinner';
 
 const Statuses = ['-', 'IDLE', 'QUEUED', 'SUCCEEDED', 'CANCELED', 'FAILED'];
 
-const Styles = makeStyles(theme => ({
+const Styles = makeStyles((theme) => ({
   breadcrumbs: {
     marginBottom: theme.spacing(2)
   },
@@ -104,10 +104,14 @@ const List = () => {
     validationSchema: yup.object().shape({
       status: yup.string().label('Method').optional().oneOf(Statuses),
       from: yup.date().label('From date').nullable().optional(),
-      to: yup.date().label('To date').nullable().optional()
+      to: yup
+        .date()
+        .label('To date')
+        .nullable()
+        .optional()
         .min(yup.ref('from'), 'To must be same or after from date')
     }),
-    onSubmit: async fields => {
+    onSubmit: async (fields) => {
       const model = {};
 
       if (fields.status !== Statuses[0]) {
@@ -127,7 +131,7 @@ const List = () => {
     }
   });
 
-  const handleDateChange = name => value => {
+  const handleDateChange = (name) => (value) => {
     if (name === 'from' && value) {
       setToMinDate(value.toDate());
     }
@@ -135,7 +139,7 @@ const List = () => {
   };
 
   const showError = (name) =>
-    (Boolean(get(errors, name)) && (Boolean(get(touched, name)) || isSubmitting));
+    Boolean(get(errors, name)) && (Boolean(get(touched, name)) || isSubmitting);
 
   const errorText = (name) => (showError(name) ? get(errors, name) : null);
 
@@ -149,17 +153,16 @@ const List = () => {
     setStartKey(nextKey);
   };
 
-  const handleSort = column => () => {
-    const localDirection = column === sortColumn && sortDirection === 'asc' ?
-      'desc' :
-      'asc';
+  const handleSort = (column) => () => {
+    const localDirection =
+      column === sortColumn && sortDirection === 'asc' ? 'desc' : 'asc';
 
     setSortColumn(column);
     setSortDirection(localDirection);
     sort(list, column, localDirection);
   };
 
-  const handleRowClick = item => history.push(`/${item.id}`);
+  const handleRowClick = (item) => history.push(`/${item.id}`);
 
   const handleScroll = debounce((e) => {
     const [rowHeight, noOfRows] = [72, 3];
@@ -171,7 +174,10 @@ const List = () => {
     const { target } = e;
 
     // noinspection JSUnresolvedVariable
-    if (target.scrollTop + target.offsetHeight + (rowHeight * noOfRows) <= table.current.offsetHeight) {
+    if (
+      target.scrollTop + target.offsetHeight + rowHeight * noOfRows <=
+      table.current.offsetHeight
+    ) {
       return;
     }
 
@@ -221,7 +227,7 @@ const List = () => {
                     select
                     fullWidth
                   >
-                    {Statuses.map(status => (
+                    {Statuses.map((status) => (
                       <MenuItem key={status} value={status}>
                         {status}
                       </MenuItem>
@@ -262,87 +268,108 @@ const List = () => {
                   />
                 </Grid>
                 <Grid item md={1} xs={12}>
-                  <Button type="submit" variant="contained" color="primary"
-                          size="small" fullWidth>Go</Button>
-                  <Button type="button" color="default" size="small"
-                          onClick={handleClear} fullWidth>Clear</Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    fullWidth
+                  >
+                    Go
+                  </Button>
+                  <Button
+                    type="button"
+                    color="default"
+                    size="small"
+                    onClick={handleClear}
+                    fullWidth
+                  >
+                    Clear
+                  </Button>
                 </Grid>
               </Grid>
             </form>
           </MuiPickersUtilsProvider>
         </CardContent>
       </Card>
-      {
-        list ? (
-          <TableContainer component={Paper} className={styles.records}
-                          onScroll={handleScroll}>
-            <Table ref={table} stickyHeader>
-              <TableHead>
-                <TableRow>
+      {list ? (
+        <TableContainer
+          component={Paper}
+          className={styles.records}
+          onScroll={handleScroll}
+        >
+          <Table ref={table} stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortColumn === 'id'}
+                    direction={sortDirection}
+                    onClick={handleSort('id')}
+                  >
+                    ID
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortColumn === 'dueAt'}
+                    direction={sortDirection}
+                    onClick={handleSort('dueAt')}
+                  >
+                    Due At
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortColumn === 'method'}
+                    direction={sortDirection}
+                    onClick={handleSort('method')}
+                  >
+                    Method
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell className={styles.urlColumn}>
+                  <TableSortLabel
+                    active={sortColumn === 'url'}
+                    direction={sortDirection}
+                    onClick={handleSort('url')}
+                  >
+                    URL
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortColumn === 'status'}
+                    direction={sortDirection}
+                    onClick={handleSort('status')}
+                  >
+                    Status
+                  </TableSortLabel>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {list.map((item) => (
+                <TableRow
+                  key={item.id}
+                  hover
+                  onClick={() => handleRowClick(item)}
+                >
+                  <TableCell>{item.id}</TableCell>
                   <TableCell>
-                    <TableSortLabel
-                      active={sortColumn === 'id'}
-                      direction={sortDirection}
-                      onClick={handleSort('id')}>
-                      ID
-                    </TableSortLabel>
+                    {dayjs(item.dueAt).format('MMMM D, h:mm a')}
                   </TableCell>
-                  <TableCell>
-                    <TableSortLabel
-                      active={sortColumn === 'dueAt'}
-                      direction={sortDirection}
-                      onClick={handleSort('dueAt')}>
-                      Due At
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell>
-                    <TableSortLabel
-                      active={sortColumn === 'method'}
-                      direction={sortDirection}
-                      onClick={handleSort('method')}>
-                      Method
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell className={styles.urlColumn}>
-                    <TableSortLabel
-                      active={sortColumn === 'url'}
-                      direction={sortDirection}
-                      onClick={handleSort('url')}>
-                      URL
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell>
-                    <TableSortLabel
-                      active={sortColumn === 'status'}
-                      direction={sortDirection}
-                      onClick={handleSort('status')}>
-                      Status
-                    </TableSortLabel>
-                  </TableCell>
+                  <TableCell>{item.method}</TableCell>
+                  <TableCell className={styles.urlColumn}>{item.url}</TableCell>
+                  <TableCell>{item.status}</TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {list.map(item => (
-                  <TableRow key={item.id} hover
-                            onClick={() => handleRowClick(item)}>
-                    <TableCell>{item.id}</TableCell>
-                    <TableCell>
-                      {dayjs(item.dueAt).format('MMMM D, h:mm a')}
-                    </TableCell>
-                    <TableCell>{item.method}</TableCell>
-                    <TableCell className={styles.urlColumn}>
-                      {item.url}
-                    </TableCell>
-                    <TableCell>{item.status}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          <Spinner/>
-        )
-      }
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <Spinner />
+      )}
     </>
   );
 };

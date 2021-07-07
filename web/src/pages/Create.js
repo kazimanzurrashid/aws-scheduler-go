@@ -27,7 +27,7 @@ import Api from '../api';
 
 const HttpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
-const Styles = makeStyles(theme => ({
+const Styles = makeStyles((theme) => ({
   breadcrumbs: {
     marginBottom: theme.spacing(2)
   },
@@ -53,36 +53,44 @@ const Create = () => {
     values,
     touched
   } = useFormik({
-    initialValues: state && state.source ? {
-      ...state.source,
-      headers: state.source.headers ?
-        Object.keys(state.source.headers).reduce((a, c) => {
-          a.push({
-            key: c,
-            value: state.source.headers[c]
-          });
-          return a;
-        }, []) :
-        []
-    } : {
-      dueAt: dayjs().add(1, 'day').toDate(),
-      method: HttpMethods[0],
-      url: '',
-      headers: [],
-      body: ''
-    },
+    initialValues:
+      state && state.source
+        ? {
+            ...state.source,
+            headers: state.source.headers
+              ? Object.keys(state.source.headers).reduce((a, c) => {
+                  a.push({
+                    key: c,
+                    value: state.source.headers[c]
+                  });
+                  return a;
+                }, [])
+              : []
+          }
+        : {
+            dueAt: dayjs().add(1, 'day').toDate(),
+            method: HttpMethods[0],
+            url: '',
+            headers: [],
+            body: ''
+          },
     validationSchema: yup.object().shape({
-      dueAt: yup.date().label('Due At').required()
+      dueAt: yup
+        .date()
+        .label('Due At')
+        .required()
         .min(dayjs().toDate(), 'Due At must be in future.'),
       url: yup.string().label('URL').required().url(),
       method: yup.string().label('Method').required().oneOf(HttpMethods),
-      headers: yup.array().of(yup.object().shape({
-        key: yup.string().label('Key').required(),
-        value: yup.string().label('Value').required()
-      })),
+      headers: yup.array().of(
+        yup.object().shape({
+          key: yup.string().label('Key').required(),
+          value: yup.string().label('Value').required()
+        })
+      ),
       body: yup.string().label('Body').optional()
     }),
-    onSubmit: fields => {
+    onSubmit: (fields) => {
       (async () => {
         const model = {
           ...fields,
@@ -92,7 +100,11 @@ const Create = () => {
           }, {})
         };
 
-        if ([HttpMethods[0], HttpMethods[HttpMethods.length - 1]].includes(values.method)) {
+        if (
+          [HttpMethods[0], HttpMethods[HttpMethods.length - 1]].includes(
+            values.method
+          )
+        ) {
           /*eslint-disable-next-line dot-notation*/
           delete model['body'];
         }
@@ -106,20 +118,19 @@ const Create = () => {
     }
   });
 
-  const handleDueAtChange = value => setFieldValue('dueAt', value);
+  const handleDueAtChange = (value) => setFieldValue('dueAt', value);
 
   const canShowBody = () =>
-    ![
-      HttpMethods[0],
-      HttpMethods[HttpMethods.length - 1]
-    ].includes(values.method);
+    ![HttpMethods[0], HttpMethods[HttpMethods.length - 1]].includes(
+      values.method
+    );
 
   const showError = (name) =>
-    (Boolean(get(errors, name)) && (Boolean(get(touched, name)) || isSubmitting));
+    Boolean(get(errors, name)) && (Boolean(get(touched, name)) || isSubmitting);
 
   const errorText = (name) => (showError(name) ? get(errors, name) : null);
 
-  const handleRemoveClick = index => () => {
+  const handleRemoveClick = (index) => () => {
     const { headers } = values;
     headers.splice(index, 1);
     setFieldValue('headers', headers);
@@ -135,13 +146,17 @@ const Create = () => {
     <>
       <Breadcrumbs className={styles.breadcrumbs}>
         <RouterLink to="/">
-          <MuiLink component="button" color="textSecondary">Home</MuiLink>
+          <MuiLink component="button" color="textSecondary">
+            Home
+          </MuiLink>
         </RouterLink>
         <Typography color="textPrimary">Create</Typography>
       </Breadcrumbs>
       <Card>
         <CardContent>
-          <Typography variant="h6" component="h2">Create</Typography>
+          <Typography variant="h6" component="h2">
+            Create
+          </Typography>
           <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <form className={styles.form} onSubmit={handleSubmit} noValidate>
               <Grid container spacing={2}>
@@ -175,7 +190,7 @@ const Create = () => {
                     fullWidth
                     required
                   >
-                    {HttpMethods.map(method => (
+                    {HttpMethods.map((method) => (
                       <MenuItem key={method} value={method}>
                         {method}
                       </MenuItem>
@@ -235,9 +250,11 @@ const Create = () => {
                           />
                         </Grid>
                         <Grid item>
-                          <IconButton type="button"
-                                      onClick={handleRemoveClick(index)}>
-                            <DeleteIcon/>
+                          <IconButton
+                            type="button"
+                            onClick={handleRemoveClick(index)}
+                          >
+                            <DeleteIcon />
                           </IconButton>
                         </Grid>
                       </Grid>
@@ -249,7 +266,7 @@ const Create = () => {
                     type="button"
                     variant="outlined"
                     color="primary"
-                    startIcon={<AddCircleOutlineIcon/>}
+                    startIcon={<AddCircleOutlineIcon />}
                     size="medium"
                     fullWidth
                     onClick={handleAddClick}
@@ -257,33 +274,32 @@ const Create = () => {
                     Add Header
                   </Button>
                 </Grid>
-                {
-                  canShowBody() && (
-                    <Grid item xs={12}>
-                      <TextField
-                        id="body"
-                        name="body"
-                        type="text"
-                        label="Body"
-                        variant="outlined"
-                        value={values.body}
-                        onChange={handleChange}
-                        error={showError('body')}
-                        helperText={errorText('body')}
-                        rows={8}
-                        fullWidth
-                        multiline
-                      />
-                    </Grid>
-                  )
-                }
+                {canShowBody() && (
+                  <Grid item xs={12}>
+                    <TextField
+                      id="body"
+                      name="body"
+                      type="text"
+                      label="Body"
+                      variant="outlined"
+                      value={values.body}
+                      onChange={handleChange}
+                      error={showError('body')}
+                      helperText={errorText('body')}
+                      rows={8}
+                      fullWidth
+                      multiline
+                    />
+                  </Grid>
+                )}
                 <Grid item xs={12}>
                   <Button
                     type="submit"
                     variant="contained"
                     color="primary"
                     size="large"
-                    fullWidth>
+                    fullWidth
+                  >
                     Submit
                   </Button>
                 </Grid>
