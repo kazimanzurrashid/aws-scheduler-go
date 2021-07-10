@@ -22,7 +22,7 @@ const request = async (operation, body) => {
 };
 
 const Api = {
-  list: async (model) => {
+  list: (model) => {
     const variables = {};
 
     if (model) {
@@ -64,7 +64,7 @@ const Api = {
     return request('list', body);
   },
 
-  get: async (id) => {
+  get: (id) => {
     const body = {
       query: `
         query Get($id: ID!) {
@@ -90,7 +90,7 @@ const Api = {
     return request('get', body);
   },
 
-  create: async (model) => {
+  create: (model) => {
     const body = {
       query: `
         mutation Create($dueAt: DateTime!, $url: String!, $method: HTTPMethod!, $headers: StringMap, $body: String) {
@@ -103,7 +103,7 @@ const Api = {
     return request('create', body);
   },
 
-  cancel: async (id) => {
+  cancel: (id) => {
     const body = {
       query: `
         mutation Cancel($id: ID!) {
