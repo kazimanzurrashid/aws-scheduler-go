@@ -218,7 +218,7 @@ const Create = () => {
                   </Typography>
                 </Grid>
                 {values.headers.map((header, index) => (
-                  <Fragment key={index}>
+                  <Fragment key={header.key}>
                     <Grid item xs={12} md={5}>
                       <TextField
                         id={`headers-key-${index}`}
