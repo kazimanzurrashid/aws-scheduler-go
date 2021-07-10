@@ -1,5 +1,11 @@
 version = 1
 
+test_patterns = [
+  "collector/**/*_test.go",
+  "graphql/**/*_test.go",
+  "worker/**/*_test.go"
+]
+
 [[analyzers]]
 name = "shell"
 enabled = true
