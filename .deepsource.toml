@@ -25,4 +25,5 @@ name = "go"
 enabled = true
 
   [analyzers.meta]
+  import_root = "github.com/kazimanzurrashid/go"
   dependencies_vendored = false
