@@ -30,6 +30,7 @@ updates:
       interval: "weekly"
     ignore:
       - dependency-name: "@date-io/dayjs"
+      - dependency-name: "@material-ui/core"
     open-pull-requests-limit: 128
 
   - package-ecosystem: "npm"
