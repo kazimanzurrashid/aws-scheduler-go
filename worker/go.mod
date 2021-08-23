@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/aws/aws-lambda-go v1.26.0
-	github.com/aws/aws-sdk-go v1.40.23
+	github.com/aws/aws-sdk-go v1.40.27
 	github.com/aws/aws-xray-sdk-go v1.6.0
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.0
@@ -18,5 +18,4 @@ require (
 	golang.org/x/sys v0.0.0-20210816183151-1e6c022a8912 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20210816143620-e15ff196659d // indirect
-	google.golang.org/grpc v1.40.0 // indirect
 )
