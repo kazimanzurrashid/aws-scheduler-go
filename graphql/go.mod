@@ -7,9 +7,8 @@ require (
 	github.com/aws/aws-lambda-go v1.26.0
 	github.com/aws/aws-sdk-go v1.40.27
 	github.com/aws/aws-xray-sdk-go v1.6.0
-	github.com/graphql-go/graphql v0.7.9
+	github.com/graphql-go/graphql v0.8.0
 	github.com/joho/godotenv v1.3.0
-	github.com/klauspost/compress v1.13.4 // indirect
 	github.com/matoous/go-nanoid v1.5.0
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.16.0
