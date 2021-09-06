@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/aws/aws-lambda-go v1.26.0
-	github.com/aws/aws-sdk-go v1.40.32
+	github.com/aws/aws-sdk-go v1.40.37
 	github.com/aws/aws-xray-sdk-go v1.6.0
 	github.com/klauspost/compress v1.13.4 // indirect
 	github.com/onsi/ginkgo v1.16.4
