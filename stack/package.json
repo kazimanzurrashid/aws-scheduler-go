@@ -11,7 +11,7 @@
     "@aws-cdk/aws-events-targets": "^1.125.0",
     "@aws-cdk/aws-lambda": "^1.125.0",
     "@aws-cdk/aws-lambda-event-sources": "^1.125.0",
-    "@aws-cdk/core": "^1.125.0",
+    "@aws-cdk/core": "^1.130.0",
     "source-map-support": "^0.5.20"
   },
   "devDependencies": {
