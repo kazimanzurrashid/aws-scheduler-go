@@ -12,7 +12,7 @@ require (
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/matoous/go-nanoid v1.5.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.16.0
+	github.com/onsi/gomega v1.17.0
 	github.com/valyala/fasthttp v1.31.0 // indirect
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9 // indirect
 	golang.org/x/sys v0.0.0-20211123173158-ef496fb156ab // indirect
