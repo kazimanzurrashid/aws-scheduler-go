@@ -33,7 +33,10 @@
       "react-app",
       "react-app/jest",
       "plugin:prettier/recommended"
-    ]
+    ],
+    "rules": {
+      "react/jsx-no-bind": [ "error", { "allowArrowFunctions": true } ]
+    }
   },
   "browserslist": {
     "production": [
