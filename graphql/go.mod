@@ -1,6 +1,6 @@
 module github.com/kazimanzurrashid/aws-scheduler-go/graphql
 
-go 1.15
+go 1.16
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
