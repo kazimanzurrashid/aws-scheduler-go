@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
-	github.com/aws/aws-lambda-go v1.27.0
+	github.com/aws/aws-lambda-go v1.27.1
 	github.com/aws/aws-sdk-go v1.42.18
 	github.com/aws/aws-xray-sdk-go v1.6.0
 	github.com/graphql-go/graphql v0.8.0
