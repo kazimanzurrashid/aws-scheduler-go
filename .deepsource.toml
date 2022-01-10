@@ -1,15 +1,5 @@
 version = 1
 
-test_patterns = [
-  "collector/**/*_test.go",
-  "graphql/**/*_test.go",
-  "worker/**/*_test.go"
-]
-
-[[analyzers]]
-name = "shell"
-enabled = true
-
 [[analyzers]]
 name = "javascript"
 enabled = true
@@ -23,7 +13,3 @@ enabled = true
 [[analyzers]]
 name = "go"
 enabled = true
-
-  [analyzers.meta]
-  import_root = "github.com/kazimanzurrashid/go"
-  dependencies_vendored = false

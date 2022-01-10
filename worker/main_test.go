@@ -123,10 +123,9 @@ type fakeClient struct {
 	Output *services.ResponseOutput
 }
 
-//goland:noinspection GoUnusedParameter
 func (fc *fakeClient) Request(
-	ctx context.Context,
-	ri *services.RequestInput) *services.ResponseOutput {
+	_ context.Context,
+	_ *services.RequestInput) *services.ResponseOutput {
 	return fc.Output
 }
 
@@ -136,9 +135,8 @@ type fakeStorage struct {
 	Inputs []*services.UpdateInput
 }
 
-//goland:noinspection GoUnusedParameter
 func (fs *fakeStorage) Update(
-	ctx context.Context,
+	_ context.Context,
 	inputs []*services.UpdateInput) error {
 
 	fs.Inputs = inputs

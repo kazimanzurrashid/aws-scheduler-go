@@ -916,41 +916,37 @@ type fakeDynamoDB struct {
 	QueryOutput *dynamodb.QueryOutput
 }
 
-//goland:noinspection GoUnusedParameter
 func (db *fakeDynamoDB) PutItemWithContext(
-	ctx aws.Context,
+	_ aws.Context,
 	input *dynamodb.PutItemInput,
-	options ...request.Option) (*dynamodb.PutItemOutput, error) {
+	_ ...request.Option) (*dynamodb.PutItemOutput, error) {
 
 	db.PutInput = input
 	return nil, db.Error
 }
 
-//goland:noinspection GoUnusedParameter
 func (db *fakeDynamoDB) UpdateItemWithContext(
-	ctx aws.Context,
+	_ aws.Context,
 	input *dynamodb.UpdateItemInput,
-	options ...request.Option) (*dynamodb.UpdateItemOutput, error) {
+	_ ...request.Option) (*dynamodb.UpdateItemOutput, error) {
 
 	db.UpdateInput = input
 	return nil, db.Error
 }
 
-//goland:noinspection GoUnusedParameter
 func (db *fakeDynamoDB) GetItemWithContext(
-	ctx aws.Context,
+	_ aws.Context,
 	input *dynamodb.GetItemInput,
-	options ...request.Option) (*dynamodb.GetItemOutput, error) {
+	_ ...request.Option) (*dynamodb.GetItemOutput, error) {
 
 	db.GetInput = input
 	return db.GetOutput, db.Error
 }
 
-//goland:noinspection GoUnusedParameter
 func (db *fakeDynamoDB) QueryWithContext(
-	ctx aws.Context,
+	_ aws.Context,
 	input *dynamodb.QueryInput,
-	options ...request.Option) (*dynamodb.QueryOutput, error) {
+	_ ...request.Option) (*dynamodb.QueryOutput, error) {
 
 	db.QueryInput = input
 

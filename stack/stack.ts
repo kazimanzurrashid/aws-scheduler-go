@@ -30,7 +30,7 @@ import { LambdaFunction } from '@aws-cdk/aws-events-targets';
 
 import { CorsHttpMethod, HttpApi, HttpMethod } from '@aws-cdk/aws-apigatewayv2';
 
-import { LambdaProxyIntegration } from '@aws-cdk/aws-apigatewayv2-integrations';
+import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations';
 
 interface SchedulerProps extends StackProps {
   name: string;
@@ -92,9 +92,7 @@ class SchedulerStack extends Stack {
 
     schedulerTable.grantReadWriteData(graphqlLambda);
 
-    const integration = new LambdaProxyIntegration({
-      handler: graphqlLambda
-    });
+    const integration = new HttpLambdaIntegration('LambdaIntegration', graphqlLambda);
 
     const api = new HttpApi(this, 'Api', {
       apiName: `${props.name}-api-${props.version}`,

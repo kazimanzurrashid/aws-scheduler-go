@@ -99,9 +99,8 @@ type fakeCancelStorage struct {
 	ID string
 }
 
-//goland:noinspection GoUnusedParameter
 func (srv *fakeCancelStorage) Cancel(
-	ctx context.Context,
+	_ context.Context,
 	id string) (bool, error) {
 
 	srv.ID = id

@@ -31,6 +31,9 @@ func handlePlayground(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "text/html;charset=utf-8")
+
 	_ = playgroundTemplate.Execute(w, struct {
 		Endpoint string
 	}{
@@ -76,6 +79,7 @@ func handleGraphQL(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
+	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(buff)
 }
 

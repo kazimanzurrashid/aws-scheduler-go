@@ -226,9 +226,8 @@ type fakeListStorage struct {
 	ReturnList *storage.List
 }
 
-//goland:noinspection GoUnusedParameter
 func (srv *fakeListStorage) List(
-	ctx context.Context,
+	_ context.Context,
 	input storage.ListInput) (*storage.List, error) {
 
 	srv.Input = input

@@ -256,9 +256,8 @@ type fakeCreateStorage struct {
 	ReturnID string
 }
 
-//goland:noinspection GoUnusedParameter
 func (srv *fakeCreateStorage) Create(
-	ctx context.Context,
+	_ context.Context,
 	input storage.CreateInput) (string, error) {
 
 	srv.Input = input

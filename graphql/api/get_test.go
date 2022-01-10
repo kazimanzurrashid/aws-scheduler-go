@@ -102,9 +102,8 @@ type fakeGetStorage struct {
 	Schedule *storage.Schedule
 }
 
-//goland:noinspection GoUnusedParameter
 func (srv *fakeGetStorage) Get(
-	ctx context.Context,
+	_ context.Context,
 	id string) (*storage.Schedule, error) {
 
 	srv.ID = id

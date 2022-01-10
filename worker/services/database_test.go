@@ -221,11 +221,10 @@ type fakeDynamoDB struct {
 	batchWriteOutputs list.List
 }
 
-//goland:noinspection GoUnusedParameter
 func (db *fakeDynamoDB) BatchWriteItemWithContext(
-	ctx aws.Context,
+	_ aws.Context,
 	input *dynamodb.BatchWriteItemInput,
-	options ...request.Option) (*dynamodb.BatchWriteItemOutput, error) {
+	_ ...request.Option) (*dynamodb.BatchWriteItemOutput, error) {
 
 	db.batchWriteInputs.PushBack(input)
 
