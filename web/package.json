@@ -35,7 +35,12 @@
       "plugin:prettier/recommended"
     ],
     "rules": {
-      "react/jsx-no-bind": [ "error", { "allowArrowFunctions": true } ]
+      "react/jsx-no-bind": [
+        "error",
+        {
+          "allowArrowFunctions": true
+        }
+      ]
     }
   },
   "browserslist": {

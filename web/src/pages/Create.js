@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import DateFnsUtils from '@date-io/dayjs';
 
 import React, { Fragment } from 'react';
-import { Link as RouterLink, useHistory, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 
 import { useFormik } from 'formik';
 
@@ -41,7 +41,7 @@ const Styles = makeStyles((theme) => ({
 
 const Create = () => {
   const styles = Styles();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { state } = useLocation();
 
   const {
@@ -113,7 +113,7 @@ const Create = () => {
 
         const id = await Api.create(model);
 
-        history.push(`/${id}`);
+        navigate(`/${id}`);
       })();
     }
   });

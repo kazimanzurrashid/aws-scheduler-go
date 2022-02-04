@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 
 import React, { useEffect, useState } from 'react';
-import { Link as RouterLink, useHistory, useParams } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
@@ -86,7 +86,7 @@ const Styles = makeStyles((theme) => ({
 
 const Details = () => {
   const styles = Styles();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { id } = useParams();
   const [item, setItem] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -120,7 +120,7 @@ const Details = () => {
       body: item.body || ''
     };
 
-    history.push('/create', { source });
+    navigate('/create', { source });
   };
 
   const handleCancel = () => {

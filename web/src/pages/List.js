@@ -5,7 +5,7 @@ import get from 'lodash.get';
 import DateFnsUtils from '@date-io/dayjs';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useFormik } from 'formik';
 
@@ -54,7 +54,7 @@ const Styles = makeStyles((theme) => ({
 
 const List = () => {
   const styles = Styles();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [toMinDate, setToMinDate] = useState(dayjs().toDate());
   const [sortColumn, setSortColumn] = useState('dueAt');
@@ -162,7 +162,7 @@ const List = () => {
     sort(list, column, localDirection);
   };
 
-  const handleRowClick = (item) => history.push(`/${item.id}`);
+  const handleRowClick = (item) => navigate(`/${item.id}`);
 
   const handleScroll = debounce((e) => {
     const [rowHeight, noOfRows] = [72, 3];

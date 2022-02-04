@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -48,17 +48,11 @@ const App = () => {
       </AppBar>
       <Container maxWidth="md">
         <main className={styles.main}>
-          <Switch>
-            <Route path="/create">
-              <Create />
-            </Route>
-            <Route path="/:id">
-              <Details />
-            </Route>
-            <Route exact path="/">
-              <List />
-            </Route>
-          </Switch>
+          <Routes>
+            <Route path="/create" element={<Create />} />
+            <Route path="/:id" element={<Details />} />
+            <Route path="/" element={<List />} />
+          </Routes>
         </main>
       </Container>
     </BrowserRouter>
