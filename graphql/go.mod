@@ -10,14 +10,16 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/matoous/go-nanoid v1.5.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.17.0
+	github.com/onsi/gomega v1.18.1
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
+	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.14.2 // indirect
+	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.33.0 // indirect
@@ -27,4 +29,6 @@ require (
 	google.golang.org/genproto v0.0.0-20220204002441-d6cc3cc0770e // indirect
 	google.golang.org/grpc v1.44.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
+	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
