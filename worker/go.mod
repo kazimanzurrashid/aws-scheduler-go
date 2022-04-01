@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-xray-sdk-go v1.6.0
 	github.com/hashicorp/go-retryablehttp v0.7.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.18.1
+	github.com/onsi/gomega v1.19.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 )
 
