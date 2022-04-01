@@ -5,13 +5,13 @@
   "license": "MIT",
   "dependencies": {
     "@aws-cdk/aws-apigatewayv2": "^1.151.0",
-    "@aws-cdk/aws-apigatewayv2-integrations": "^1.149.0",
-    "@aws-cdk/aws-dynamodb": "^1.149.0",
-    "@aws-cdk/aws-events": "^1.149.0",
-    "@aws-cdk/aws-events-targets": "^1.149.0",
-    "@aws-cdk/aws-lambda": "^1.149.0",
-    "@aws-cdk/aws-lambda-event-sources": "^1.149.0",
-    "@aws-cdk/core": "^1.149.0",
+    "@aws-cdk/aws-apigatewayv2-integrations": "^1.151.0",
+    "@aws-cdk/aws-dynamodb": "^1.151.0",
+    "@aws-cdk/aws-events": "^1.151.0",
+    "@aws-cdk/aws-events-targets": "^1.151.0",
+    "@aws-cdk/aws-lambda": "^1.151.0",
+    "@aws-cdk/aws-lambda-event-sources": "^1.151.0",
+    "@aws-cdk/core": "^1.151.0",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
