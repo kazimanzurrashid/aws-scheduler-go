@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/aws/aws-lambda-go v1.29.0
 	github.com/aws/aws-sdk-go v1.43.31
-	github.com/aws/aws-xray-sdk-go v1.6.0
+	github.com/aws/aws-xray-sdk-go v1.7.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.19.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
