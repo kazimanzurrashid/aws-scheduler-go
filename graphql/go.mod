@@ -3,7 +3,7 @@ module github.com/kazimanzurrashid/aws-scheduler-go/graphql
 go 1.18
 
 require (
-	github.com/aws/aws-lambda-go v1.32.0
+	github.com/aws/aws-lambda-go v1.32.1
 	github.com/aws/aws-sdk-go v1.44.42
 	github.com/aws/aws-xray-sdk-go v1.7.0
 	github.com/graphql-go/graphql v0.8.0
