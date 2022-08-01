@@ -7,7 +7,7 @@
     "@aws-cdk/aws-apigatewayv2": "^1.161.0",
     "@aws-cdk/aws-apigatewayv2-integrations": "^1.161.0",
     "@aws-cdk/aws-dynamodb": "^1.161.0",
-    "@aws-cdk/aws-events": "^1.161.0",
+    "@aws-cdk/aws-events": "^1.166.1",
     "@aws-cdk/aws-events-targets": "^1.161.0",
     "@aws-cdk/aws-lambda": "^1.161.0",
     "@aws-cdk/aws-lambda-event-sources": "^1.161.0",
