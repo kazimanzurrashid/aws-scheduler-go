@@ -9,7 +9,7 @@
     "@aws-cdk/aws-dynamodb": "^1.171.0",
     "@aws-cdk/aws-events": "^1.171.0",
     "@aws-cdk/aws-events-targets": "^1.171.0",
-    "@aws-cdk/aws-lambda": "^1.171.0",
+    "@aws-cdk/aws-lambda": "^1.175.0",
     "@aws-cdk/aws-lambda-event-sources": "^1.171.0",
     "@aws-cdk/core": "^1.171.0",
     "source-map-support": "^0.5.21"
