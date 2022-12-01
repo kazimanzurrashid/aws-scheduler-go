@@ -5,8 +5,8 @@ github.com/aws/aws-lambda-go v1.35.0 h1:iocVDy5Cw5SCRrKOPHwarkdFwwy48OkfmHoE6SJ3
 github.com/aws/aws-lambda-go v1.35.0/go.mod h1:jwFe2KmMsHmffA1X2R09hH6lFzJQxzI8qK17ewzbQMM=
 github.com/aws/aws-sdk-go v1.44.150 h1:X9HBhXu0ZPi+tOHUaZkjx43int7g0Ejk+IVbW25+wYg=
 github.com/aws/aws-sdk-go v1.44.150/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
-github.com/aws/aws-xray-sdk-go v1.7.1 h1:mji68Db4oWipJ6SiQQuFiWBYWI8sUvPfcv86mLFVKHQ=
-github.com/aws/aws-xray-sdk-go v1.7.1/go.mod h1:aNQo1pqFaaeKaf18CSWCkoaXUI+PQZ7yfNE28YyE2CI=
+github.com/aws/aws-xray-sdk-go v1.8.0 h1:0xncHZ588wB/geLjbM/esoW3FOEThWy2TJyb4VXfLFY=
+github.com/aws/aws-xray-sdk-go v1.8.0/go.mod h1:7LKe47H+j3evfvS1+q0wzpoaGXGrF3mUsfM+thqVO+A=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
