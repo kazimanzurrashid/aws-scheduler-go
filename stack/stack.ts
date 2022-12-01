@@ -1,18 +1,19 @@
+import { Construct } from 'constructs';
+
 import {
   App,
-  Construct,
   Duration,
   RemovalPolicy,
   Stack,
   StackProps
-} from '@aws-cdk/core';
+} from 'aws-cdk-lib';
 
 import {
   AttributeType,
   BillingMode,
   StreamViewType,
   Table
-} from '@aws-cdk/aws-dynamodb';
+} from 'aws-cdk-lib/aws-dynamodb';
 
 import {
   Code,
@@ -20,17 +21,17 @@ import {
   Runtime,
   StartingPosition,
   Tracing
-} from '@aws-cdk/aws-lambda';
+} from 'aws-cdk-lib/aws-lambda';
 
-import { DynamoEventSource } from '@aws-cdk/aws-lambda-event-sources';
+import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 
-import { Rule, RuleTargetInput, Schedule } from '@aws-cdk/aws-events';
+import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 
-import { LambdaFunction } from '@aws-cdk/aws-events-targets';
+import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 
-import { CorsHttpMethod, HttpApi, HttpMethod } from '@aws-cdk/aws-apigatewayv2';
+import { CorsHttpMethod, HttpApi, HttpMethod } from '@aws-cdk/aws-apigatewayv2-alpha';
 
-import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations';
+import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
 
 interface SchedulerProps extends StackProps {
   name: string;
