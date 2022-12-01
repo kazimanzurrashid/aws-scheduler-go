@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/aws/aws-lambda-go v1.35.0
 	github.com/aws/aws-sdk-go v1.44.136
-	github.com/aws/aws-xray-sdk-go v1.7.1
+	github.com/aws/aws-xray-sdk-go v1.8.0
 	github.com/graphql-go/graphql v0.8.0
 	github.com/joho/godotenv v1.4.0
 	github.com/matoous/go-nanoid v1.5.0
