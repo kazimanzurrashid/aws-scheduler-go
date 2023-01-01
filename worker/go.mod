@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/aws/aws-lambda-go v1.35.0
-	github.com/aws/aws-sdk-go v1.44.150
+	github.com/aws/aws-sdk-go v1.44.171
 	github.com/aws/aws-xray-sdk-go v1.8.0
 	github.com/hashicorp/go-retryablehttp v0.7.1
 	github.com/onsi/ginkgo v1.16.5
