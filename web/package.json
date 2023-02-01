@@ -23,9 +23,9 @@
     "yup": "^0.32.11"
   },
   "devDependencies": {
-    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "prettier": "^2.8.1",
+    "prettier": "^2.8.3",
     "prop-types": "^15.8.1"
   },
   "eslintConfig": {
