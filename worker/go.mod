@@ -3,13 +3,13 @@ module github.com/kazimanzurrashid/aws-scheduler-go/worker
 go 1.19
 
 require (
-	github.com/aws/aws-lambda-go v1.40.0
-	github.com/aws/aws-sdk-go v1.44.253
+	github.com/aws/aws-lambda-go v1.41.0
+	github.com/aws/aws-sdk-go v1.44.273
 	github.com/aws/aws-xray-sdk-go v1.8.1
 	github.com/hashicorp/go-retryablehttp v0.7.2
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.27.6
-	golang.org/x/sync v0.1.0
+	golang.org/x/sync v0.2.0
 )
 
 require (
