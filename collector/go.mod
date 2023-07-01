@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.273
 	github.com/aws/aws-xray-sdk-go v1.8.1
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.27.7
+	github.com/onsi/gomega v1.27.8
 	golang.org/x/sync v0.2.0
 )
 
