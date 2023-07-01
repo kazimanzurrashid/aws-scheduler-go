@@ -6,11 +6,11 @@
   "dependencies": {
     "@aws-cdk/aws-apigatewayv2-alpha": "^2.77.0-alpha.0",
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.77.0-alpha.0",
-    "aws-cdk-lib": "^2.80.0",
-    "constructs": "^10.2.45"
+    "aws-cdk-lib": "^2.86.0",
+    "constructs": "^10.2.65"
   },
   "devDependencies": {
-    "@types/node": "^20.2.5",
-    "typescript": "^5.0.4"
+    "@types/node": "^20.3.3",
+    "typescript": "^5.1.6"
   }
 }
