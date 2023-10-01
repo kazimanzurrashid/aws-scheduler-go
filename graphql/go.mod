@@ -10,7 +10,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/matoous/go-nanoid v1.5.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.27.10
+	github.com/onsi/gomega v1.28.0
 )
 
 require (
