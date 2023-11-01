@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.4
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.28.0
-	golang.org/x/sync v0.3.0
+	golang.org/x/sync v0.4.0
 )
 
 require (
