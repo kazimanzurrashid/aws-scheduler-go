@@ -4,13 +4,13 @@
   "private": true,
   "license": "MIT",
   "dependencies": {
-    "@aws-cdk/aws-apigatewayv2-alpha": "^2.98.0-alpha.0",
-    "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.98.0-alpha.0",
-    "aws-cdk-lib": "^2.117.0",
+    "@aws-cdk/aws-apigatewayv2-alpha": "^2.114.1-alpha.0",
+    "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.114.1-alpha.0",
+    "aws-cdk-lib": "^2.123.0",
     "constructs": "^10.3.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.1",
+    "@types/node": "^20.11.6",
     "typescript": "^5.3.3"
   }
 }
