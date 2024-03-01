@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/aws/aws-lambda-go v1.46.0
-	github.com/aws/aws-sdk-go v1.50.8
+	github.com/aws/aws-sdk-go v1.50.29
 	github.com/aws/aws-xray-sdk-go v1.8.3
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.31.1
