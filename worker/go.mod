@@ -4,11 +4,11 @@ go 1.20
 
 require (
 	github.com/aws/aws-lambda-go v1.46.0
-	github.com/aws/aws-sdk-go v1.50.38
+	github.com/aws/aws-sdk-go v1.51.11
 	github.com/aws/aws-xray-sdk-go v1.8.3
 	github.com/hashicorp/go-retryablehttp v0.7.5
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.31.1
+	github.com/onsi/gomega v1.32.0
 	golang.org/x/sync v0.6.0
 )
 
