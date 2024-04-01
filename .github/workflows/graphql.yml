@@ -37,7 +37,7 @@ jobs:
 
       - name: Update
         if: ${{ github.event_name == 'push' && github.ref_name == 'main' && env.AWS_REGION != '' }}
-        uses: kazimanzurrashid/aws-lambda-update-action@v2.0.2
+        uses: kazimanzurrashid/aws-lambda-update-action@v2.0.3
         with:
           zip-file: ./graphql/dist/scheduler-graphql-v1.zip
         env:
