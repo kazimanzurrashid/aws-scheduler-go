@@ -3,7 +3,7 @@ module github.com/kazimanzurrashid/aws-scheduler-go/collector
 go 1.20
 
 require (
-	github.com/aws/aws-lambda-go v1.46.0
+	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go v1.51.11
 	github.com/aws/aws-xray-sdk-go v1.8.3
 	github.com/onsi/ginkgo v1.16.5
