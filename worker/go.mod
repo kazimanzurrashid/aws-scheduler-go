@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go v1.51.32
 	github.com/aws/aws-xray-sdk-go v1.8.4
-	github.com/hashicorp/go-retryablehttp v0.7.5
+	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.33.1
 	golang.org/x/sync v0.7.0
@@ -25,7 +25,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.52.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240311173647-c811ad7063a7 // indirect
 	google.golang.org/grpc v1.62.1 // indirect
