@@ -10,7 +10,7 @@
     "constructs": "^10.3.0"
   },
   "devDependencies": {
-    "@types/node": "^20.13.0",
+    "@types/node": "^20.14.9",
     "typescript": "^5.4.5"
   }
 }
