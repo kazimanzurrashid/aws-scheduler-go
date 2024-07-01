@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/aws/aws-lambda-go v1.47.0
-	github.com/aws/aws-sdk-go v1.53.14
+	github.com/aws/aws-sdk-go v1.54.11
 	github.com/aws/aws-xray-sdk-go v1.8.4
 	github.com/graphql-go/graphql v0.8.1
 	github.com/joho/godotenv v1.5.1
