@@ -7,7 +7,7 @@
     "@aws-cdk/aws-apigatewayv2-alpha": "^2.114.1-alpha.0",
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.114.1-alpha.0",
     "aws-cdk-lib": "^2.144.0",
-    "constructs": "^10.3.0"
+    "constructs": "^10.4.2"
   },
   "devDependencies": {
     "@types/node": "^20.13.0",
